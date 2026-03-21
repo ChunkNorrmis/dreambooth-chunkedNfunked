@@ -1,11 +1,10 @@
-import os
+import os, torch, random
 import numpy as np
-import PIL
-from PIL import Image
 from torch.utils.data import Dataset
-from torchvision import transforms
+from torchvision.io import decode_image
+from torchvision.transforms import v2
+from torchvision.transforms.v2 import functional as fun
 
-import random
 
 imagenet_templates_small = [
     'a painting in the style of {}',
@@ -54,76 +53,58 @@ per_img_token_list = [
 ]
 
 class PersonalizedBase(Dataset):
-    def __init__(self,
-                 data_root,
-                 size=None,
-                 repeats=100,
-                 interpolation="bicubic",
-                 flip_p=0.5,
-                 set="train",
-                 placeholder_token="*",
-                 per_image_tokens=False,
-                 center_crop=False,
-                 ):
-
+    def __init__(
+        self,
+        set,
+        data_root,
+        size,
+        repeats,
+        flip_p,
+        placeholder_token,
+        per_image_tokens,
+        center_crop
+    ):
+        super().__init__()
         self.data_root = data_root
-
         self.image_paths = [os.path.join(self.data_root, file_path) for file_path in os.listdir(self.data_root)]
-
-        # self._length = len(self.image_paths)
         self.num_images = len(self.image_paths)
-        self._length = self.num_images 
-
+        self._length = self.num_images
         self.placeholder_token = placeholder_token
-
+        self.flip_p = flip_p
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
-
+        self.size = size
+        self.repeats = repeats
+                        
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == "train":
-            self._length = self.num_images * repeats
-
-        self.size = size
-        self.interpolation = {"linear": PIL.Image.LINEAR,
-                              "bilinear": PIL.Image.BILINEAR,
-                              "bicubic": PIL.Image.BICUBIC,
-                              "lanczos": PIL.Image.LANCZOS,
-                              }[interpolation]
-        self.flip = transforms.RandomHorizontalFlip(p=flip_p)
-
+            self._length = self.num_images * self.repeats
+    
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = {}
-        image = Image.open(self.image_paths[i % self.num_images])
-
-        if not image.mode == "RGB":
-            image = image.convert("RGB")
-
-        if self.per_image_tokens and np.random.uniform() < 0.25:
-            text = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
-        else:
-            text = random.choice(imagenet_templates_small).format(self.placeholder_token)
-            
-        example["caption"] = text
-
-        # default to score-sde preprocessing
-        img = np.array(image).astype(np.uint8)
+        image_path = self.image_paths[i % self.num_images]
+        img = decode_image(image_path, mode="RGB")
+        transform = v2.Compose([
+            v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.RandomCrop(min(img.shape[1], img.shape[2])),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
+            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.5), p=0.5),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.RandomHorizontalFlip(p=self.flip_p),
+            v2.RandomPerspective(distortion_scale=0.25, p=0.5, interpolation=2),
+            v2.Lambda(lambda x: x.detach().clone().permute(1, 2, 0).cpu().numpy().astype(np.uint8))
+        ])
+        example['image'] = np.array(transform(img) / 127.5 - 1.0).astype(np.float32)
         
-        if self.center_crop:
-            crop = min(img.shape[0], img.shape[1])
-            h, w, = img.shape[0], img.shape[1]
-            img = img[(h - crop) // 2:(h + crop) // 2,
-                (w - crop) // 2:(w + crop) // 2]
+        if self.per_image_tokens and np.random.uniform() < 0.25:
+            example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
+        else:
+            example["caption"] = random.choice(imagenet_templates_small).format(self.placeholder_token)
 
-        image = Image.fromarray(img)
-        if self.size is not None:
-            image = image.resize((self.size, self.size), resample=self.interpolation)
-
-        image = self.flip(image)
-        image = np.array(image).astype(np.uint8)
-        example["image"] = (image / 127.5 - 1.0).astype(np.float32)
         return example
+
