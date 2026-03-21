@@ -108,7 +108,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
                 "target": "ldm.modules.embedding_manager.EmbeddingManager",
                 "params": {
                     "placeholder_strings": ['*'],
-                    "initializer_words": ["sculpture"],
+                    "initializer_words": [f"{config.token}"],
                     "per_image_tokens": False,
                     "num_vectors_per_token": 1,
                     "progressive_words": False,
@@ -166,48 +166,60 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
     reg_block = {
         "target": "ldm.data.personalized.PersonalizedBase",
         "params": {
-            "size": 512,
             "set": "train",
             "reg": True,
-            "per_image_tokens": False,
-            "repeats": 10,
             "data_root": config.regularization_images_folder_path,
-            "coarse_class_text": config.class_word,
+            "size": config.res,
+            "repeats": 10,
+            "flip_p": config.flip_percent,
             "placeholder_token": config.token,
+            "coarse_class_text": config.class_word,
+            "token_only": config.token_only,
+            "per_image_tokens": False,
+            "center_crop": config.crop,
+            "mixing_prob": 0.25
         }
     }
 
     data_config = {
         "target": "main.DataModuleFromConfig",
         "params": {
-            "batch_size": 1,
+            "batch_size": config.batch_size,
             "num_workers": 1,
             "wrap": False,
             "train": {
                 "target": "ldm.data.personalized.PersonalizedBase",
                 "params": {
-                    "size": 512,
                     "set": "train",
-                    "per_image_tokens": False,
-                    "repeats": 100,
-                    "coarse_class_text": config.class_word,
+                    "reg": False,
                     "data_root": config.training_images_folder_path,
-                    "placeholder_token": config.token,
-                    "token_only": config.token_only or not config.class_word,
+                    "size": config.res,
+                    "repeats": config.repeats,
                     "flip_p": config.flip_percent,
+                    "placeholder_token": config.token,
+                    "coarse_class_text": config.class_word,
+                    "token_only": config.token_only,
+                    "per_image_tokens": False,                    
+                    "center_crop": config.crop,
+                    "mixing_prob": 0.25
                 }
             },
             "reg": reg_block if config.regularization_images_folder_path is not None and config.regularization_images_folder_path != '' else None,
             "validation": {
                 "target": "ldm.data.personalized.PersonalizedBase",
                 "params": {
-                    "size": 512,
                     "set": "val",
-                    "per_image_tokens": False,
-                    "repeats": 10,
-                    "coarse_class_text": config.class_word,
-                    "placeholder_token": config.token,
+                    "reg": False,
                     "data_root": config.training_images_folder_path,
+                    "size": config.res,
+                    "repeats": 10,
+                    "flip_p": config.flip_percent,
+                    "placeholder_token": config.token,
+                    "coarse_class_text": config.class_word,
+                    "token_only": config.token_only,
+                    "per_image_tokens": False,
+                    "center_crop": config.crop,                    
+                    "mixing_prob": 0.25
                 }
             }
         }
@@ -239,7 +251,7 @@ def get_dreambooth_lightning_config(config: JoePennaDreamboothConfigSchemaV1) ->
             "accelerator": "gpu",
             "devices": f"{config.gpu},",
             "benchmark": True,
-            "accumulate_grad_batches": 1,
+            "accumulate_grad_batches": config.accumed_grads,
             "max_steps": config.max_training_steps,
         }
     }
@@ -248,7 +260,6 @@ def get_dreambooth_lightning_config(config: JoePennaDreamboothConfigSchemaV1) ->
         lightning_config["callbacks"]["metrics_over_trainsteps_checkpoint"] = cb.metrics_over_trainsteps_checkpoint()
 
     return lightning_config
-
 
 def get_dreambooth_trainer_config(config: JoePennaDreamboothConfigSchemaV1, model, lightning_config) -> dict:
     cb = callbacks(config)
