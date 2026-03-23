@@ -3,8 +3,6 @@ import numpy as np
 from torch.utils.data import Dataset
 from torchvision.io import decode_image
 from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
-
 
 imagenet_templates_small = [
     'a painting in the style of {}',
@@ -70,7 +68,7 @@ class PersonalizedBase(Dataset):
         self.num_images = len(self.image_paths)
         self._length = self.num_images
         self.placeholder_token = placeholder_token
-        self.flip_p = flip_p
+        self.chance = flip_p
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
@@ -82,15 +80,10 @@ class PersonalizedBase(Dataset):
         if set == "train":
             self._length = self.num_images * self.repeats
 
-    def to_nda(self, img):
-        img = np.array(img.detach().permute(1, 2, 0)).astype(np.uint8)
-        img = np.array(img / 127.5 - 1.0).astype(np.float32)
-        return img
-
-    def g_blur(self, img):
-        if self.chance > random.random():
-            img = fun.gaussian_blur(img, kernel_size=1, sigma=(0.1, 0.5))
-        return img
+    
+    def tensor2array(self, image):
+        image = image.detach().clone().permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+        return np.array(image / 127.5 - 1.0).astype(np.float32)
 
     def __len__(self):
         return self._length
@@ -98,18 +91,20 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         image_path = self.image_paths[i % self.num_images]
-        img = decode_image(image_path, mode="RGB")
+        image = decode_image(image_path, mode="RGB")
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.RandomCrop(min(img.shape[1], img.shape[2])),
+            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.5), p=self.chance),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.7), p=self.chance),
-            v2.Lambda(self.g_blur),
-            v2.RandomHorizontalFlip(p=self.chance),
-            v2.RandomPerspective(distortion_scale=0.25, p=self.chance, interpolation=2),
-            v2.Lambda(self.to_nda)
+            v2.RandomChoice([
+                v2.RandomHorizontalFlip(p=self.chance),
+                v2.RandomPerspective(distortion_scale=0.35, p=self.chance, interpolation=2)
+            ]),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.Lambda(self.tensor2array)
         ])
-        example['image'] = transform(img)
+        example['image'] = transform(image)
         
         if self.per_image_tokens and np.random.uniform() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
