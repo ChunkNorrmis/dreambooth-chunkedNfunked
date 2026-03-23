@@ -41,28 +41,30 @@ class PersonalizedBase(Dataset):
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
     
-    def to_ndarray(self, img):
-        img = img.detach().clone().permute(1, 2, 0)).cpu().numpy().astype(np.uint8)
-        img = np.array(img / 127.5 - 1.0).astype(np.float32)
-        return img
-    
+    def tensor2array(self, image):
+        image = image.detach().clone().permute(1, 2, 0).cpu().numpy().astype(np.uint8)
+        return np.array(image / 127.5 - 1.0).astype(np.float32)
+            
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = {}
         image_path = self.image_paths[i % self.num_images]
-        img = decode_image(image_path, mode="RGB")
+        image = decode_image(image_path, mode="RGB")
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(img.shape[1], img.shape[2])),
+            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.5), p=self.chance),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.chance),
+            v2.RandomChoice([
+                v2.RandomHorizontalFlip(p=self.chance),
+                v2.RandomPerspective(distortion_scale=0.35, p=self.chance, interpolation=2)
+            ]),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.RandomPerspective(distortion_scale=0.25, p=self.chance, interpolation=2),
-            v2.Lambda(self.to_ndarray)
+            v2.Lambda(self.tensor2array)
         ])
-        example['image'] = transform(img)
+        example['image'] = transform(image)
         
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
