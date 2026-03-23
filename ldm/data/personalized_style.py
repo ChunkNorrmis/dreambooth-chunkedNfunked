@@ -81,7 +81,17 @@ class PersonalizedBase(Dataset):
 
         if set == "train":
             self._length = self.num_images * self.repeats
-    
+
+    def to_nda(self, img):
+        img = np.array(img.detach().permute(1, 2, 0)).astype(np.uint8)
+        img = np.array(img / 127.5 - 1.0).astype(np.float32)
+        return img
+
+    def g_blur(self, img):
+        if self.chance > random.random():
+            img = fun.gaussian_blur(img, kernel_size=1, sigma=(0.1, 0.5))
+        return img
+
     def __len__(self):
         return self._length
 
@@ -93,13 +103,13 @@ class PersonalizedBase(Dataset):
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.RandomCrop(min(img.shape[1], img.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.5), p=0.5),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.RandomPerspective(distortion_scale=0.25, p=0.5, interpolation=2),
-            v2.Lambda(lambda x: x.detach().clone().permute(1, 2, 0).cpu().numpy().astype(np.uint8))
+            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.7), p=self.chance),
+            v2.Lambda(self.g_blur),
+            v2.RandomHorizontalFlip(p=self.chance),
+            v2.RandomPerspective(distortion_scale=0.25, p=self.chance, interpolation=2),
+            v2.Lambda(self.to_nda)
         ])
-        example['image'] = np.array(transform(img) / 127.5 - 1.0).astype(np.float32)
+        example['image'] = transform(img)
         
         if self.per_image_tokens and np.random.uniform() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
