@@ -55,12 +55,9 @@ class PersonalizedBase(Dataset):
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
-            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.5), p=self.chance),
+            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.lf.chance),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomChoice([
-                v2.RandomHorizontalFlip(p=self.chance),
-                v2.RandomPerspective(distortion_scale=0.35, p=self.chance, interpolation=2)
-            ]),
+            v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.Lambda(self.tensor2array)
         ])
