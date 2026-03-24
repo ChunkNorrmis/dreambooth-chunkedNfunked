@@ -42,8 +42,9 @@ class PersonalizedBase(Dataset):
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
     
     def tensor2array(self, image):
-        image = image.detach().clone().permute(1, 2, 0).cpu().numpy().astype(np.uint8)
-        return np.array(image / 127.5 - 1.0).astype(np.float32)
+        image = np.array(image.permute(1, 2, 0)).astype(np.uint8)
+        image = np.array(image / 127.5 - 1.0).astype(np.float32)
+        return image
             
     def __len__(self):
         return self._length
@@ -55,9 +56,9 @@ class PersonalizedBase(Dataset):
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
-            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.1, 1.5), p=self.chance),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
+            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.0, 1.5), p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.Lambda(self.tensor2array)
         ])
