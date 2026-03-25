@@ -3,7 +3,6 @@ import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
 from torchvision.io import decode_image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
@@ -15,8 +14,8 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(self, set, reg, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
                 token_only, per_image_tokens, center_crop, mixing_prob):
-        
         super().__init__()
+        
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
         self.num_images = len(self.image_paths)
@@ -30,21 +29,21 @@ class PersonalizedBase(Dataset):
         self.coarse_class_text = coarse_class_text
         self.size = size
         self.reg = reg
-        self.repeats = repeats
                        
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == "train":
-            self._length = self.num_images * self.repeats
+            self._length = self.num_images * repeats
         
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-    
-    def tensor2array(self, image):
-        image = np.array(image.permute(1, 2, 0)).astype(np.uint8)
-        image = np.array(image / 127.5 - 1.0).astype(np.float32)
-        return image
+
+
+    def tensor2array(self, img):
+        img = img.detach().permute(1, 2, 0)
+        image = np.array(img).astype(np.uint8)
+        return np.array(image / 127.5 - 1.0).astype(np.float32)
             
     def __len__(self):
         return self._length
