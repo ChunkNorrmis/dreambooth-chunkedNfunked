@@ -63,6 +63,7 @@ class PersonalizedBase(Dataset):
         center_crop
     ):
         super().__init__()
+        
         self.data_root = data_root
         self.image_paths = [os.path.join(self.data_root, file_path) for file_path in os.listdir(self.data_root)]
         self.num_images = len(self.image_paths)
@@ -72,19 +73,18 @@ class PersonalizedBase(Dataset):
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
-        self.repeats = repeats
                         
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == "train":
-            self._length = self.num_images * self.repeats
+            self._length = self.num_images * repeats
 
-    
-    def tensor2array(self, image):
-        image = np.array(image.detach().permute(1, 2, 0)).astype(np.uint8)
-        image = np.array(image / 127.5 - 1.0).astype(np.float32)
-        return image
+
+    def tensor2array(self, img):
+        img = img.detach().permute(1, 2, 0)
+        image = np.array(img).astype(np.uint8)
+        return np.array(image / 127.5 - 1.0).astype(np.float32)
 
     def __len__(self):
         return self._length
