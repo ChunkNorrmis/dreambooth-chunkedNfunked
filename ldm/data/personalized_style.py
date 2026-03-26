@@ -81,10 +81,9 @@ class PersonalizedBase(Dataset):
             self._length = self.num_images * repeats
 
 
-    def tensor2array(self, img):
-        img = img.detach().permute(1, 2, 0)
-        image = np.array(img).astype(np.uint8)
-        return np.array(image / 127.5 - 1.0).astype(np.float32)
+    def tensor2array(self, image):
+        img = image.detach().clone().permute(1, 2, 0).numpy().astype(np.uint8)
+        return np.array(img / 127.5 - 1.0).astype(np.float32)
 
     def __len__(self):
         return self._length
@@ -98,7 +97,6 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.RandomAdjustSharpness(sharpness_factor=random.uniform(1.0, 1.5), p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.Lambda(self.tensor2array)
         ])
