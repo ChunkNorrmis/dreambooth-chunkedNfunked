@@ -40,7 +40,7 @@ class JoePennaDreamboothConfigSchemaV1():
     ):
 
         self.repeats = repeats
-        self.batch_size = float(batch_size)
+        self.batch_size = batch_size
         self.accumed_grads = accumed_grads
         self.res = res
         self.crop = crop
