@@ -54,8 +54,7 @@ class PersonalizedBase(Dataset):
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5))
         ])
         image = transform(image)
-        image = image.detach().clone().permute(1, 2, 0)
-        image = np.array(image).astype(np.uint8)
+        image = np.array(image.detach().clone().permute(1, 2, 0)).astype(np.uint8)
         example['image'] = np.array(image / 127.5 - 1.0).astype(np.float32)
         
         if self.reg and self.coarse_class_text:
