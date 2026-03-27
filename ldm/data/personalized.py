@@ -38,11 +38,6 @@ class PersonalizedBase(Dataset):
         
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-
-
-    def tensor2array(self, image):
-        img = image.detach().clone().permute(1, 2, 0).numpy().astype(np.uint8)
-        return np.array(img / 127.5 - 1.0).astype(np.float32)
             
     def __len__(self):
         return self._length
@@ -56,10 +51,12 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(self.tensor2array)
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5))
         ])
-        example['image'] = transform(image)
+        image = transform(image)
+        image = image.detach().clone().permute(1, 2, 0)
+        image = np.array(image).astype(np.uint8)
+        example['image'] = np.array(image / 127.5 - 1.0).astype(np.float32)
         
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
