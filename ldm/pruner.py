@@ -4,6 +4,6 @@ def prune_checkpoint(old_state):
         print(f"Checkpoint Keys: {old_state.keys()}")
         print('Removing optimizer states from checkpoint')
         pruned_checkpoint = {k: v for k, v in old_state.items() if k != "optimizer_states" or k != 'state_dict'}
-        pruned_checkpoint['state_dict'] = {k: v.contiguous() for k, v in old_state['state_dict'].items()}
-        pruned_checkpoint['precision'] = 'float32'
+        pruned_checkpoint['state_dict'] = {k: v.half().contiguous() for k, v in old_state['state_dict'].items()}
+        pruned_checkpoint['precision'] = 'float16'
         return pruned_checkpoint
