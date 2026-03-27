@@ -5,7 +5,7 @@ gdown
 huggingface_hub
 hf_transfer
 hf_xet
-setuptools==81.0
+setuptools==76.0
 safetensors
 numpy==1.26.4
 pytorch-lightning==1.7.6
