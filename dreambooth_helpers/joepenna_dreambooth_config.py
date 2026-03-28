@@ -34,6 +34,7 @@ class JoePennaDreamboothConfigSchemaV1():
             token_only,
             debug,
             gpu,
+            float32,
             model_repo_id=None,
             run_seed_everything=True,
             config_date_time=None
@@ -49,6 +50,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.save_every_x_steps = save_every_x_steps
         self.debug = debug
         self.gpu = gpu
+        self.float32 = float32
 
         if self.project_name is None or self.project_name == '':
             raise Exception("'--project_name': Required.")
