@@ -152,7 +152,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             accumed_grads=opt.accumed_grads,
             res=opt.resolution,
             crop=opt.center_crop,
-            float32=opt.fp32
+            fp32=opt.fp32
         )
 
     return config
