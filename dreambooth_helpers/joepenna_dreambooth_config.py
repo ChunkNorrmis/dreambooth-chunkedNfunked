@@ -105,7 +105,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
-        self.precision = 'float32' if fp32 else 'float16'
+        self.precision = fp32
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
@@ -169,7 +169,7 @@ class JoePennaDreamboothConfigSchemaV1():
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-    def model_precision(self):
+    def precision(self):
         return self.precision
 
     def create_checkpoint_file_name(self, steps: str):
