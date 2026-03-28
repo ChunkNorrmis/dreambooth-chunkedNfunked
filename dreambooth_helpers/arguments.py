@@ -118,6 +118,10 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             '--center_crop',
             action='store_true'
         )
+        parser.add_argument(
+            '--fp32',
+            action='store_true'
+        )
 
         return parser
 
@@ -147,7 +151,8 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             batch_size=opt.batch_size,
             accumed_grads=opt.accumed_grads,
             res=opt.resolution,
-            crop=opt.center_crop
+            crop=opt.center_crop,
+            float32=opt.fp32
         )
 
     return config
