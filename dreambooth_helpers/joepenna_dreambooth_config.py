@@ -169,7 +169,7 @@ class JoePennaDreamboothConfigSchemaV1():
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-    def precision(self):
+    def model_precision(self):
         return self.precision
 
     def create_checkpoint_file_name(self, steps: str):
