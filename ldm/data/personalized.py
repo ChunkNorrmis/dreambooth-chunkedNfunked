@@ -51,11 +51,11 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5))
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.Lambda(lambda x: np.array(x.permute(1, 2, 0)).astype(np.uint8)),
+            v2.Lambda(lambda y: np.array(y / 127.5 - 1.0).astype(np.float32))
         ])
-        image = transform(image)
-        image = np.array(image.detach().clone().permute(1, 2, 0)).astype(np.uint8)
-        example['image'] = np.array(image / 127.5 - 1.0).astype(np.float32)
+        example['image'] = transform(image)
         
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
