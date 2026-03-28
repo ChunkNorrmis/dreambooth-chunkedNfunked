@@ -1,6 +1,7 @@
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
 
-def prune_checkpoint(old_state, precision=JoePennaDreamboothConfigSchemaV1):
+def prune_checkpoint(old_state):
+    precision = JoePennaDreamboothConfigSchemaV1()
     if int(old_state['global_step']) > 0:
         print(f"This is global step {old_state['global_step']}.")
         print(f"Checkpoint Keys: {old_state.keys()}")
