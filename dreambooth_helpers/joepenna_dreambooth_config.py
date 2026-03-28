@@ -34,7 +34,7 @@ class JoePennaDreamboothConfigSchemaV1():
             token_only,
             debug,
             gpu,
-            float32,
+            fp32,
             model_repo_id=None,
             run_seed_everything=True,
             config_date_time=None
@@ -50,7 +50,6 @@ class JoePennaDreamboothConfigSchemaV1():
         self.save_every_x_steps = save_every_x_steps
         self.debug = debug
         self.gpu = gpu
-        self.float32 = float32
 
         if self.project_name is None or self.project_name == '':
             raise Exception("'--project_name': Required.")
@@ -106,6 +105,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
+        self.precision = 'float32' if fp32 else 'float16'
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
@@ -168,6 +168,9 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+    def model_precision(self):
+        return self.precision
 
     def create_checkpoint_file_name(self, steps: str):
         date_string = datetime.now(timezone.utc).strftime("%m-%d-%Y")
