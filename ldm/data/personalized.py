@@ -51,9 +51,9 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.Lambda(lambda x: np.array(x.permute(1, 2, 0)).astype(np.uint8)),
-            v2.Lambda(lambda y: np.array(y / 127.5 - 1.0).astype(np.float32))
+            v2.Lambda(lambda x: np.array(x / 127.5 - 1).astype(np.float32))
         ])
         example['image'] = transform(image)
         
