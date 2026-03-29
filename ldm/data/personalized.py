@@ -38,7 +38,7 @@ class PersonalizedBase(Dataset):
         
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-            
+                
     def __len__(self):
         return self._length
 
@@ -46,14 +46,16 @@ class PersonalizedBase(Dataset):
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
+        crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            (v2.RandomCrop((crop, crop)) if image.shape[1] > crop or image.shape[2] > crop else v2.CenterCrop((crop, crop))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(lambda x: np.array(x.permute(1, 2, 0)).astype(np.uint8)),
-            v2.Lambda(lambda x: np.array(x / 127.5 - 1).astype(np.float32))
+            v2.GaussianBlur(kernel_size=random.choice([1, 3, 5]), sigma=(0.1, 0.3)),
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[torch.mean(image, 0)], std=[torch.std(image, 0)]),
+            v2.Lambda(lambda x: np.array(x.permute(1, 2, 0)).astype(np.float32))
         ])
         example['image'] = transform(image)
         
