@@ -105,7 +105,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
-        self.precision = fp32
+        self.fp32 = fp32
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
