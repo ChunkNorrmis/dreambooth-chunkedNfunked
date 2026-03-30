@@ -169,8 +169,8 @@ class JoePennaDreamboothConfigSchemaV1():
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-    def model_precision(self):
-        return self.precision
+    def isfloat32(self):
+        return self.fp32
 
     def create_checkpoint_file_name(self, steps: str):
         date_string = datetime.now(timezone.utc).strftime("%m-%d-%Y")
