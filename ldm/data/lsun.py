@@ -1,16 +1,16 @@
-import os
+import os, random, torch
 import numpy as np
-import PIL
 from PIL import Image
 from torch.utils.data import Dataset
-from torchvision import transforms
+from torchvision.transforms import v2
+from torchvision.io import decode_image
 
 
 class LSUNBase(Dataset):
     def __init__(self,
                  txt_file,
                  data_root,
-                 size=None,
+                 size=512,
                  interpolation="bicubic",
                  flip_p=0.5
                  ):
@@ -24,39 +24,25 @@ class LSUNBase(Dataset):
             "file_path_": [os.path.join(self.data_root, l)
                            for l in self.image_paths],
         }
-
+        self.chance = flip_p
         self.size = size
-        self.interpolation = {"linear": PIL.Image.LINEAR,
-                              "bilinear": PIL.Image.BILINEAR,
-                              "bicubic": PIL.Image.BICUBIC,
-                              "lanczos": PIL.Image.LANCZOS,
-                              }[interpolation]
-        self.flip = transforms.RandomHorizontalFlip(p=flip_p)
 
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
-        image = Image.open(example["file_path_"])
-        if not image.mode == "RGB":
-            image = image.convert("RGB")
-
-        # default to score-sde preprocessing
-        img = np.array(image).astype(np.uint8)
-        crop = min(img.shape[0], img.shape[1])
-        h, w, = img.shape[0], img.shape[1]
-        img = img[(h - crop) // 2:(h + crop) // 2,
-              (w - crop) // 2:(w + crop) // 2]
-
-        image = Image.fromarray(img)
-        if self.size is not None:
-            image = image.resize((self.size, self.size), resample=self.interpolation)
-
-        image = self.flip(image)
-        image = np.array(image).astype(np.uint8)
-        example["image"] = (image / 127.5 - 1.0).astype(np.float32)
-        return example
+        image = decode_image(example["file_path_"], mode="RGB")
+        crop = min(image.shape[1], image.shape[2])
+        transform = v2.Compose([
+            v2.RandomCrop((crop, crop)) if image.shape[1] > (crop * 2) and image.shape[2] > (crop * 2) else v2.CenterCrop((crop, crop)),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
+            v2.RandomHorizontalFlip(p=self.chance),
+            v2.GaussianBlur(kernel_size=random.choice([1, 3, 5]), sigma=(0.1, 0.3)),
+            v2.Lambda(lambda x: np.array(x.detach().permute(1, 2, 0)).astype(np.uint8)),
+            v2.Lambda(lambda x: np.array(x / 127.5 - 1).astype(np.float32))
+        ])
+        example['image'] = transform(image)
 
 
 class LSUNChurchesTrain(LSUNBase):
