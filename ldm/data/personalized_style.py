@@ -80,11 +80,6 @@ class PersonalizedBase(Dataset):
         if set == "train":
             self._length = self.num_images * repeats
 
-
-    def tensor2array(self, image):
-        img = image.detach().clone().permute(1, 2, 0).numpy().astype(np.uint8)
-        return np.array(img / 127.5 - 1.0).astype(np.float32)
-
     def __len__(self):
         return self._length
 
@@ -92,13 +87,14 @@ class PersonalizedBase(Dataset):
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
+        crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
-            v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            v2.RandomCrop((crop, crop)) if image.shape[1] > (crop * 2) and image.shape[2] > (crop * 2) else v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(self.tensor2array)
+            v2.GaussianBlur(kernel_size=random.choice([1, 3, 5]), sigma=(0.1, 0.3)),
+            v2.Lambda(lambda x: np.array(x.detach().permute(1, 2, 0)).astype(np.uint8)),
+            v2.Lambda(lambda x: np.array(x / 127.5 - 1).astype(np.float32))
         ])
         example['image'] = transform(image)
         
