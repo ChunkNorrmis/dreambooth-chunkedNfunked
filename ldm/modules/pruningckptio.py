@@ -9,7 +9,8 @@ class PruningCheckpointIO(TorchCheckpointIO):
             self, 
             checkpoint: Dict[str, Any], 
             path: _PATH, 
-            storage_options: Optional[Any] = None
+            storage_options: Optional[Any] = None,
+            float32=False
         ) -> None:
-        pruned_checkpoint = prune_checkpoint(checkpoint)
+        pruned_checkpoint = prune_checkpoint(checkpoint, float32)
         TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
