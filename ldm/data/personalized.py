@@ -3,7 +3,6 @@ import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
 from torchvision.io import decode_image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
@@ -44,14 +43,6 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        def normal(image):
-            rm = float(image[[0],:,:].mean())
-            gm = float(image[[1],:,:].mean())
-            bm = float(image[[2],:,:].mean())
-            rs = float(image[[0],:,:].std())
-            gs = float(image[[1],:,:].std())
-            bs = float(image[[2],:,:].std())
-            return fun.normalize(image, mean=[rm, gm, bm], std=[rs, gs, bs])
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
@@ -63,7 +54,7 @@ class PersonalizedBase(Dataset):
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(normal),
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
             v2.Lambda(lambda x: x.permute(1, 2, 0).numpy(force=True))
         ])
         example['image'] = transform(image)
