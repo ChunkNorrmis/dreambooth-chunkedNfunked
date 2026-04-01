@@ -43,7 +43,7 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        def to_ndarray(image): return image.permute(1, 2, 0).numpy(force=True)
+        def to_ndarray(image): return image.permute(1, 2, 0).numpy(force=True).astype(np.float32)
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
