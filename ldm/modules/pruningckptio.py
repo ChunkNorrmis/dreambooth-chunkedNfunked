@@ -5,7 +5,7 @@ from pytorch_lightning.utilities.types import _PATH
 from ldm.pruner import prune_checkpoint
  
 class PruningCheckpointIO(TorchCheckpointIO):
-    def __init__(self, precision=float16):
+    def __init__(self, precision='float16'):
         self.precision = precision
     def save_checkpoint(
             self, 
