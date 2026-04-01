@@ -52,7 +52,7 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
             v2.Lambda(lambda x: x.permute(1, 2, 0).numpy(force=True))
