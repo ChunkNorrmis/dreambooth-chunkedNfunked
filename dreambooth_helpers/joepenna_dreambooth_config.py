@@ -34,7 +34,7 @@ class JoePennaDreamboothConfigSchemaV1():
             token_only,
             debug,
             gpu,
-            fp32,
+            precision,
             model_repo_id=None,
             run_seed_everything=True,
             config_date_time=None
@@ -105,7 +105,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
-        self.fp32 = fp32
+        self.precision = precision
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
