@@ -45,7 +45,6 @@ class PersonalizedBase(Dataset):
     def to_ndarray(self, image): return image.permute(1, 2, 0).numpy(force=True).astype(np.float32)
 
     def __getitem__(self, i):
-        
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
