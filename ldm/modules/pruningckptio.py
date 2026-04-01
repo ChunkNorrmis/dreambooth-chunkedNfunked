@@ -5,13 +5,13 @@ from pytorch_lightning.utilities.types import _PATH
 from ldm.pruner import prune_checkpoint
  
 class PruningCheckpointIO(TorchCheckpointIO):
-    def __init__(self, float32=False):
-        self.float32 = float32
+    def __init__(self, precision=float16):
+        self.precision = precision
     def save_checkpoint(
             self, 
             checkpoint: Dict[str, Any], 
             path: _PATH, 
             storage_options: Optional[Any] = None
         ) -> None:
-        pruned_checkpoint = prune_checkpoint(checkpoint, fp32=self.float32)
+        pruned_checkpoint = prune_checkpoint(checkpoint, precision=self.precision)
         TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
