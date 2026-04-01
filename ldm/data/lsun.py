@@ -29,17 +29,21 @@ class LSUNBase(Dataset):
     def __len__(self):
         return self._length
 
+    def to_ndarray(self, image): return image.permute(1, 2, 0).numpy(force=True).astype(np.float32)
+
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         image = decode_image(example["file_path_"], mode="RGB")
         crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
-            v2.RandomCrop((crop, crop)) if image.shape[1] > (crop * 2) and image.shape[2] > (crop * 2) else v2.CenterCrop((crop, crop)),
+            v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=random.choice([1, 3, 5]), sigma=(0.1, 0.3)),
-            v2.Lambda(lambda x: np.array(x.detach().permute(1, 2, 0)).astype(np.uint8)),
-            v2.Lambda(lambda x: np.array(x / 127.5 - 1).astype(np.float32))
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.35)),
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            v2.Lambda(self.to_ndarray)
         ])
         example['image'] = transform(image)
 
