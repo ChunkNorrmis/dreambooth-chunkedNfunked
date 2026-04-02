@@ -42,8 +42,6 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def to_ndarray(self, image): return image.permute(1, 2, 0).numpy(force=True).astype(np.float32)
-
     def __getitem__(self, i):
         example = {}
         image_path = self.image_paths[i % self.num_images]
@@ -54,12 +52,12 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.35)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(self.to_ndarray)
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
         ])
-        example['image'] = transform(image)
+        image = transform(image)
+        example['image'] = image.permute(1, 2, 0).numpy(force=True)
         
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
