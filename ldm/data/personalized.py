@@ -54,7 +54,7 @@ class PersonalizedBase(Dataset):
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(lambda x: np.array(x.detach().permute(1, 2, 0).cpu()).astype(np.float32))
+            v2.Lambda(lambda x: np.array(x.permute(1, 2, 0).contiguous().cpu()).astype(np.float32))
         ])
         example['image'] = transform(image)
         
