@@ -29,8 +29,6 @@ class LSUNBase(Dataset):
     def __len__(self):
         return self._length
 
-    def to_ndarray(self, image): return image.permute(1, 2, 0).numpy(force=True).astype(np.float32)
-
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         image = decode_image(example["file_path_"], mode="RGB")
@@ -40,12 +38,12 @@ class LSUNBase(Dataset):
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.35)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(self.to_ndarray)
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
         ])
-        example['image'] = transform(image)
+        image = transform(image)
+        example['image'] = image.permute(1, 2, 0).numpy(force=True)
 
 
 class LSUNChurchesTrain(LSUNBase):
