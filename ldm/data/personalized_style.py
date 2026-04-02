@@ -80,7 +80,8 @@ class PersonalizedBase(Dataset):
         if set == "train":
             self._length = self.num_images * repeats
 
-    def to_ndarray(self, image): return image.permute(1, 2, 0).numpy(force=True).astype(np.float32)
+    def __len__(self):
+        return self._length
 
     def __getitem__(self, i):
         example = {}
@@ -92,12 +93,12 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.35)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(self.to_ndarray)
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
         ])
-        example['image'] = transform(image)
+        image = transform(image)
+        example['image'] = image.permute(1, 2, 0).numpy(force=True)
         
         if self.per_image_tokens and np.random.uniform() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
