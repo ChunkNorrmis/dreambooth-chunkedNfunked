@@ -90,15 +90,15 @@ class PersonalizedBase(Dataset):
         crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop((crop, crop)),
+            v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            v2.Lambda(lambda tt: np.array(tt.detach().clone().permute(1, 2, 0).cpu())),
         ])
-        image = transform(image)
-        example['image'] = image.permute(1, 2, 0).numpy(force=True)
+        example['image'] = transform(image)
         
         if self.per_image_tokens and np.random.uniform() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
