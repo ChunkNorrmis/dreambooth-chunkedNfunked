@@ -87,7 +87,6 @@ class PersonalizedBase(Dataset):
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
-        crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.CenterCrop(min(image.shape[1], image.shape[2])),
