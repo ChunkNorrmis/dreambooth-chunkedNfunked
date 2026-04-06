@@ -32,18 +32,17 @@ class LSUNBase(Dataset):
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         image = decode_image(example["file_path_"], mode="RGB")
-        crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop((crop, crop)),
+            v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            v2.Lambda(lambda tt: np.array(tt.detach().clone().permute(1, 2, 0).cpu())),
         ])
-        image = transform(image)
-        example['image'] = image.permute(1, 2, 0).numpy(force=True)
+        example['image'] = transform(image)
 
 
 class LSUNChurchesTrain(LSUNBase):
