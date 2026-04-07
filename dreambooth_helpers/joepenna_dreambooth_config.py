@@ -174,8 +174,8 @@ class JoePennaDreamboothConfigSchemaV1():
         std /= n_imgs
         std = std.sqrt()
         
-        mean = [f"{float(mean[0]):d0.4}", f"{float(mean[1]):d0.4}", f"{float(mean[2]):d0.4}"]
-        std = [f"{float(std[0]):d0.4}", f"{float(std[1]):d0.4}", f"{float(std[2]):d0.4}"]
+        mean = [f"{float(mean[0]):0.4f}", f"{float(mean[1]):0.4f}", f"{float(mean[2]):0.4f}"]
+        std = [f"{float(std[0]):0.4f}", f"{float(std[1]):0.4f}", f"{float(std[2]):0.4f}"]
         return mean, std
         
     def saturate_from_file(
