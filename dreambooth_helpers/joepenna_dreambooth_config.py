@@ -156,14 +156,16 @@ class JoePennaDreamboothConfigSchemaV1():
         mean = torch.zeros(3)
         std = torch.zeros(3)
         n_imgs = len(data_loader)
-    
+        print(f"{data_loader}")
+        sys.exit(0)
+        
         for data, _ in data_loader:
             data = data[0].squeeze(0)
             size = data.size(1) * data.size(2)
             mean += data.sum((1, 2)) / size
         mean /= n_imgs
         mean = mean.unsqueeze(1).unsqueeze(2)
-        
+                
         for data, _ in data_loader:
             data = data[0].squeeze(0)
             std += ((data - mean) ** 2).sum((1, 2)) / size
