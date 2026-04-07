@@ -26,6 +26,20 @@ class LSUNBase(Dataset):
         self.chance = flip_p
         self.size = size
 
+        mean = 0.
+        std = 0.
+        for data in self.image_paths:
+            data = decode_image(data, mode='RGB')
+            crop = min(data.shape[1], data.shape[2])
+            data = fun.center_crop(data, size=(crop, crop))
+            data = fun.resize(data, size=(self.size, self.size), interpolation=3, antialias=True)
+            data = fun.to_dtype(data, dtype=torch.float32, scale=True)
+            data = data.view(data.size(0), -1)
+            mean += data.mean(1)
+            std += data.std(1)
+        self.mean = mean / self.num_images
+        self.std = std / self.num_images
+
     def __len__(self):
         return self._length
 
@@ -39,8 +53,8 @@ class LSUNBase(Dataset):
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(lambda tt: np.array(tt.detach().clone().permute(1, 2, 0).cpu())),
+            v2.Normalize(mean=self.mean, std=self.std),
+            v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32))
         ])
         example['image'] = transform(image)
 
