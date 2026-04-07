@@ -174,8 +174,8 @@ class JoePennaDreamboothConfigSchemaV1():
         std /= n_imgs
         std = std.sqrt()
         
-        mean = torch.tensor([float(mean[0]), float(mean[1]), float(mean[2])], dtype=torch.float32)
-        std = torch.tensor([float(std[0]), float(std[1]), float(std[2])], dtype=torch.float32)
+        mean = [float(mean[0]), float(mean[1]), float(mean[2])]
+        std = [float(std[0]), float(std[1]), float(std[2])]
         return mean, std
         
     def saturate_from_file(
