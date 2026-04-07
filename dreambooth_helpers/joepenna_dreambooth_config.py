@@ -140,11 +140,11 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def normal_data(self):
         transform = v2.Compose([
+            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.shape[1], x.shape[2]))),
             v2.Resize((512, 512), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
-        loader = lambda x: decode_image(x, mode='RGB')
         dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform, loader=loader)
         data_loader = DataLoader(
             dataset,
