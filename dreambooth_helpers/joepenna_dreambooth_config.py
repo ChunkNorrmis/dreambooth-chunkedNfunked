@@ -119,8 +119,6 @@ class JoePennaDreamboothConfigSchemaV1():
         self.mean, self.std = self.normal_data()
         self.validate_gpu_vram()
         self._create_log_folders()
-        print(self.mean)
-        print(self.std)
        
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
