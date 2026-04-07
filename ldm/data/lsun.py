@@ -3,6 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 from torchvision.io import decode_image
+from torchvision.transforms.v2 import functional as fun
 
 
 class LSUNBase(Dataset):
