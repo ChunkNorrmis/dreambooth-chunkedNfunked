@@ -169,6 +169,7 @@ class JoePennaDreamboothConfigSchemaV1():
                 
         for data in data_loader:
             data = data[0].squeeze(0)
+            size = data.size(1) * data.size(2)
             std += ((data - mean) ** 2).sum((1, 2)) / size
         std /= n_imgs
         std = std.sqrt()
