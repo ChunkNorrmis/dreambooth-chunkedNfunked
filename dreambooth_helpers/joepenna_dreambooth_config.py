@@ -139,7 +139,7 @@ class JoePennaDreamboothConfigSchemaV1():
         mean = 0.
         std = 0.
         n_imgs = self.training_images_count
-        batch_data = tensor.randn(n_imgs, 3, self.res, self.res) 
+        batch_data = torch.randn(n_imgs, 3, self.res, self.res) 
         for train_data in self.training_data:
             data = decode_image(train_data, mode='RGB')
             crop = min(data.shape[1], data.shape[2])
