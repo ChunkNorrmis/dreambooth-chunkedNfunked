@@ -111,6 +111,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.model_path):
             raise Exception(f"Model Path Not Found: '{self.model_path}'.")
 
+        self.mean, self.std = self.normal_data(self.training_images)
         self.validate_gpu_vram()
         self._create_log_folders()
        
@@ -132,6 +133,24 @@ class JoePennaDreamboothConfigSchemaV1():
         if gpu_vram < twenty_one_gigabytes:
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
+    def normal_data(self, training_data):
+        mean = 0.
+        std = 0.
+        n_imgs = self.training_images_count
+        batch_data = tensor.randn(n_imgs, 3, self.res, self.res) 
+        for train_data in self.training_data:
+            data = decode_image(train_data, mode='RGB')
+            crop = min(data.shape[1], data.shape[2])
+            data = fun.center_crop(data, (crop, crop))
+            data = fun.resize(data, size=(self.res, self.res), interpolation=3, antialias=True)
+            data = fun.to_dtype(data, dtype=torch.float32, scale=True)
+            data = data.view(batch_data.size(0), data.size(0), -1)
+            mean += data.mean(2)
+            std += data.std(2)
+        mean /= self.training_images_count
+        std /= self.training_images_count
+        return mean, std
+        
     def saturate_from_file(
             self,
             config_file_path: str,
