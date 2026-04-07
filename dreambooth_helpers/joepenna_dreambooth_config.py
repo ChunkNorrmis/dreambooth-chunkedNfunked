@@ -141,11 +141,12 @@ class JoePennaDreamboothConfigSchemaV1():
     def normal_data(self):
         loader = lambda x: decode_image(x, mode='RGB')
         transform = v2.Compose([
+            v2.Lambda(loader),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.shape[1], x.shape[2]))),
             v2.Resize((512, 512), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
-        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform, loader=loader)
+        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform)
         data_loader = DataLoader(
             dataset,
             batch_size=1,
@@ -156,14 +157,14 @@ class JoePennaDreamboothConfigSchemaV1():
         std = torch.zeros(3)
         n_imgs = len(data_loader)
     
-        for _, data in data_loader:
+        for data, _ in data_loader:
             data = data[0].squeeze(0)
             size = data.size(1) * data.size(2)
             mean += data.sum((1, 2)) / size
         mean /= n_imgs
         mean = mean.unsqueeze(1).unsqueeze(2)
         
-        for _, data in data_loader:
+        for data, _ in data_loader:
             data = data[0].squeeze(0)
             std += ((data - mean) ** 2).sum((1, 2)) / size
         std /= n_imgs
