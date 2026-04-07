@@ -156,7 +156,9 @@ class JoePennaDreamboothConfigSchemaV1():
         mean = torch.zeros(3)
         std = torch.zeros(3)
         n_imgs = len(data_loader)
-        print(f"{data_loader}")
+        print(dataset)
+        print(data_loader)
+        
         sys.exit(0)
         
         for data, _ in data_loader:
