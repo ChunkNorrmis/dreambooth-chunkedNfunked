@@ -12,7 +12,9 @@ class LSUNBase(Dataset):
                  data_root,
                  size=512,
                  interpolation="bicubic",
-                 flip_p=0.5
+                 flip_p=0.5,
+                 mean,
+                 std
                  ):
         self.data_paths = txt_file
         self.data_root = data_root
@@ -26,20 +28,8 @@ class LSUNBase(Dataset):
         }
         self.chance = flip_p
         self.size = size
-
-        mean = 0.
-        std = 0.
-        for data in self.image_paths:
-            data = decode_image(data, mode='RGB')
-            crop = min(data.shape[1], data.shape[2])
-            data = fun.center_crop(data, size=(crop, crop))
-            data = fun.resize(data, size=(self.size, self.size), interpolation=3, antialias=True)
-            data = fun.to_dtype(data, dtype=torch.float32, scale=True)
-            data = data.view(data.size(0), -1)
-            mean += data.mean(1)
-            std += data.std(1)
-        self.mean = mean / self.num_images
-        self.std = std / self.num_images
+        self.mean = mean
+        self.std = std
 
     def __len__(self):
         return self._length
