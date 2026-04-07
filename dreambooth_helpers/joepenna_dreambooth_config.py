@@ -8,7 +8,10 @@ from datetime import datetime, timezone
 
 import torch
 from torchvision.transforms.v2 import functional as fun
+from torchvision.transforms import v2
+from torchvision import datasets
 from torchvision.io import decode_image
+from torch.utils.data import DataLoader
 from pytorch_lightning import seed_everything
 
 
@@ -113,7 +116,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.model_path):
             raise Exception(f"Model Path Not Found: '{self.model_path}'.")
 
-        self.mean, self.std = self.normal_data(self.training_images)
+        self.mean, self.std = self.normal_data()
         self.validate_gpu_vram()
         self._create_log_folders()
        
@@ -135,20 +138,42 @@ class JoePennaDreamboothConfigSchemaV1():
         if gpu_vram < twenty_one_gigabytes:
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
-    def normal_data(self, training_data):
-        mean = 0.
-        std = 0.
-        for train_data in training_data:
-            data = decode_image(train_data, mode='RGB')
-            crop = min(data.shape[1], data.shape[2])
-            data = fun.center_crop(data, (crop, crop))
-            data = fun.resize(data, size=(self.res, self.res), interpolation=3, antialias=True)
-            data = fun.to_dtype(data, dtype=torch.float32, scale=True)
-            data = data.view(data.size(0), -1)
-            mean += data.mean(1)
-            std += data.std(1)
-        mean = mean / self.training_images_count
-        std = std / self.training_images_count
+    def normal_data(self):
+        transform = v2.Compose([
+            v2.Lambda(lambda x: fun.center_crop(x, min(x.shape[1], x.shape[2]))),
+            v2.Resize((512, 512), interpolation=3, antialias=True),
+            v2.ToDtype(dtype=torch.float32, scale=True)
+        ])
+        loader = lambda x: decode_image(x, mode='RGB')
+        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform, loader=loader)
+        data_loader = DataLoader(
+            dataset,
+            batch_size=1,
+            num_workers=1,
+            shuffle=False
+        )
+        mean = torch.zeros(3)
+        std = torch.zeros(3)
+        n_imgs = len(data_loader)
+    
+        for i, data in enumerate(data_loader):
+            if (i % n_imgs == 0):
+                print(i)
+            data = data[0].squeeze(0)
+            if (i == 0):
+                size = data.size(1) * data.size(2)
+            mean += data.sum((1, 2)) / size
+        mean /= n_imgs
+        mean = mean.unsqueeze(1).unsqueeze(2)
+        
+        for i, data in enumerate(data_loader):
+            if (i % n_imgs == 0):
+                print(i)
+            data = data[0].squeeze(0)
+            std += ((data - mean) ** 2).sum((1, 2)) / size
+        std /= n_imgs
+        std = std.sqrt()
+        
         mean = [float(mean[0]), float(mean[1]), float(mean[2])]
         std = [float(std[0]), float(std[1]), float(std[2])]
         return mean, std
