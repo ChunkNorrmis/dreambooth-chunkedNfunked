@@ -139,13 +139,13 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
     def normal_data(self):
+        loader = lambda x: decode_image(x, mode='RGB')
         transform = v2.Compose([
-            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.shape[1], x.shape[2]))),
             v2.Resize((512, 512), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
-        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform)
+        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform, loader=loader)
         data_loader = DataLoader(
             dataset,
             batch_size=1,
