@@ -145,7 +145,7 @@ class JoePennaDreamboothConfigSchemaV1():
             v2.Resize((512, 512), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
-        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform, loader=loader)
+        dataset = datasets.ImageFolder(root=self.training_images_folder_path, target_transform=transform)
         data_loader = DataLoader(
             dataset,
             batch_size=1,
