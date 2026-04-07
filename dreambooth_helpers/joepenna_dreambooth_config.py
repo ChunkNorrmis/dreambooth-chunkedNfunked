@@ -176,7 +176,9 @@ class JoePennaDreamboothConfigSchemaV1():
         
         mean = [f"{float(mean[0]):0.4f}", f"{float(mean[1]):0.4f}", f"{float(mean[2]):0.4f}"]
         std = [f"{float(std[0]):0.4f}", f"{float(std[1]):0.4f}", f"{float(std[2]):0.4f}"]
-        return float(mean), float(std)
+        mean = [float(mean[0]), float(mean[1], float(mean[2])]
+        std = [float(std[0]), float(std[1], float(std[2])]
+        return mean, std
         
     def saturate_from_file(
             self,
