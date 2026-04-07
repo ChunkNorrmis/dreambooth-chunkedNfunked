@@ -147,8 +147,8 @@ class JoePennaDreamboothConfigSchemaV1():
             data = fun.resize(data, size=(self.res, self.res), interpolation=3, antialias=True)
             data = fun.to_dtype(data, dtype=torch.float32, scale=True)
             data = data.view(batch_data.size(0), data.size(0), -1)
-            mean += data.mean(2)
-            std += data.std(2)
+            mean += data.mean(2).sum(0)
+            std += data.std(2).sum(0)
         mean /= self.training_images_count
         std /= self.training_images_count
         return mean, std
