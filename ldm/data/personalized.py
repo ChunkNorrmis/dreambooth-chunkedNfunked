@@ -35,7 +35,7 @@ class PersonalizedBase(Dataset):
         for data in self.image_paths:
             data = decode_image(data, mode='RGB')
             crop = min(data.shape[1], data.shape[2])
-            data = fun.center_crop(data, size=(crop, crop))
+            data = fun.center_crop(data, (crop, crop))
             data = fun.resize(data, size=(self.size, self.size), interpolation=3, antialias=True)
             data = fun.to_dtype(data, dtype=torch.float32, scale=True)
             data = data.view(data.size(0), -1)
@@ -60,9 +60,10 @@ class PersonalizedBase(Dataset):
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode="RGB")
+        crop = min(data.shape[1], data.shape[2])
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
