@@ -28,8 +28,8 @@ class LSUNBase(Dataset):
         }
         self.chance = flip_p
         self.size = size
-        self.mean = mean
-        self.std = std
+        self.mean = torch.tensor(mean, dtype=torch.float32)
+        self.std = torch.tensor(std, dtype=torch.float32)
 
     def __len__(self):
         return self._length
