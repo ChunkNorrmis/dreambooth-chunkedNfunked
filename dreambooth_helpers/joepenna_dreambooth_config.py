@@ -7,6 +7,8 @@ import sys
 from datetime import datetime, timezone
 
 import torch
+from torchvision.transforms.v2 import functional as fun
+from torchvision.io import decode_image
 from pytorch_lightning import seed_everything
 
 
