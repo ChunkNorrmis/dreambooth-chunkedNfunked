@@ -34,12 +34,9 @@ class PersonalizedBase(Dataset):
         for data in self.image_paths:
             data = decode_image(data, mode='RGB')
             crop = min(data.shape[1], data.shape[2])
-            transnorm = v2.Compose([
-                v2.CenterCrop((crop, crop)),
-                v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-                v2.ToDtype(data, dtype=torch.float32, scale=True)
-            ])
-            data = transnorm(data)
+            data = fun.center_crop(data, size=(crop, crop))
+            data = fun.resize(data, size=(self.size, self.size), interpolation=3, antialias=True)
+            data = fun.to_dtype(data, dtype=torch.float32, scale=True)
             data = data.view(data.size(0), -1)
             mean += data.mean(1)
             std += data.std(1)
