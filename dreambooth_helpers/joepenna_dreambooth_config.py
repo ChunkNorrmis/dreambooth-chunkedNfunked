@@ -136,8 +136,8 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
     def normal_data(self, training_data):
-        mean = 0.
-        std = 0.
+        mean = float(0.)
+        std = float(0.)
         for train_data in training_data:
             data = decode_image(train_data, mode='RGB')
             crop = min(data.shape[1], data.shape[2])
@@ -145,10 +145,10 @@ class JoePennaDreamboothConfigSchemaV1():
             data = fun.resize(data, size=(self.res, self.res), interpolation=3, antialias=True)
             data = fun.to_dtype(data, dtype=torch.float32, scale=True)
             data = data.view(data.size(0), -1)
-            mean += data.mean(1)
-            std += data.std(1)
-        mean /= self.training_images_count
-        std /= self.training_images_count
+            mean += float(data.mean(1))
+            std += float(data.std(1))
+        mean = float(mean / self.training_images_count)
+        std = float(std / self.training_images_count)
         return mean, std
         
     def saturate_from_file(
