@@ -13,8 +13,8 @@ per_img_token_list = [
 ]
 
 class PersonalizedBase(Dataset):
-    def __init__(self, set, reg, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
-                token_only, per_image_tokens, mean, std, center_crop, mixing_prob):
+    def __init__(self, set, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
+                token_only, per_image_tokens, center_crop, mixing_prob, reg=False, mean=0, std=1):
         
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
@@ -29,8 +29,8 @@ class PersonalizedBase(Dataset):
         self.coarse_class_text = coarse_class_text
         self.size = size
         self.reg = reg
-        self.mean = torch.tensor(mean, dtype=torch.float32)
-        self.std = torch.tensor(std, dtype=torch.float32)
+        self.mean = mean
+        self.std = std
 
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
