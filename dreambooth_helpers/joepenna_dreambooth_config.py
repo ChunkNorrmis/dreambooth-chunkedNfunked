@@ -139,22 +139,21 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
     def normal_data(self):
-        transformn = v2.Compose([v2.PILToTensor()])
-        dataset = datasets.ImageFolder(root=self.training_images_folder_path, transform=transformn)
-        data_loader = DataLoader(dataset, batch_size=1, num_workers=1, shuffle=False)
-        sum = 0.
-        sqr_sum = 0.
-        n_imgs = len(data_loader)
-        pixels = self.res * self.res * n_imgs
-
         transform = v2.Compose([
+            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
             v2.Resize((self.res, self.res), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
         
-        for data in data_loader:
+        #data_loader = DataLoader(dataset, batch_size=1, num_workers=1, shuffle=False)
+        sum = 0.
+        sqr_sum = 0.
+        n_imgs = len(self.training_images)
+        pixels = self.res * self.res * n_imgs
+
+        for data in self.training_images:
             data = transform(data)
             sum += data.sum(axis=(1, 2))
             sqr_sum += (data ** 2).sum(axis=(1, 2))
