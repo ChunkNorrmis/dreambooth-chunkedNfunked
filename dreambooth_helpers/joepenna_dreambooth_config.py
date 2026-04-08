@@ -157,6 +157,8 @@ class JoePennaDreamboothConfigSchemaV1():
 
         mean = avg.sum() / n_imgs
         std = torch.sqrt(sqr_avg.sum() / n_imgs - (mean * mean))
+        print(f"mean: {mean}")
+        print(f"std: {std}")
         #mean = (float(mean[0]), float(mean[1]), float(mean[2]))
         #std = (float(std[0]), float(std[1]), float(std[2]))
         
