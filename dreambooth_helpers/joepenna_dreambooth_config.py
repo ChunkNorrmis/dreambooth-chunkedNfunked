@@ -154,7 +154,6 @@ class JoePennaDreamboothConfigSchemaV1():
         pixels = self.res * self.res * n_imgs
 
         for data in data_loader:
-            data = transform(data)
             sum += data.sum((1,2))
             sqr_sum += (data ** 2).sum((1,2))
         mean = sum / pixels
