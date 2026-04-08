@@ -45,13 +45,12 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
+        image = self.image_paths[i % self.num_images]
         example = {}
-        image_path = self.image_paths[i % self.num_images]
-        image = decode_image(image_path, mode="RGB")
-        crop = min(image.shape[1], image.shape[2])
         transform = v2.Compose([
+            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop((crop, crop)),
+            v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
@@ -59,12 +58,12 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=self.mean, std=self.std),
             v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
         ])
-        example['image'] = transform(image)
-        
+                
         if self.reg and self.coarse_class_text:
-            example["caption"] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
+            example["caption"] = generic_captions_from_path(image, self.data_root, self.reg_tokens)
         else:
-            example["caption"] = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+            example["caption"] = caption_from_path(image, self.data_root, self.coarse_class_text, self.placeholder_token)
         
+        example['image'] = transform(image)
         return example
 
