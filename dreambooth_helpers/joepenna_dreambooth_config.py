@@ -142,7 +142,7 @@ class JoePennaDreamboothConfigSchemaV1():
         transform = v2.Compose([
             v2.ToImage(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda x: fun.center_crop(x, min(x.size[1], x.size[2]))),
+            v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
             v2.Resize((self.res, self.res), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
