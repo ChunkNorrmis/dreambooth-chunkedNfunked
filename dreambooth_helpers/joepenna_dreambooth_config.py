@@ -148,14 +148,14 @@ class JoePennaDreamboothConfigSchemaV1():
         ])
         dataset = datasets.ImageFolder(root=self.training_images_folder_path, transform=transform)
         data_loader = DataLoader(dataset, batch_size=1, num_workers=1, shuffle=False)
-        sum = torch.tensor([0.0])
-        sqr_sum = torch.tensor([0.0])
+        sum = 0.
+        sqr_sum = 0.
         n_imgs = len(data_loader)
         pixels = self.res * self.res * n_imgs
 
         for data in data_loader:
-            sum += torch.sum(data, dim=(1, 2))
-            sqr_sum += torch.sum(data ** 2, dim=(1, 2))
+            sum += data.sum(axis=(1, 2))
+            sqr_sum += (data ** 2).sum(axis=(1, 2))
         mean = sum / pixels
         std = torch.sqrt((sqr_sum / pixels) - (mean ** 2))
         
