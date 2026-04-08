@@ -157,9 +157,12 @@ class JoePennaDreamboothConfigSchemaV1():
         mean = avg_sum / n_imgs
         sqr_avg = sqr_avg_sum / n_imgs - (mean ** 2)
         std = torch.sqrt(sqr_avg)
-
+        
+        mean = (float(mean[0]), float(mean[1]), float(mean[2]))
+        std = (float(std[0]), float(std[1]), float(std[2]))
         print(f"mean: {mean}")
         print(f"std: {std}")
+        
         return mean, std
         
     def saturate_from_file(
