@@ -163,6 +163,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
 
 
 def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict:
+    mean, std = config.normalize_data()
     reg_block = {
         "target": "ldm.data.personalized.PersonalizedBase",
         "params": {
@@ -176,8 +177,6 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "coarse_class_text": config.class_word,
             "token_only": config.token_only,
             "per_image_tokens": False,
-            "mean": config.mean,
-            "std": config.std,
             "center_crop": config.crop,
             "mixing_prob": 0.25
         }
@@ -202,8 +201,8 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "coarse_class_text": config.class_word,
                     "token_only": config.token_only,
                     "per_image_tokens": False,
-                    "mean": config.mean,
-                    "std": config.std,
+                    "mean": mean,
+                    "std": std,
                     "center_crop": config.crop,
                     "mixing_prob": 0.25
                 }
@@ -222,8 +221,8 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "coarse_class_text": config.class_word,
                     "token_only": config.token_only,
                     "per_image_tokens": False,
-                    "mean": config.mean,
-                    "std": config.std,
+                    "mean": mean,
+                    "std": std,
                     "center_crop": config.crop,                    
                     "mixing_prob": 0.25
                 }
