@@ -160,8 +160,8 @@ class JoePennaDreamboothConfigSchemaV1():
         mean = sum / pixels
         std = torch.sqrt((sqr_sum / pixels) - (mean ** 2))
         
-        mean = [float(mean[0], mean[1], mean[2])]
-        std = [float(std[0], std[1], std[2])]
+        mean = [float(mean[0]), float(mean[1]), float(mean[2])]
+        std = [float(std[0]), float(std[1]), float(std[2])]
         return mean, std
         
     def saturate_from_file(
