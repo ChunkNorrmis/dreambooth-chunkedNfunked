@@ -116,10 +116,10 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.model_path):
             raise Exception(f"Model Path Not Found: '{self.model_path}'.")
 
-        self.normal_eyes = self.normalize_data()
         self.validate_gpu_vram()
         self._create_log_folders()
-       
+
+    
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
             if size_bytes == 0:
@@ -157,10 +157,10 @@ class JoePennaDreamboothConfigSchemaV1():
 
         mean = avg.sum() / n_imgs
         std = torch.sqrt(sqr_avg.sum() / n_imgs - (mean * mean))
-        mean = (float(mean[0]), float(mean[1]), float(mean[2]))
-        std = (float(std[0]), float(std[1]), float(std[2]))
+        #mean = (float(mean[0]), float(mean[1]), float(mean[2]))
+        #std = (float(std[0]), float(std[1]), float(std[2]))
         
-        return (mean, std)
+        return mean, std
         
     def saturate_from_file(
             self,
