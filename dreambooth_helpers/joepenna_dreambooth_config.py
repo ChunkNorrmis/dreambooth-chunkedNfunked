@@ -155,7 +155,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         for data in data_loader:
             sum += torch.sum(data, (1, 2))
-            sqr_sum += torch.sum((data ** 2), (1, 2))
+            sqr_sum += torch.sum(data ** 2, (1, 2))
         mean = sum / pixels
         std = torch.sqrt((sqr_sum / pixels) - (mean ** 2))
         
