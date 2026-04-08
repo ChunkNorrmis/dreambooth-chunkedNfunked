@@ -163,7 +163,6 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
 
 
 def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict:
-    mean, std = config.normalize_data()
     reg_block = {
         "target": "ldm.data.personalized.PersonalizedBase",
         "params": {
@@ -202,8 +201,8 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "per_image_tokens": False,
                     "center_crop": config.crop,
                     "mixing_prob": 0.25,
-                    "mean": mean,
-                    "std": std
+                    "mean": config.mean,
+                    "std": config.std
                 }
             },
             "reg": reg_block if config.regularization_images_folder_path is not None and config.regularization_images_folder_path != '' else None,
