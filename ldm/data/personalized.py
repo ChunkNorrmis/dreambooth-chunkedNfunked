@@ -45,8 +45,6 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        image = self.image_paths[i % self.num_images]
-        example = {}
         transform = v2.Compose([
             v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
@@ -58,6 +56,8 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=self.mean, std=self.std),
             v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
         ])
+        image = self.image_paths[i % self.num_images]
+        example = {}
                 
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image, self.data_root, self.reg_tokens)
