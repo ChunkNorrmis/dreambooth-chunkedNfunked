@@ -146,8 +146,8 @@ class JoePennaDreamboothConfigSchemaV1():
             v2.Resize((self.res, self.res), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
-        avg = torch.zeros(3)
-        sqr_avg = torch.zeros(3)
+        avg_sum = torch.zeros(3)
+        sqr_avg_sum = torch.zeros(3)
         n_imgs = len(self.training_images)
                 
         for image in self.training_images:
