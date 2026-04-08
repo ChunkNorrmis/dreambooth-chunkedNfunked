@@ -139,30 +139,28 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
     def normal_data(self):
-        #loader = lambda x: decode_image(x, mode='RGB')
+        load_img = lambda x: decode_image(x, mode='RGB')
         transform = v2.Compose([
-            v2.PILToTensor(),
+            v2.Lambda(load_img),
+            #v2.ToImage(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.size[1], x.size[2]))),
             v2.Resize((self.res, self.res), interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True)
         ])
-        dataset = datasets.ImageFolder(root=self.training_images_folder_path, transform=transform)
+        dataset = datasets.ImageFolder(root=self.training_images_folder_path)
         data_loader = DataLoader(dataset, batch_size=1, num_workers=1, shuffle=False)
-        mean = torch.zeros(3)
-        std = torch.zeros(3)
+        sum = torch.tensor([0.0])
+        sqr_sum = torch.tensor([0.0])
         n_imgs = len(data_loader)
-        pixels = (self.res * self.res) * n_imgs
+        pixels = self.res * self.res * n_imgs
         
         for data in data_loader:
-            data = data[0].squeeze(0)
-            mean += data.sum((1, 2))
-        mean = (mean / pixels).unsqueeze(1).unsqueeze(2)
-                
-        for data in data_loader:
-            data = data[0].squeeze(0)
-            std += ((data - mean) ** 2).sum((1, 2))
-        std = (std / pixels).sqrt()
+            data = transform(data)
+            sum += data.sum((1,2))
+            sqr_sum += (data ** 2).sum((1,2))
+        mean = sum / pixels
+        std = torch.sqrt((sqr_sum / pixels) - (mean ** 2))
         
         mean = [float(mean[0], mean[1], mean[2])]
         std = [float(std[0], std[1], std[2])]
