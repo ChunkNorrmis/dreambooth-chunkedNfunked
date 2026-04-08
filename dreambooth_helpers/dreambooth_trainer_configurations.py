@@ -201,10 +201,9 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "coarse_class_text": config.class_word,
                     "token_only": config.token_only,
                     "per_image_tokens": False,
-                    "mean": mean,
-                    "std": std,
                     "center_crop": config.crop,
-                    "mixing_prob": 0.25
+                    "mixing_prob": 0.25,
+                    k: v for k, v in config.normalize_data()
                 }
             },
             "reg": reg_block if config.regularization_images_folder_path is not None and config.regularization_images_folder_path != '' else None,
