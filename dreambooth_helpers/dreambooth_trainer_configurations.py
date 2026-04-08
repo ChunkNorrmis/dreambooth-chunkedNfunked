@@ -177,9 +177,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "token_only": False,
             "per_image_tokens": False,
             "center_crop": config.crop,
-            "mixing_prob": 0.25,
-            "mean": 0.0,
-            "std": 1.0
+            "mixing_prob": 0.25
         }
     }
 
