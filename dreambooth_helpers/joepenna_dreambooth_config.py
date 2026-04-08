@@ -116,9 +116,10 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.model_path):
             raise Exception(f"Model Path Not Found: '{self.model_path}'.")
 
+        self.mean, self.std = self.normalize_data()
         self.validate_gpu_vram()
         self._create_log_folders()
-        self.mean, self.std = self.normalize_data()
+        
 
     
     def validate_gpu_vram(self):
