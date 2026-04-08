@@ -143,8 +143,7 @@ class JoePennaDreamboothConfigSchemaV1():
         sum = 0.
         sqr_sum = 0.
         n_imgs = len(self.training_images)
-        pixels = self.res * self.res * n_imgs
-
+        
         for image in self.training_images:
             image = decode_image(image, mode='RGB')
             crop = min(image.size(1), image.size(2))
@@ -155,12 +154,11 @@ class JoePennaDreamboothConfigSchemaV1():
                 v2.ToDtype(dtype=torch.float32, scale=True)
             ])
             image = transform(image)
-            sum += torch.sum(image, axis=(1, 2))
-            data_sqr = image ** 2
-            sqr_sum += torch.sum(data_sqr, axis=(1, 2))
+            sum += image.mean(dim=(1, 2))
+            sqr_sum += (image ** 2).mean(dim=(1, 2))
             
-        mean = sum / pixels
-        std = sqr_sum / pixels - (mean ** 2)
+        mean = sum / n_imgs
+        std = (sqr_sum / n_imgs) - (mean ** 2)
         std = torch.sqrt(std)
         
         mean = [float(mean[0]), float(mean[1]), float(mean[2])]
