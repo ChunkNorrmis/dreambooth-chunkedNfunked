@@ -152,11 +152,12 @@ class JoePennaDreamboothConfigSchemaV1():
                 
         for image in self.training_images:
             im_data = transform(image)
-            avg += im_data.mean(dim=(1, 2))
-            sqr_avg += (im_data * im_data).mean(dim=(1, 2))
+            avg_sum += im_data.mean(dim=(1, 2))
+            sqr_avg_sum += (im_data ** 2).mean(dim=(1, 2))
 
-        mean = avg.sum() / n_imgs
-        std = torch.sqrt(sqr_avg.sum() / n_imgs - (mean * mean))
+        mean = avg_sum / n_imgs
+        sqr_avg = sqr_avg_sum / n_imgs - (mean ** 2)
+        std = sqr_avg.sqrt()
         print(f"mean: {mean}")
         print(f"std: {std}")
         #mean = (float(mean[0]), float(mean[1]), float(mean[2]))
