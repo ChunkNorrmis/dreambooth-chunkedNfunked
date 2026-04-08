@@ -140,7 +140,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def normal_data(self):
         transform = v2.Compose([
-            v2.ToImage(),
+            v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
             v2.Resize((self.res, self.res), interpolation=3, antialias=True),
@@ -154,8 +154,8 @@ class JoePennaDreamboothConfigSchemaV1():
         pixels = self.res * self.res * n_imgs
 
         for data in data_loader:
-            sum += torch.sum(data, (1, 2))
-            sqr_sum += torch.sum(data ** 2, (1, 2))
+            sum += torch.sum(data, dim=(1, 2))
+            sqr_sum += torch.sum(data ** 2, dim=(1, 2))
         mean = sum / pixels
         std = torch.sqrt((sqr_sum / pixels) - (mean ** 2))
         
