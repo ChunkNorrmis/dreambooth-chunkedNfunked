@@ -14,7 +14,7 @@ per_img_token_list = [
 
 class PersonalizedBase(Dataset):
     def __init__(self, set, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
-                token_only, per_image_tokens, center_crop, mixing_prob, reg=False, mean=(0., 0., 0.), std=(1., 1., 1.)):
+                token_only, per_image_tokens, center_crop, mixing_prob, reg=False):
         self.set = set
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
@@ -28,15 +28,14 @@ class PersonalizedBase(Dataset):
         self.chance = flip_p
         self.coarse_class_text = coarse_class_text
         self.size = size
+        self.repeats = repeats
         self.reg = reg
-        self.mean = torch.tensor(mean, dtype=torch.float32)
-        self.std = torch.tensor(std, dtype=torch.float32)
 
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if self.set == "train":
-            self._length = self.num_images * repeats
+            self._length = self.num_images * self.repeats
         
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
@@ -54,7 +53,7 @@ class PersonalizedBase(Dataset):
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=self.mean, std=self.std),
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
             v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
         ])
         example = {}
