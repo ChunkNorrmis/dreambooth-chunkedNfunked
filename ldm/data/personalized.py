@@ -39,13 +39,8 @@ class PersonalizedBase(Dataset):
         
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-                
-    def __len__(self):
-        return self._length
 
-    def __getitem__(self, i):
-        image = self.image_paths[i % self.num_images]
-        transform = v2.Compose([
+        self.transform = v2.Compose([
             v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
@@ -56,13 +51,19 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
             v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
         ])
+                
+    def __len__(self):
+        return self._length
+
+    def __getitem__(self, i):
         example = {}
+        image = self.image_paths[i % self.num_images]
+        example['image'] = self.transform(image)
                 
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image, self.data_root, self.reg_tokens)
         else:
             example["caption"] = caption_from_path(image, self.data_root, self.coarse_class_text, self.placeholder_token)
         
-        example['image'] = transform(image)
         return example
 
