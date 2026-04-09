@@ -201,8 +201,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "per_image_tokens": False,
                     "center_crop": config.crop,
                     "mixing_prob": 0.25,
-                    "mean": config.mean,
-                    "std": config.std
+                    "reg": False
                 }
             },
             "reg": reg_block if config.regularization_images_folder_path is not None and config.regularization_images_folder_path != '' else None,
@@ -218,8 +217,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "coarse_class_text": config.class_word,
                     "token_only": config.token_only,
                     "per_image_tokens": False,
-                    "mean": config.mean,
-                    "std": config.std,
+                    "reg": False,
                     "center_crop": config.crop,                    
                     "mixing_prob": 0.25
                 }
