@@ -15,7 +15,7 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(self, set, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
                 token_only, per_image_tokens, center_crop, mixing_prob, reg=False, mean=(0., 0., 0.), std=(1., 1., 1.)):
-        
+        self.set = set
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
         self.num_images = len(self.image_paths)
@@ -35,7 +35,7 @@ class PersonalizedBase(Dataset):
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
-        if set == "train":
+        if self.set == "train":
             self._length = self.num_images * repeats
         
         if self.reg and self.coarse_class_text:
@@ -45,6 +45,7 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
+        image = self.image_paths[i % self.num_images]
         transform = v2.Compose([
             v2.Lambda(lambda x: decode_image(x, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
@@ -56,7 +57,6 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=self.mean, std=self.std),
             v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
         ])
-        image = self.image_paths[i % self.num_images]
         example = {}
                 
         if self.reg and self.coarse_class_text:
