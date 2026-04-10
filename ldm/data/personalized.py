@@ -42,13 +42,12 @@ class PersonalizedBase(Dataset):
 
         self.transform = v2.Compose([
             v2.Lambda(lambda x: decode_image(x, mode='RGB')),
-            v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            v2.Normalize(mean=0.5, std=0.5),
             v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
         ])
                 
