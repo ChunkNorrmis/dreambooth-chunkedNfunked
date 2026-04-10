@@ -3,8 +3,7 @@ import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
-from torchvision.io import decode_image
+from PIL import Image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
 
@@ -14,7 +13,7 @@ per_img_token_list = [
 
 class PersonalizedBase(Dataset):
     def __init__(self, set, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
-                token_only, per_image_tokens, center_crop, mixing_prob, reg=False):
+                token_only, per_image_tokens, center_crop, mixing_prob, reg):
         self.set = set
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
@@ -40,24 +39,25 @@ class PersonalizedBase(Dataset):
         if self.reg and self.coarse_class_text:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
-        self.transform = v2.Compose([
-            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
-            v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
-            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
-        ])
-                
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = {}
-        image = self.image_paths[i % self.num_images]
-        example['image'] = self.transform(image)
+        image = Image.open(self.image_paths[i % self.num_images])
+        crop = min(image.size)
+        transform = v2.Compose([
+            v2.RGB(),
+            v2.PILToTensor(),
+            v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop((crop, crop)),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
+            v2.RandomHorizontalFlip(p=self.chance),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.ToDtype(dtype=torch.float32),
+            v2.Lambda(lambda x: ((x / 255 - 0.5) / 0.5).permute(1, 2, 0).contiguous().numpy())
+        ])
+        example['image'] = transform(image)
                 
         if self.reg and self.coarse_class_text:
             example["caption"] = generic_captions_from_path(image, self.data_root, self.reg_tokens)
