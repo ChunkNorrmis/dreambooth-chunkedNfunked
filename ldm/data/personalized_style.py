@@ -1,4 +1,4 @@
-import os, torch, random
+import os, torch, random, sys
 import numpy as np
 from torch.utils.data import Dataset
 from PIL import Image
@@ -99,7 +99,7 @@ class PersonalizedBase(Dataset):
         ])
         example['image'] = transform(image)
         
-        if self.per_image_tokens and np.random.uniform() < 0.25:
+        if self.per_image_tokens and random.random() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
         else:
             example["caption"] = random.choice(imagenet_templates_small).format(self.placeholder_token)
