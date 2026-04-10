@@ -1,9 +1,8 @@
 import os, torch, random
 import numpy as np
 from torch.utils.data import Dataset
-from torchvision.io import decode_image
+from PIL import Image
 from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
 
 imagenet_templates_small = [
     'a painting in the style of {}',
@@ -61,11 +60,9 @@ class PersonalizedBase(Dataset):
         flip_p,
         placeholder_token,
         per_image_tokens,
-        mean,
-        std,
         center_crop
     ):
-        
+        super().__init__()
         self.data_root = data_root
         self.image_paths = [os.path.join(self.data_root, file_path) for file_path in os.listdir(self.data_root)]
         self.num_images = len(self.image_paths)
@@ -75,8 +72,6 @@ class PersonalizedBase(Dataset):
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
-        self.mean = torch.tensor(mean, dtype=torch.float32)
-        self.std = torch.tensor(std, dtype=torch.float32)
                         
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -84,25 +79,25 @@ class PersonalizedBase(Dataset):
         if set == "train":
             self._length = self.num_images * repeats
 
-        self.transform = v2.Compose([
-            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
-            v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
-            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-            v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32)),
-        ])
-
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = {}
-        image = self.image_paths[i % self.num_images]
-        example['image'] = self.transform(image)
+        image = Image.open(self.image_paths[i % self.num_images])
+        crop = min(image.size)
+        transform = v2.Compose([
+            v2.RGB(),
+            v2.PILToTensor(),
+            v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop((crop, crop)),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
+            v2.RandomHorizontalFlip(p=self.chance),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.ToDtype(dtype=torch.float32),
+            v2.Lambda(lambda x: ((x / 255 - 0.5) / 0.5).permute(1, 2, 0).contiguous().numpy())
+        ])
+        example['image'] = transform(image)
         
         if self.per_image_tokens and np.random.uniform() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
