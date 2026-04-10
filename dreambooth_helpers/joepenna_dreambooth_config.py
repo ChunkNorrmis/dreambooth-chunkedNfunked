@@ -139,33 +139,6 @@ class JoePennaDreamboothConfigSchemaV1():
         if gpu_vram < twenty_one_gigabytes:
             raise Exception(f"VRAM: Currently unable to run on less than {convert_size(twenty_one_gigabytes)} of VRAM.")
 
-    def normalize_data(self):
-        transform = v2.Compose([
-            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
-            v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda x: fun.center_crop(x, min(x.size(1), x.size(2)))),
-            v2.Resize((self.res, self.res), interpolation=3, antialias=True),
-            v2.ToDtype(dtype=torch.float32, scale=True)
-        ])
-        avg_sum = torch.zeros(3)
-        sqr_avg_sum = torch.zeros(3)
-        n_imgs = len(self.training_images)
-                
-        for image in self.training_images:
-            im_data = transform(image)
-            avg_sum += im_data.mean(dim=(1, 2), keepdims=True)
-            sqr_avg_sum += (im_data ** 2).mean(dim=(1, 2),  keepdims=True)
-        mean = avg_sum / n_imgs
-        sqr_avg = sqr_avg_sum / n_imgs - (mean ** 2)
-        std = torch.sqrt(sqr_avg)
-        
-        mean = (float(mean[0]), float(mean[1]), float(mean[2]))
-        std = (float(std[0]), float(std[1]), float(std[2]))
-        print(f"mean: {mean}")
-        print(f"std: {std}")
-        
-        return mean, std
-        
     def saturate_from_file(
             self,
             config_file_path: str,
