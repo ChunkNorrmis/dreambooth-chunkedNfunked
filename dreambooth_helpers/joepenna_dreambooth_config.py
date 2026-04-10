@@ -55,6 +55,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.save_every_x_steps = save_every_x_steps
         self.debug = debug
         self.gpu = gpu
+        self.token_only = token_only
 
         if self.project_name is None or self.project_name == '':
             raise Exception("'--project_name': Required.")
@@ -90,19 +91,20 @@ class JoePennaDreamboothConfigSchemaV1():
         self.max_training_steps = int(self.training_images_count * self.repeats / (self.batch_size * self.accumed_grads))
         
         #self.training_images = _training_image_paths
-        if token_only is False and regularization_images_folder_path is not None and regularization_images_folder_path != '':
-            self.regularization_images_folder_path = regularization_images_folder_path
+        if not self.token_only and regularization_images_folder_path is not None and regularization_images_folder_path != '':
+            self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
+            self.r_token = os.path.basename(os.path.listdir(self.regularization_images_folder_path))
+            self.r_class_word = os.path.basename(os.path.listdir(os.path.join(self.regularization_images_folder_path, self.r_token)))
 
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = token
-        if self.token is None or self.token == '':
+        self.t_token = token
+        if self.t_token is None or self.t_token == '':
             raise Exception(f"Token not provided.")
 
-        self.token_only = token_only
-        if token_only is False:
-            self.class_word = class_word
+        if not self.token_only:
+            self.t_class_word = class_word
 
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
