@@ -12,8 +12,8 @@ per_img_token_list = [
 ]
 
 class PersonalizedBase(Dataset):
-    def __init__(self, set, data_root, size, repeats, flip_p, placeholder_token, coarse_class_text,
-                token_only, per_image_tokens, center_crop, mixing_prob, reg):
+    def __init__(self, set, data_root, size, repeats, placeholder_token, coarse_class_text, center_crop,
+                 mixing_prob, flip_p=0.5, reg=False, token_only=False, per_image_tokens=False,):
 
         super().__init__()
         self.data_root = data_root
