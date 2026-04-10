@@ -88,9 +88,8 @@ class PersonalizedBase(Dataset):
             return (x / 255 - 0.5) / 0.5
         
         example = {}
-        img_path = self.image_paths[i % self.num_images]
-        image = Image.open(img_path)
-        crop = min(image.size)
+        image = Image.open(self.image_paths[i % self.num_images])
+        crop = min(image.width, image.height)
         transform = v2.Compose([
             v2.RGB(),
             v2.PILToTensor(),
@@ -101,11 +100,12 @@ class PersonalizedBase(Dataset):
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.Lambda(normpy)
         ])
-        class_dir = os.path.dirname(img_path)
+        class_dir = os.path.dirname(self.image_paths[i % self.num_images])
         token_dir = os.path.dirname(class_dir)
         im_class = os.path.basename(class_dir)
         im_token = os.path.basename(token_dir)
-        
+
+        example['image'] = transform(image)
         if self.per_image_tokens and random.random() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(im_token, per_img_token_list[i % self.num_images])
         else:
