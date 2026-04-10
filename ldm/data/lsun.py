@@ -1,21 +1,13 @@
-import os, random, torch
+import os, random, torch, sys
 import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from torchvision.io import decode_image
-from torchvision.transforms.v2 import functional as fun
+from PIL import Image
 
 
 class LSUNBase(Dataset):
-    def __init__(self,
-                 txt_file,
-                 data_root,
-                 size=512,
-                 interpolation="bicubic",
-                 flip_p=0.5,
-                 mean,
-                 std
-                 ):
+    def __init__(self, txt_file, data_root, size=512, interpolation="bicubic", flip_p=0.5):
+        super().__init__()
         self.data_paths = txt_file
         self.data_root = data_root
         with open(self.data_paths, "r") as f:
@@ -28,26 +20,28 @@ class LSUNBase(Dataset):
         }
         self.chance = flip_p
         self.size = size
-        self.mean = torch.tensor(mean, dtype=torch.float32)
-        self.std = torch.tensor(std, dtype=torch.float32)
 
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
-        image = decode_image(example["file_path_"], mode="RGB")
+        image = Image.open(example["file_path_"])
+        crop = min(image.size)
         transform = v2.Compose([
+            v2.RGB(),
+            v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=self.mean, std=self.std),
-            v2.Lambda(lambda tt: np.array(tt.clone().detach().permute(1, 2, 0).cpu()).astype(np.float32))
+            v2.ToDtype(dtype=torch.float32),
+            v2.Lambda(lambda x: ((x / 255 - 0.5) / 0.5).permute(1, 2, 0).contiguous().numpy())
         ])
         example['image'] = transform(image)
+
+        return example
 
 
 class LSUNChurchesTrain(LSUNBase):
