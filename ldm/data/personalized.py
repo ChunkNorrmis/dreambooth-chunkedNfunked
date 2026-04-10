@@ -41,14 +41,14 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
+        def normpy(x):
+            x = np.array(x.permute(1, 2, 0).contiguous()).astype(np.float32)
+            return (x / 255 - 0.5) / 0.5
+        
         example = {}
         img_path = self.image_paths[i % self.num_images]
         image = Image.open(img_path)
         crop = min(image.size)
-        def normpy(x):
-            x = np.array(x.permute(1, 2, 0).contiguous()).astype(np.float32)
-            x = (x / 255 - 0.5) / 0.5
-            return x
         transform = v2.Compose([
             v2.RGB(),
             v2.PILToTensor(),
