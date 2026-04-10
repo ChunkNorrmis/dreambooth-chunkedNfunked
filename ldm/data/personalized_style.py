@@ -64,7 +64,7 @@ class PersonalizedBase(Dataset):
     ):
         super().__init__()
         self.data_root = data_root
-        self.image_paths = [os.path.join(self.data_root, file_path) for file_path in os.listdir(self.data_root)]
+        self.image_paths = os.listdir(self.data_root)
         self.num_images = len(self.image_paths)
         self._length = self.num_images
         self.placeholder_token = placeholder_token
@@ -83,8 +83,13 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
+        def normpy(x):
+            x = np.array(x.permute(1, 2, 0).contiguous()).astype(np.float32)
+            return (x / 255 - 0.5) / 0.5
+        
         example = {}
-        image = Image.open(self.image_paths[i % self.num_images])
+        img_path = self.image_paths[i % self.num_images]
+        image = Image.open(img_path)
         crop = min(image.size)
         transform = v2.Compose([
             v2.RGB(),
@@ -94,15 +99,17 @@ class PersonalizedBase(Dataset):
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32),
-            v2.Lambda(lambda x: ((x / 255 - 0.5) / 0.5).permute(1, 2, 0).contiguous().numpy())
+            v2.Lambda(normpy)
         ])
-        example['image'] = transform(image)
+        class_dir = os.path.dirname(img_path)
+        token_dir = os.path.dirname(class_dir)
+        im_class = os.path.basename(class_dir)
+        im_token = os.path.basename(token_dir)
         
         if self.per_image_tokens and random.random() < 0.25:
-            example["caption"] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
+            example["caption"] = random.choice(imagenet_dual_templates_small).format(im_token, per_img_token_list[i % self.num_images])
         else:
-            example["caption"] = random.choice(imagenet_templates_small).format(self.placeholder_token)
+            example["caption"] = random.choice(imagenet_templates_small).format(im_token)
 
         return example
 
