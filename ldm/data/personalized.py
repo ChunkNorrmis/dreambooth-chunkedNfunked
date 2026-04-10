@@ -45,6 +45,10 @@ class PersonalizedBase(Dataset):
         img_path = self.image_paths[i % self.num_images]
         image = Image.open(img_path)
         crop = min(image.size)
+        def normpy(x):
+            x = np.array(x.permute(1, 2, 0).contiguous()).astype(np.float32)
+            x = (x / 255 - 0.5) / 0.5
+            return x
         transform = v2.Compose([
             v2.RGB(),
             v2.PILToTensor(),
@@ -53,16 +57,16 @@ class PersonalizedBase(Dataset):
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.chance),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32),
-            v2.Lambda(lambda x: ((x / 255 - 0.5) / 0.5).permute(1, 2, 0).contiguous().numpy())
+            v2.Lambda(normpy)
         ])
         class_dir = os.path.dirname(img_path)
         token_dir = os.path.dirname(class_dir)
         im_class = os.path.basename(class_dir)
         im_token = os.path.basename(token_dir)
+        reg_tokens = OrderedDict([('C', im_class)])
+        
         example['image'] = transform(image)
         if self.reg:
-            reg_tokens = OrderedDict([('C', im_class)])            
             example["caption"] = generic_captions_from_path(image, self.data_root, reg_tokens)
         else:
             example["caption"] = caption_from_path(image, self.data_root, im_class, im_token)
