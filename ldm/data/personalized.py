@@ -16,7 +16,6 @@ class PersonalizedBase(Dataset):
                 token_only, per_image_tokens, center_crop, mixing_prob, reg):
 
         super().__init__()
-        self.set = set
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
         self.num_images = len(self.image_paths)
@@ -35,18 +34,16 @@ class PersonalizedBase(Dataset):
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
-        if self.set == "train":
+        if set == "train":
             self._length = self.num_images * self.repeats
-        
-        if self.reg and self.coarse_class_text:
-            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = {}
-        image = Image.open(self.image_paths[i % self.num_images])
+        img_path = self.image_paths[i % self.num_images]
+        image = Image.open(img_path)
         crop = min(image.size)
         transform = v2.Compose([
             v2.RGB(),
@@ -59,12 +56,16 @@ class PersonalizedBase(Dataset):
             v2.ToDtype(dtype=torch.float32),
             v2.Lambda(lambda x: ((x / 255 - 0.5) / 0.5).permute(1, 2, 0).contiguous().numpy())
         ])
+        class_dir = os.path.dirname(img_path)
+        token_dir = os.path.dirname(class_dir)
+        im_class = os.path.basename(class_dir)
+        im_token = os.path.basename(token_dir)
         example['image'] = transform(image)
-                
-        if self.reg and self.coarse_class_text:
-            example["caption"] = generic_captions_from_path(image, self.data_root, self.reg_tokens)
+        if self.reg:
+            reg_tokens = OrderedDict([('C', im_class)])            
+            example["caption"] = generic_captions_from_path(image, self.data_root, reg_tokens)
         else:
-            example["caption"] = caption_from_path(image, self.data_root, self.coarse_class_text, self.placeholder_token)
+            example["caption"] = caption_from_path(image, self.data_root, im_class, im_token)
         
         return example
 
