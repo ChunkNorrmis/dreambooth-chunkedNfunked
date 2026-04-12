@@ -1,3 +1,4 @@
+import os
 from pytorch_lightning.plugins.io.torch_plugin import TorchCheckpointIO
 import safetensors.torch.save_model
 
@@ -18,4 +19,10 @@ class PruningCheckpointIO(TorchCheckpointIO):
         if not sftsr:
             TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
         else:
+            if path.endswith('.ckpt'):
+                path = path.replace('.ckpt', '.safetensors')
+            elif os.path.isdir(path):
+                path = os.path.join(path, 'last.safetensors')
+            else: 
+                path = f"{path}.safetensors"
             safetensors.torch.save_model(pruned_checkpoint, path)
