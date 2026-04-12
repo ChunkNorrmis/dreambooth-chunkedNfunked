@@ -126,28 +126,34 @@ From within the My Pods page,
 ### <a name="running-locally-venv"></a> Setup - Virtual Environment
 
 ### Pre-Requisites
-1. [Git](https://gitforwindows.org/)
-2. [Python 3.10](https://www.python.org/downloads/)
-3. Open `cmd`
-4. Clone the repository
-   1. `C:\>git clone https://github.com/JoePenna/Dreambooth-Stable-Diffusion`
-5. Navigate into the repository
-   1. `C:\>cd Dreambooth-Stable-Diffusion`
-
+1. Open `bash`
+   1. [Git] `apt install -y git`
+   2. [Python 3.10] `apt install -y python3.10-full (pre 24.04). 24.04+ you have to build 3.10 from source`
+2. Clone the repository
+   1. `$ git clone https://github.com/ChunkNorrmis/dreambooth-chunkedNfunked`
+3. Navigate into the repository
+   1. `$ cd dreambooth-chunkedNfunked`
 ### Install Dependencies and Activate Environment
-```cmd
-cmd> python -m venv dreambooth_joepenna
-cmd> dreambooth_joepenna\Scripts\activate.bat
-cmd> pip install torch==1.13.1+cu117 torchvision==0.14.1+cu117 --extra-index-url https://download.pytorch.org/whl/cu117
-cmd> pip install -r requirements.txt
+```bash
+$ python3.10 -m venv dream_venv
+$ dream_venv\bin\activate
+$ pip install -r requirements.txt
 ```
-
 #### Run
-`cmd> python "main.py" --project_name "ProjectName" --training_model "C:\v1-5-pruned-emaonly-pruned.ckpt" --regularization_images "C:\regularization_images" --training_images "C:\training_images" --max_training_steps 2000 --class_word "person" --token "zwx" --flip_p 0 --learning_rate 1.0e-06 --save_every_x_steps 250`
-
+`$ python main.py --project_name "ProjectName" \
+--training_model v1-5-pruned.ckpt \
+--regularization_images regularization_images \
+--training_images training_images \
+--class_word person \
+--token zwx \
+--center_crop \
+--repeats 100 \
+--batch_size 4 \
+--accume_grads 4 \
+--fp32`
 #### Cleanup
-```cmd
-cmd> deactivate 
+```bash
+$ deactivate 
 ```
 
 ### <a name="running-locally-conda"></a>  Setup - Conda
@@ -189,7 +195,6 @@ cmd> conda deactivate
     "flip_percent": 0.0,
     "gpu": 0,
     "learning_rate": 1e-06,
-    "max_training_steps": 3500,
     "model_path": "D:\\stable-diffusion\\models\\v1-5-pruned-emaonly-pruned.ckpt",
     "model_repo_id": "",
     "project_config_filename": "my-config.json",
@@ -247,7 +252,6 @@ python "main.py" --config_file_path "path/to/the/my-config.json"
 | `--project_name` | string | `"My Project Name"` | Name of the project |
 | `--debug` | bool | `False` | *Optional* Defaults to `False`. Enable debug logging |
 | `--seed` | int | `23` | *Optional* Defaults to `23`. Seed for seed_everything |
-| `--max_training_steps` | int | `3000` | Number of training steps to run |
 | `--token` | string | `"owhx"` | Unique token you want to represent your trained model. |
 | `--token_only` | bool | `False` | *Optional* Defaults to `False`. Train only using the token and no class. |
 | `--training_model` | string | `"D:\\stable-diffusion\\models\\v1-5-pruned-emaonly-pruned.ckpt"` | Path to model to train (model.ckpt) |
@@ -262,7 +266,7 @@ python "main.py" --config_file_path "path/to/the/my-config.json"
 ### Using your configuration for training
 
 ```
-python "main.py" --project_name "My Project Name" --max_training_steps 3000 --token "owhx" --training_model "D:\\stable-diffusion\\models\\v1-5-pruned-emaonly-pruned.ckpt" --training_images "D:\\stable-diffusion\\training_images\\24 Images - captioned" --regularization_images "D:\\stable-diffusion\\regularization_images\\Stable-Diffusion-Regularization-Images-person_ddim\\person_ddim" --class_word "woman" --flip_p 0.0 --save_every_x_steps 500
+python "main.py" --project_name "My Project Name" --token "owhx" --training_model "D:\\stable-diffusion\\models\\v1-5-pruned-emaonly-pruned.ckpt" --training_images "D:\\stable-diffusion\\training_images\\24 Images - captioned" --regularization_images "D:\\stable-diffusion\\regularization_images\\Stable-Diffusion-Regularization-Images-person_ddim\\person_ddim" --class_word "woman" --flip_p 0.0 --save_every_x_steps 500
 ```
 
 # <a name="captions-and-multi-concept"></a>  Captions and Multiple Subject/Concept Support
