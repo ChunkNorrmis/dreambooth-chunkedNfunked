@@ -25,7 +25,7 @@ class PersonalizedBase(Dataset):
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.mixing_prob = mixing_prob
-        self.chance = flip_p
+        self.flip_p = flip_p
         self.coarse_class_text = coarse_class_text
         self.size = size
         self.repeats = repeats
@@ -41,34 +41,36 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        def normpy(x):
-            x = np.array(x.permute(1, 2, 0).contiguous()).astype(np.float32)
-            return (x / 255 - 0.5) / 0.5
-        
         example = {}
-        image = Image.open(self.image_paths[i % self.num_images])
-        crop = min(image.width, image.height)
+        img_path = self.image_paths[i % self.num_images]
+        image = Image.open(img_path)
+        crop = min(image.size)
         transform = v2.Compose([
             v2.RGB(),
             v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.chance),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(normpy)
+            v2.RandomHorizontalFlip(p=self.flip_p),
+            v2.GaussianBlur(kernel_size=1, sigma=0.2),
+            v2.Lambda(self.normpy)
         ])
-        class_dir = os.path.dirname(self.image_paths[i % self.num_images])
-        token_dir = os.path.dirname(class_dir)
-        im_class = os.path.basename(class_dir)
-        im_token = os.path.basename(token_dir)
-        reg_tokens = OrderedDict([('C', im_class)])
-        
         example['image'] = transform(image)
+        class_dir = os.path.dirname(img_path)
+        im_class = os.path.basename(class_dir)
         if self.reg:
+            reg_tokens = OrderedDict([('C', im_class)])
             example["caption"] = generic_captions_from_path(image, self.data_root, reg_tokens)
         else:
+            token_dir = os.path.dirname(class_dir)
+            im_token = os.path.basename(token_dir)
             example["caption"] = caption_from_path(image, self.data_root, im_class, im_token)
-        
+                
         return example
+
+    def normpy(self, x):
+        x = x.clone().detach().permute(1, 2, 0).numpy()
+        x = np.array(x).astype(np.float32)
+        return (x / 255 - 0.5) / 0.5
+
 
