@@ -3,7 +3,7 @@ import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from PIL import Image
+from torchvision.io import decode_image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
 
@@ -42,18 +42,15 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.image_paths[i % self.num_images]
-        image = Image.open(img_path)
-        crop = min(image.size)
+        image = decode_image(img_path, mode='RGB')
+        crop = min(image.size(1), image.size(2))
         transform = v2.Compose([
-            v2.RGB(),
-            v2.PILToTensor(),
-            v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda x: ((x - 0.5) / 0.5).detach().permute(1, 2, 0).cpu().numpy())
+            v2.Lambda(lambda x: ((x - 0.5) / 0.5).clone().detach().permute(1, 2, 0).cpu().numpy())
         ])
         example = {'image': transform(image)}
         class_dir = os.path.dirname(img_path)
