@@ -41,7 +41,6 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.image_paths[i % self.num_images]
         image = Image.open(img_path)
         crop = min(image.size)
@@ -53,9 +52,10 @@ class PersonalizedBase(Dataset):
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
-            v2.Lambda(self.normpy)
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Lambda(lambda x: ((x.clone().detach() - 0.5) / 0.5).permute(1, 2, 0).cpu().numpy())
         ])
-        example['image'] = transform(image)
+        example = {'image': transform(image)}
         class_dir = os.path.dirname(img_path)
         im_class = os.path.basename(class_dir)
         if self.reg:
@@ -67,10 +67,4 @@ class PersonalizedBase(Dataset):
             example["caption"] = caption_from_path(image, self.data_root, im_class, im_token)
                 
         return example
-
-    def normpy(self, x):
-        x = x.clone().detach().permute(1, 2, 0).numpy()
-        x = np.array(x).astype(np.float32)
-        return (x / 255 - 0.5) / 0.5
-
 
