@@ -53,7 +53,7 @@ class PersonalizedBase(Dataset):
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda x: ((x.clone().detach() - 0.5) / 0.5).permute(1, 2, 0).cpu().numpy())
+            v2.Lambda(lambda x: ((x - 0.5) / 0.5).detach().permute(1, 2, 0).cpu().numpy())
         ])
         example = {'image': transform(image)}
         class_dir = os.path.dirname(img_path)
