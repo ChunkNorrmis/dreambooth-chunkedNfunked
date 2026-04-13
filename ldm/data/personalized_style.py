@@ -85,9 +85,8 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         img_path = self.image_paths[i % self.num_images]
         image = decode_image(img_path, mode='RGB')
-        crop = min(image.size(1), image.size(2))
         transform = v2.Compose([
-            v2.CenterCrop((crop, crop)),
+            v2.CenterCrop(min(image.size(1), image.size(2))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
