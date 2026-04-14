@@ -104,7 +104,7 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"Token not provided.")
 
         if not self.token_only:
-            self.t_class_word = class_word
+            self.class_word = class_word
 
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
