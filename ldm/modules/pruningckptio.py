@@ -18,6 +18,7 @@ class PruningCheckpointIO(TorchCheckpointIO):
         print('Removing optimizer states from checkpoint')
         
         if self.sftsr:
+            pruned_checkpoint = {}
             metadata = {'precision': self.precision}
             for k, v in checkpoint.items():
                 if isinstance(v, torch.Tensor):
