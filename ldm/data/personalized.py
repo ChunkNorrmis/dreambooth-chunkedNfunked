@@ -56,11 +56,11 @@ class PersonalizedBase(Dataset):
         im_class = os.path.basename(class_dir)
         if self.reg:
             reg_tokens = OrderedDict([('C', im_class)])
-            example["caption"] = generic_captions_from_path(image, self.data_root, reg_tokens)
+            example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
         else:
             token_dir = os.path.dirname(class_dir)
             im_token = os.path.basename(token_dir)
-            example["caption"] = caption_from_path(image, self.data_root, im_class, im_token)
+            example["caption"] = caption_from_path(img_path, self.data_root, im_class, im_token)
                 
         return example
 
