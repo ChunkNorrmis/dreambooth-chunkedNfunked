@@ -17,6 +17,7 @@ class PruningCheckpointIO(TorchCheckpointIO):
         print('Removing optimizer states from checkpoint')
         
         if self.sftsr:
+            metadata = {'precision': self.precision}
             for k, v in checkpoint.items():
                 if isinstance(v, torch.Tensor):
                     pruned_checkpoint[k] = v if k != "optimizer_states" and k != 'state_dict'
@@ -38,7 +39,6 @@ class PruningCheckpointIO(TorchCheckpointIO):
             pruned_checkpoint['precision'] = self.precision
             TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
         else:
-            metadata = {'precision': self.precision}
             if path.endswith('.ckpt'):
                 path = path.replace('.ckpt', '.safetensors')
             elif os.path.isdir(path):
