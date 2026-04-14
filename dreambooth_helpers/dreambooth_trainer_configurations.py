@@ -109,7 +109,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
                 "params": {
                     "placeholder_strings": ['*'],
                     "initializer_words": [f"{config.token}"],
-                    "per_image_t_tokens": False,
+                    "per_image_tokens": False,
                     "num_vectors_pet_token": 1,
                     "progressive_words": False,
                 }
@@ -194,7 +194,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "placeholder_token": config.token,
                     "coarse_class_text": config.class_word,
                     "token_only": config.token_only,
-                    "per_image_t_tokens": False,
+                    "per_image_tokens": False,
                     "center_crop": config.crop,
                     "mixing_prob": 0.25,
                     "reg": False
@@ -212,7 +212,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "placeholder_token": config.token,
                     "coarse_class_text": config.class_word,
                     "token_only": config.token_only,
-                    "per_image_t_tokens": False,
+                    "per_image_tokens": False,
                     "reg": False,
                     "center_crop": config.crop,                    
                     "mixing_prob": 0.25
