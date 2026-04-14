@@ -9,6 +9,7 @@ from ldm.pruner import prune_checkpoint
 class PruningCheckpointIO(TorchCheckpointIO):
     def __init__(self, precision='float16', sftsr=False):
         self.precision = precision
+        self.sftsr = sftsr
     def save_checkpoint(
             self, 
             checkpoint: Dict[str, Any], 
@@ -16,7 +17,7 @@ class PruningCheckpointIO(TorchCheckpointIO):
             storage_options: Optional[Any] = None
         ) -> None:
         pruned_checkpoint = prune_checkpoint(checkpoint, precision=self.precision)
-        if not sftsr:
+        if not self.sftsr:
             TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
         else:
             if path.endswith('.ckpt'):
