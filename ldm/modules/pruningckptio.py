@@ -1,6 +1,7 @@
 import os
 from pytorch_lightning.plugins.io.torch_plugin import TorchCheckpointIO
 from safetensors.torch import save_file
+import torch
 
 from typing import Any, Callable, Dict, Optional
 from pytorch_lightning.utilities.types import _PATH
