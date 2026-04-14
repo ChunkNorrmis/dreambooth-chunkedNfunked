@@ -126,6 +126,10 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             default='float16',
             help='saves model state dict as float32, rather than float16 (the default)'
         )
+        parser.add_argument(
+            '--safetensors',
+            action='store_true'
+        )        
 
         return parser
 
@@ -156,7 +160,8 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             accumed_grads=opt.accumed_grads,
             res=opt.resolution,
             crop=opt.center_crop,
-            precision=opt.fp32
+            precision=opt.fp32,
+            safetensors=opt.safetensors
         )
 
     return config
