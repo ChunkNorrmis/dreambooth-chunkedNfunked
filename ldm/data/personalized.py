@@ -41,7 +41,7 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        img_path = self.image_paths[i % self.num_images]
+        img_path = os.path.abspath(self.image_paths[i % self.num_images])
         image = decode_image(img_path, mode='RGB')
         transform = v2.Compose([
             v2.CenterCrop(min(image.size(1), image.size(2))),
