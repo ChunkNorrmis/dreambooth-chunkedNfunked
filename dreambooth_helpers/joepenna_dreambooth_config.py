@@ -40,7 +40,7 @@ class JoePennaDreamboothConfigSchemaV1():
             debug,
             gpu,
             precision,
-            safetensors
+            safetensors,
             model_repo_id=None,
             run_seed_everything=True,
             config_date_time=None,
