@@ -20,7 +20,8 @@ class PruningCheckpointIO(TorchCheckpointIO):
             metadata = {'precision': self.precision}
             for k, v in checkpoint.items():
                 if isinstance(v, torch.Tensor):
-                    pruned_checkpoint[k] = v if k != "optimizer_states" and k != 'state_dict'
+                    if k != "optimizer_states" and k != 'state_dict':
+                        pruned_checkpoint[k] = v
                 elif isinstance(v, int):
                     pruned_checkpoint[k] = torch.tensor(v)
                 elif isinstance(v, str):
