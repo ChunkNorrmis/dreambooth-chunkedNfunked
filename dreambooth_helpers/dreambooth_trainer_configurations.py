@@ -108,9 +108,9 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
                 "target": "ldm.modules.embedding_manager.EmbeddingManager",
                 "params": {
                     "placeholder_strings": ['*'],
-                    "initializer_words": [f"{config.token}"],
-                    "per_image_tokens": False,
-                    "num_vectors_per_token": 1,
+                    "initializer_words": [f"{config.t_token}"],
+                    "per_image_t_tokens": False,
+                    "num_vectors_pet_token": 1,
                     "progressive_words": False,
                 }
             },
@@ -171,8 +171,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "data_root": config.regularization_images_folder_path,
             "size": config.res,
             "repeats": 10,
-            "placeholder_token": config.r_token,
-            "coarse_class_text": config.r_class_word,
+            "coarse_class_text": '*',
             "center_crop": config.crop,
             "mixing_prob": 0.25
         }
@@ -192,10 +191,10 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "size": config.res,
                     "repeats": config.repeats,
                     "flip_p": config.flip_percent,
-                    "placeholder_token": config.t_token,
-                    "coarse_class_text": config.t_class_word,
-                    "token_only": config.token_only,
-                    "per_image_tokens": False,
+                    "placeholdet_token": config.token,
+                    "coarse_class_text": config.class_word,
+                    "t_token_only": config.token_only,
+                    "per_image_t_tokens": False,
                     "center_crop": config.crop,
                     "mixing_prob": 0.25,
                     "reg": False
@@ -210,10 +209,10 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "size": config.res,
                     "repeats": 10,
                     "flip_p": 0.0,
-                    "placeholder_token": config.token,
+                    "placeholdet_token": config.token,
                     "coarse_class_text": config.class_word,
-                    "token_only": config.token_only,
-                    "per_image_tokens": False,
+                    "t_token_only": config.token_only,
+                    "per_image_t_tokens": False,
                     "reg": False,
                     "center_crop": config.crop,                    
                     "mixing_prob": 0.25
