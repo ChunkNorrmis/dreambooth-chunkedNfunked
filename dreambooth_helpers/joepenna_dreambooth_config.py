@@ -93,8 +93,8 @@ class JoePennaDreamboothConfigSchemaV1():
         #self.training_images = _training_image_paths
         if not self.token_only and regularization_images_folder_path is not None and regularization_images_folder_path != '':
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            self.r_token = os.path.basename(os.listdir(self.regularization_images_folder_path))
-            self.r_class_word = os.path.basename(os.listdir(os.path.join(self.regularization_images_folder_path, self.r_token)))
+            #self.r_token = os.path.basename((self.regularization_images_folder_path))
+            #self.r_class_word = os.path.basename(os.listdir(os.path.join(self.regularization_images_folder_path, self.r_token)))
 
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
