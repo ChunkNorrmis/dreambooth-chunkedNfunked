@@ -31,9 +31,9 @@ class PruningCheckpointIO(TorchCheckpointIO):
         else:
             pruned_checkpoint = {k: v for k, v in checkpoint.items() if k != "optimizer_states" and k != 'state_dict'}
         
-        if precision == 'float16':
+        if self.precision == 'float16':
             pruned_checkpoint['state_dict'] = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
-        elif precision == 'float32':
+        elif self.precision == 'float32':
             pruned_checkpoint['state_dict'] = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
 
         print(f"Checkpoint Keys: {pruned_checkpoint.keys()}")
