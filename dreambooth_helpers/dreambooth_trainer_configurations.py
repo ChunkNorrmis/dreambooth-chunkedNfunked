@@ -171,6 +171,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "data_root": config.regularization_images_folder_path,
             "size": config.res,
             "repeats": 10,
+            "placeholder_token": 'statue',
             "coarse_class_text": '*',
             "center_crop": config.crop,
             "mixing_prob": 0.25
