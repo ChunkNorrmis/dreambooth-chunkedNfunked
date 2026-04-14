@@ -1,6 +1,6 @@
 import os
 from pytorch_lightning.plugins.io.torch_plugin import TorchCheckpointIO
-from safetensors.torch import save_model
+from safetensors.torch import save_file
 
 from typing import Any, Callable, Dict, Optional
 from pytorch_lightning.utilities.types import _PATH
@@ -26,4 +26,4 @@ class PruningCheckpointIO(TorchCheckpointIO):
                 path = os.path.join(path, 'last.safetensors')
             else: 
                 path = f"{path}.safetensors"
-            save_model(pruned_checkpoint, path)
+            save_file(pruned_checkpoint, path)
