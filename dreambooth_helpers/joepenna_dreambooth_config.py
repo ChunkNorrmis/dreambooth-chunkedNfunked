@@ -40,9 +40,10 @@ class JoePennaDreamboothConfigSchemaV1():
             debug,
             gpu,
             precision,
+            safetensors
             model_repo_id=None,
             run_seed_everything=True,
-            config_date_time=None
+            config_date_time=None,
     ):
 
         self.repeats = repeats
@@ -113,6 +114,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
         self.precision = precision
+        self.safetensors = safetensors
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
