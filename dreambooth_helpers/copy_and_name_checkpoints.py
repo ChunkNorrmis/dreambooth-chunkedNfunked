@@ -3,6 +3,7 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
+from ldm.depicklizer import depicklize
 
 def copy_and_name_checkpoints(
     config: JoePennaDreamboothConfigSchemaV1,
@@ -32,7 +33,8 @@ def copy_and_name_checkpoints(
         )
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-        file_paths = glob.glob(f"{intermediate_checkpoints_directory}/*.ckpt")
+        file_paths = [fp for fp in glob.glob(os.path.join(intermediate_checkpoints_directory), '*.ckpt') +
+                                  glob.glob(os.path.join(intermediate_checkpoints_directory), '*.safetensors')]
 
         for i, original_file_path in enumerate(file_paths):
             # Grab the steps from the filename
@@ -61,10 +63,12 @@ def copy_and_name_checkpoints(
         output_file_name = os.path.join(output_folder, new_file_name)
 
         if os.path.exists(original_file_name):
-            print(f"Moving {original_file_name} to {output_file_name}")
-
-            # Move the checkpoint
-            shutil.move(original_file_name, output_file_name)
+            if config.safetensors:
+                output_file_name = depicklize(original_file_name, output_folder)
+                print(f"Moving {original_file_name} to {output_file_name}")
+            else:
+                print(f"Moving {original_file_name} to {output_file_name}")
+                shutil.move(original_file_name, output_file_name)
 
             checkpoints_found = True
 
