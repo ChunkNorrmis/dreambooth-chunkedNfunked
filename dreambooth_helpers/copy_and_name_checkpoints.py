@@ -23,7 +23,7 @@ def copy_and_name_checkpoints(
         return
 
     # Gather, name, and move the checkpoint files.
-    checkpoints_and_steps: list[tuple] = ()
+    checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
         checkpoints_and_steps.append(
             (
