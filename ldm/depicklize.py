@@ -7,7 +7,7 @@ def depicklize(suspicious_pickle, device=None, only_weights=False):
     if suspicious_pickle.endswith('.ckpt'):
         dict_pickle = torch.load(suspicious_pickle, map_location=device, weights_only=only_weights)
         if not only_weights:
-            metadata = {k: v for k, v in dict_pickle.items() if k != 'state_dict'}
+            metadata = {k: f"{v}" for k, v in dict_pickle.items() if k != 'state_dict'}
             metadata['format'] = 'ckpt'
         else:
             metadata = {'format': 'ckpt'}
