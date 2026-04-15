@@ -52,7 +52,6 @@ def copy_and_name_checkpoints(
                 )
             )
 
-    checkpoints_found = False
     for i, file_and_steps in enumerate(checkpoints_and_steps):
 
         original_file_name, steps = file_and_steps[0], file_and_steps[1]
@@ -60,7 +59,8 @@ def copy_and_name_checkpoints(
         # Setup the filenames
         new_file_name = config.create_checkpoint_file_name(steps)
         output_file_name = os.path.join(output_folder, new_file_name)
-
+    
+    checkpoints_found = True
         if os.path.exists(original_file_name):
             if config.safetensors:
                 output_file_name = depicklize(original_file_name, output_file_name)
@@ -68,8 +68,8 @@ def copy_and_name_checkpoints(
             else:
                 print(f"Moving {original_file_name} to {output_file_name}")
                 shutil.move(original_file_name, output_file_name)
-
-            checkpoints_found = True
+        else: checkpoints_found = False
+        
 
     if checkpoints_found:
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
