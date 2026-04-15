@@ -33,8 +33,7 @@ def copy_and_name_checkpoints(
         )
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-        file_paths = [fp for fp in glob.glob(os.path.join(intermediate_checkpoints_directory), '*.ckpt') +
-                                  glob.glob(os.path.join(intermediate_checkpoints_directory), '*.safetensors')]
+        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory), '*.ckpt')
 
         for i, original_file_path in enumerate(file_paths):
             # Grab the steps from the filename
@@ -64,7 +63,7 @@ def copy_and_name_checkpoints(
 
         if os.path.exists(original_file_name):
             if config.safetensors:
-                output_file_name = depicklize(original_file_name, output_folder)
+                output_file_name = depicklize(original_file_name, output_file_name)
                 print(f"Moving {original_file_name} to {output_file_name}")
             else:
                 print(f"Moving {original_file_name} to {output_file_name}")
