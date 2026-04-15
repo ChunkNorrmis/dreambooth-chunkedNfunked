@@ -51,7 +51,7 @@ def copy_and_name_checkpoints(
                     checkpoint_steps
                 )
             )
-
+    checkpoints_found = True
     for i, file_and_steps in enumerate(checkpoints_and_steps):
 
         original_file_name, steps = file_and_steps[0], file_and_steps[1]
@@ -60,7 +60,6 @@ def copy_and_name_checkpoints(
         new_file_name = config.create_checkpoint_file_name(steps)
         output_file_name = os.path.join(output_folder, new_file_name)
     
-    checkpoints_found = True
         if os.path.exists(original_file_name):
             if config.safetensors:
                 output_file_name = depicklize(original_file_name, output_file_name)
