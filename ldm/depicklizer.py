@@ -1,7 +1,7 @@
 import os, torch, diffusers
 from safetensors.torch import save_file, load_file
 
-def depicklize(suspicious_pickle, output_folder, only_weights=False):
+def depicklize(suspicious_pickle, out_path, only_weights=False):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if suspicious_pickle.endswith('.ckpt'):
         dict_pickle = torch.load(suspicious_pickle, map_location=device, weights_only=only_weights)
@@ -11,8 +11,8 @@ def depicklize(suspicious_pickle, output_folder, only_weights=False):
         else:
             metadata = {'format': 'ckpt'}
     pickle_dict = {k: v.contiguous() for k, v in dict_pickle['state_dict'].items()}
-    nil_pickle = os.path.basename(suspicious_pickle).replace(f".{metadata['format']}", '.safetensors')
-    nil_pickle = os.path.join(output_folder, nil_pickle)
+    nil_pickle = os.path.basename(out_path).replace(f".{metadata['format']}", '.safetensors')
+    nil_pickle = os.path.join(os.path.dirname(out_path), nil_pickle)
     save_file(pickle_dict, nil_pickle, metadata=metadata)
     loaded = load_file(nil_pickle, device=device)
     for k in pickle_dict.keys():
@@ -20,3 +20,4 @@ def depicklize(suspicious_pickle, output_folder, only_weights=False):
             raise RuntimeError('keys do not match')
         else:
             print('conversion successful')
+            return nil_pickle
