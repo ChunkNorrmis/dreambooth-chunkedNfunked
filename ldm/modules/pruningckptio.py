@@ -1,55 +1,16 @@
 import os
 from pytorch_lightning.plugins.io.torch_plugin import TorchCheckpointIO
-from safetensors.torch import save_file
-import torch
 
 from typing import Any, Callable, Dict, Optional
 from pytorch_lightning.utilities.types import _PATH
 from ldm.pruner import prune_checkpoint
  
 class PruningCheckpointIO(TorchCheckpointIO):
-    def __init__(self, precision='float16', sftsr=False):
+    def __init__(self, precision='float16'):
         self.precision = precision
-        self.sftsr = sftsr
      
     def save_checkpoint(self, checkpoint, path, storage_options=None):
-        if int(checkpoint['global_step']) > 0:
-            print(f"This is global step {checkpoint['global_step']}.")
-        print('Removing optimizer states from checkpoint')
-        
-        if self.sftsr:
-            pruned_checkpoint = {}
-            metadata = {'precision': self.precision}
-            for k, v in checkpoint.items():
-                if k != "optimizer_states" and k != 'state_dict':
-                    if isinstance(v, str):
-                        metadata[k] = v
-                    else:
-                        pruned_checkpoint[k] = torch.tensor(v)
-                if self.precision == 'float16':
-                    pruned_checkpoint['state_dict'] = {k: torch.tensor(v).half().contiguous() for k, v in checkpoint['state_dict'].items()}
-                if self.precision == 'float32':
-                    pruned_checkpoint['state_dict'] = {k: torch.tensor(v).contiguous() for k, v in checkpoint['state_dict'].items()}
-            if path.endswith('.ckpt'):
-                path = path.replace('.ckpt', '.safetensors')
-            elif os.path.isdir(path):
-                path = os.path.join(path, 'last.safetensors')
-            else:
-                path = f"{path}.safetensors"
-            
-            save_file(pruned_checkpoint, path, metadata=metadata)
-
-       
-        else:
-            pruned_checkpoint = {k: v for k, v in checkpoint.items() if k != "optimizer_states" and k != 'state_dict'}
-            if self.precision == 'float16':
-                pruned_checkpoint['state_dict'] = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
-            elif self.precision == 'float32':
-                pruned_checkpoint['state_dict'] = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-            pruned_checkpoint['precision'] = self.precision
-            
-            TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
-
-        print(f"Checkpoint Keys: {pruned_checkpoint.keys()}")
+        pruned_checkpoint = prune_checkpoint(checkpoint, precision=self.precision)
+        TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
 
 
