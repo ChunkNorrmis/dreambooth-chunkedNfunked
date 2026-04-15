@@ -2,7 +2,7 @@ import os, torch, diffusers
 from safetensors.torch import save_file, load_file
 
 def depicklize(suspicious_pickle, out_path, only_weights=False):
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     if suspicious_pickle.endswith('.ckpt'):
         dict_pickle = torch.load(suspicious_pickle, map_location=device, weights_only=only_weights)
         if not only_weights:
