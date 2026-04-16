@@ -116,6 +116,9 @@ class JoePennaDreamboothConfigSchemaV1():
         self.model_repo_id = model_repo_id
         self.precision = precision
         self.safetensors = safetensors
+        if self.safetensors:
+            self.format = '.safetensors'
+        else: self.format = '.ckpt'
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
@@ -182,7 +185,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def create_checkpoint_file_name(self, steps: str):
         date_string = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps.ckpt".replace(" ", "_")
+        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps{self.format}".replace(" ", "_")
 
     def save_config_to_file(
             self,
