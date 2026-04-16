@@ -171,6 +171,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "data_root": config.regularization_images_folder_path,
             "size": config.res,
             "repeats": 10,
+            "flip_p": config.flip_percent,
             "center_crop": config.crop,
             "mixing_prob": 0.25
         }
@@ -205,7 +206,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "data_root": config.training_images_folder_path,
                     "size": config.res,
                     "repeats": 10,
-                    "flip_p": 0.0,
+                    "flip_p": config.flip_percent,
                     "token_only": config.token_only,
                     "per_image_tokens": False,
                     "reg": False,
