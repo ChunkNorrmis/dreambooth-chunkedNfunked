@@ -3,11 +3,13 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
-from ldm.depicklizer import depicklize
 
 def copy_and_name_checkpoints(
     config: JoePennaDreamboothConfigSchemaV1,
 ):
+    if config.safetensors:
+        format = '.safetensors'
+    else: format = '.ckpt'
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
@@ -27,13 +29,13 @@ def copy_and_name_checkpoints(
     if config.save_every_x_steps == 0:
         checkpoints_and_steps.append(
             (
-                os.path.join(config.log_checkpoint_directory(), "last.ckpt"),
+                os.path.join(config.log_checkpoint_directory(), f"last{format}"),
                 str(config.max_training_steps)
             )
         )
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory), '*.ckpt')
+        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory), f"*{format}")
 
         for i, original_file_path in enumerate(file_paths):
             # Grab the steps from the filename
@@ -44,7 +46,7 @@ def copy_and_name_checkpoints(
 
             # Remove the .ckpt
             # "250.ckpt" => "250"
-            checkpoint_steps = checkpoint_steps.replace(".ckpt", "")
+            checkpoint_steps = checkpoint_steps.replace(f"{format}", "")
             checkpoints_and_steps.append(
                 (
                     original_file_path,
@@ -61,12 +63,8 @@ def copy_and_name_checkpoints(
         output_file_name = os.path.join(output_folder, new_file_name)
     
         if os.path.exists(original_file_name):
-            if config.safetensors:
-                output_file_name = depicklize(original_file_name, output_file_name)
-                print(f"Moving {original_file_name} to {output_file_name}")
-            else:
-                print(f"Moving {original_file_name} to {output_file_name}")
-                shutil.move(original_file_name, output_file_name)
+            print(f"Moving {original_file_name} to {output_file_name}")
+            shutil.move(original_file_name, output_file_name)
         else: checkpoints_found = False
         
 
