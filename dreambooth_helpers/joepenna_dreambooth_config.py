@@ -74,8 +74,9 @@ class JoePennaDreamboothConfigSchemaV1():
         if self.save_every_x_steps < 0:
             raise Exception("--save_every_x_steps: must be greater than or equal to 0")
 
-        self.training_images_folder_path = os.path.abspath(training_images_folder_path)
-
+        self.training_images_folder_path = os.path.relpath(training_images_folder_path)
+        self.init_words = os.listdir(self.training_images_folder_path)
+        
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
