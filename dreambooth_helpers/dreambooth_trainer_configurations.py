@@ -108,7 +108,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
                 "target": "ldm.modules.embedding_manager.EmbeddingManager",
                 "params": {
                     "placeholder_strings": ['*'],
-                    "initializer_words": [f"{config.token}"],
+                    "initializer_words": [f"{config.token_1}", f"{config.token_2}"],
                     "per_image_tokens": False,
                     "num_vectors_pet_token": 1,
                     "progressive_words": False,
@@ -171,8 +171,6 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "data_root": config.regularization_images_folder_path,
             "size": config.res,
             "repeats": 10,
-            "placeholder_token": 'statue',
-            "coarse_class_text": '*',
             "center_crop": config.crop,
             "mixing_prob": 0.25
         }
