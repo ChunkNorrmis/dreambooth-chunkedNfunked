@@ -12,9 +12,8 @@ per_img_token_list = [
 ]
 
 class PersonalizedBase(Dataset):
-    def __init__(self, set, data_root, size, repeats, center_crop, mixing_prob, flip_p,
-                 reg=False, token_only=False, per_image_tokens=False,):
-
+    def __init__(self, set='train', data_root=None, size=512, repeats=100, center_crop=False, mixing_prob=0.25, flip_p=0.5, placeholder_token=None,
+                coarse_class_text=None, reg=False, token_only=False, per_image_tokens=False,):
         super().__init__()
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
@@ -28,6 +27,8 @@ class PersonalizedBase(Dataset):
         self.size = size
         self.repeats = repeats
         self.reg = reg
+        self.placeholder_token = placeholder_token
+        self.coarse_class_text = coarse_class_text
 
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -39,24 +40,26 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        img_path = os.path.relpath(self.image_paths[i % self.num_images])
+        example = {}
+        img_path = self.image_paths[i % self.num_images]
         image = decode_image(img_path, mode='RGB')
         transform = v2.Compose([
             v2.CenterCrop(min(image.size(1), image.size(2))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda x: ((x.clone().detach() - 0.5) / 0.5).permute(1, 2, 0).cpu().numpy())
+            v2.Lambda(lambda x: np.array(x.permute(1, 2, 0)).astype(np.float32)),
+            v2.Lambda(lambda x: (x / 255 - 0.5) / 0.5)
         ])
-        example = {'image': transform(image)}
-        img_class = img_path.split('/')[-2]
+        
+        img_class = img_path.rsplit('/')[1]
         if self.reg:
             reg_tokens = OrderedDict([('C', img_class)])
             example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
         else:
-            img_token = img_path.split('/')[-3]
+            img_token = img_path.rsplit('/')[2]
             example["caption"] = caption_from_path(img_path, self.data_root, img_class, img_token)
-                
+        example['image'] = transform(image)
+        
         return example
 
