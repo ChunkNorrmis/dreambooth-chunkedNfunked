@@ -108,7 +108,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
                 "target": "ldm.modules.embedding_manager.EmbeddingManager",
                 "params": {
                     "placeholder_strings": ['*'],
-                    "initializer_words": [f"{config.token_1}", f"{config.token_2}"],
+                    "initializer_words": f"{config.init_words}",
                     "per_image_tokens": False,
                     "num_vectors_pet_token": 1,
                     "progressive_words": False,
