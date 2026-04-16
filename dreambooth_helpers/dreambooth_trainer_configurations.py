@@ -108,7 +108,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
                 "target": "ldm.modules.embedding_manager.EmbeddingManager",
                 "params": {
                     "placeholder_strings": ['*'],
-                    "initializer_words": f"{config.init_words}",
+                    "initializer_words": ["sculpture"],
                     "per_image_tokens": False,
                     "num_vectors_pet_token": 1,
                     "progressive_words": False,
@@ -173,6 +173,8 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "repeats": 10,
             "flip_p": config.flip_percent,
             "center_crop": config.crop,
+            "placeholder_token": config.token,
+            "coarse_class_text": config.class_word,
             "mixing_prob": 0.25
         }
     }
@@ -195,7 +197,8 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "per_image_tokens": False,
                     "center_crop": config.crop,
                     "mixing_prob": 0.25,
-                    "reg": False
+                    "placeholder_token": config.token,
+                    "coarse_class_text": config.class_word
                 }
             },
             "reg": reg_block if config.regularization_images_folder_path is not None and config.regularization_images_folder_path != '' else None,
@@ -209,9 +212,10 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "flip_p": config.flip_percent,
                     "token_only": config.token_only,
                     "per_image_tokens": False,
-                    "reg": False,
                     "center_crop": config.crop,                    
-                    "mixing_prob": 0.25
+                    "mixing_prob": 0.25,
+                    "placeholder_token": config.token,
+                    "coarse_class_text": config.class_word
                 }
             }
         }
