@@ -12,21 +12,19 @@ per_img_token_list = [
 ]
 
 class PersonalizedBase(Dataset):
-    def __init__(self, set, data_root, size, repeats, placeholder_token, coarse_class_text, center_crop,
-                 mixing_prob, flip_p=0.5, reg=False, token_only=False, per_image_tokens=False,):
+    def __init__(self, set, data_root, size, repeats, center_crop, mixing_prob, flip_p,
+                 reg=False, token_only=False, per_image_tokens=False,):
 
         super().__init__()
         self.data_root = data_root
         self.image_paths = find_images(self.data_root)
         self.num_images = len(self.image_paths)
         self._length = self.num_images
-        self.placeholder_token = placeholder_token
         self.token_only = token_only
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.mixing_prob = mixing_prob
         self.flip_p = flip_p
-        self.coarse_class_text = coarse_class_text
         self.size = size
         self.repeats = repeats
         self.reg = reg
@@ -34,14 +32,14 @@ class PersonalizedBase(Dataset):
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
-        if set == "train":
+        if set == 'train':
             self._length = self.num_images * self.repeats
 
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
-        img_path = os.path.abspath(self.image_paths[i % self.num_images])
+        img_path = os.path.relpath(self.image_paths[i % self.num_images])
         image = decode_image(img_path, mode='RGB')
         transform = v2.Compose([
             v2.CenterCrop(min(image.size(1), image.size(2))),
@@ -49,18 +47,16 @@ class PersonalizedBase(Dataset):
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda x: ((x - 0.5) / 0.5).clone().detach().permute(1, 2, 0).cpu().numpy())
+            v2.Lambda(lambda x: ((x.clone().detach() - 0.5) / 0.5).permute(1, 2, 0).cpu().numpy())
         ])
         example = {'image': transform(image)}
-        class_dir = os.path.dirname(img_path)
-        im_class = os.path.basename(class_dir)
+        img_class = img_path.split('/')[-2]
         if self.reg:
-            reg_tokens = OrderedDict([('C', im_class)])
+            reg_tokens = OrderedDict([('C', img_class)])
             example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
         else:
-            token_dir = os.path.dirname(class_dir)
-            im_token = os.path.basename(token_dir)
-            example["caption"] = caption_from_path(img_path, self.data_root, im_class, im_token)
+            img_token = img_path.split('/')[-3]
+            example["caption"] = caption_from_path(img_path, self.data_root, img_class, img_token)
                 
         return example
 
