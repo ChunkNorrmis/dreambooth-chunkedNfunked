@@ -7,9 +7,6 @@ from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConf
 def copy_and_name_checkpoints(
     config: JoePennaDreamboothConfigSchemaV1,
 ):
-    if config.safetensors:
-        format = '.safetensors'
-    else: format = '.ckpt'
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
@@ -29,13 +26,13 @@ def copy_and_name_checkpoints(
     if config.save_every_x_steps == 0:
         checkpoints_and_steps.append(
             (
-                os.path.join(config.log_checkpoint_directory(), f"last{format}"),
+                os.path.join(config.log_checkpoint_directory(), f"last{config.format}"),
                 str(config.max_training_steps)
             )
         )
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory), f"*{format}")
+        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory), f"*{config.format}")
 
         for i, original_file_path in enumerate(file_paths):
             # Grab the steps from the filename
@@ -46,7 +43,7 @@ def copy_and_name_checkpoints(
 
             # Remove the .ckpt
             # "250.ckpt" => "250"
-            checkpoint_steps = checkpoint_steps.replace(f"{format}", "")
+            checkpoint_steps = checkpoint_steps.replace(f"{config.format}", "")
             checkpoints_and_steps.append(
                 (
                     original_file_path,
