@@ -14,9 +14,11 @@ class PruningCheckpointIO(TorchCheckpointIO):
     def save_checkpoint(self, checkpoint, path, storage_options=None):
         if self.safetensors:
             pruned_pickle, metadata = prune_pickle(checkpoint, precision=self.precision)
-            pickle_path, pickle = os.path.split(path)
-            pickle = pickle.replace('.ckpt', '.safetensors')
-            nil_pickle = os.path.join(pickle_path, pickle)
+            if path.endswith('.ckpt'):
+                pickle_path, pickle = os.path.split(path)
+                pickle = pickle.replace('.ckpt', '.safetensors')
+                nil_pickle = os.path.join(pickle_path, pickle)
+            else: nil_pickle = path
             save_file(pruned_pickle, nil_pickle, metadata=metadata)
         else:
             pruned_checkpoint = prune_checkpoint(checkpoint, precision=self.precision)
