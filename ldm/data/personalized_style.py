@@ -3,6 +3,7 @@ import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 from torchvision.io import decode_image
+import glob
 
 imagenet_templates_small = [
     'a painting in the style of {}',
@@ -64,20 +65,20 @@ class PersonalizedBase(Dataset):
     ):
         super().__init__()
         self.data_root = data_root
-        self.image_paths = os.listdir(self.data_root)
+        self.image_paths = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.num_images = len(self.image_paths)
         self._length = self.num_images
-        self.placeholder_token = placeholder_token
         self.flip_p = flip_p
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
+        self.repeats = repeats
                         
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == "train":
-            self._length = self.num_images * repeats
+            self._length = self.num_images * self.repeats
 
     def __len__(self):
         return self._length
@@ -91,16 +92,16 @@ class PersonalizedBase(Dataset):
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda x: ((x - 0.5) / 0.5).clone().detach().permute(1, 2, 0).cpu().numpy())
+            v2.Lambda(lambda x: ((x.clone().detach() - 0.5) / 0.5).permute(1, 2, 0).cpu().numpy())
         ])
         example = {'image': transform(image)}
-        class_dir = os.path.dirname(img_path)
-        im_class = os.path.basename(class_dir)
-        token_dir = os.path.dirname(class_dir)
-        im_token = os.path.basename(token_dir)
+        img_class = img_path.split('/')[-2]
+        img_token = img_path.split('/')[-3]
         if self.per_image_tokens and random.random() < 0.25:
-            example["caption"] = random.choice(imagenet_dual_templates_small).format(im_token, per_img_token_list[i % self.num_images])
+            example["caption"] = random.choice(imagenet_dual_templates_small).format(img_token, per_img_token_list[i % self.num_images])
         else:
-            example["caption"] = random.choice(imagenet_templates_small).format(im_token)
+            example["caption"] = random.choice(imagenet_templates_small).format(img_token)
 
         return example
+
+
