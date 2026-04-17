@@ -52,15 +52,14 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(lambda x: x.detach().clone().permute(1, 2, 0).numpy())
         ])
-        
-        img_class = img_path.rsplit('/')[1]
-        if self.reg:
-            reg_tokens = OrderedDict([('C', img_class)])
-            example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
-        else:
-            img_token = img_path.rsplit('/')[2]
-            example["caption"] = caption_from_path(img_path, self.data_root, img_class, img_token)
         example['image'] = transform(image)
+        self.img_class = img_path.rsplit('/')[1]
+        if self.reg:
+            self.reg_tokens = OrderedDict([('C', img_class)])
+            example["caption"] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+        else:
+            self.img_token = img_path.rsplit('/')[2]
+            example["caption"] = caption_from_path(img_path, self.data_root, self.img_class, self.img_token)
         
         return example
 
