@@ -47,9 +47,10 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop(min(image.size(1), image.size(2))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=0.2),
-            v2.Lambda(lambda x: np.array(x.permute(1, 2, 0)).astype(np.float32)),
-            v2.Lambda(lambda x: (x / 255 - 0.5) / 0.5)
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3),
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[0.5], std=[0.5]),
+            v2.Lambda(lambda x: x.detach().clone().permute(1, 2, 0).numpy())
         ])
         
         img_class = img_path.rsplit('/')[1]
