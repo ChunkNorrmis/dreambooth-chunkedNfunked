@@ -42,9 +42,13 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.image_paths[i % self.num_images]
-        image = decode_image(img_path, mode='RGB')
+        image = Image.open(img_path)
+        crop = min(image.size)
         transform = v2.Compose([
-            v2.CenterCrop(min(image.size(1), image.size(2))),
+            v2.RGB(),
+            v2.PILToTensor(),
+            v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3),
@@ -53,6 +57,7 @@ class PersonalizedBase(Dataset):
             v2.Lambda(lambda x: x.detach().clone().permute(1, 2, 0).numpy())
         ])
         example['image'] = transform(image)
+
         self.img_class = img_path.rsplit('/')[1]
         if self.reg:
             self.reg_tokens = OrderedDict([('C', img_class)])
