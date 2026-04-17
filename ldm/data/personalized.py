@@ -59,13 +59,13 @@ class PersonalizedBase(Dataset):
         ])
         example['image'] = transform(image)
 
-        self.img_class = img_path.rsplit('/')[1]
+        img_class = img_path.rsplit('/')[1]
         if self.reg:
-            self.reg_tokens = OrderedDict([('C', img_class)])
-            example["caption"] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            reg_tokens = OrderedDict([('C', img_class)])
+            example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
         else:
-            self.img_token = img_path.rsplit('/')[2]
-            example["caption"] = caption_from_path(img_path, self.data_root, self.img_class, self.img_token)
+            img_token = img_path.rsplit('/')[2]
+            example["caption"] = caption_from_path(img_path, self.data_root, img_class, img_token)
         
         return example
 
