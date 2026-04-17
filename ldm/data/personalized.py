@@ -1,5 +1,6 @@
 import os, torch, random
 import numpy as np
+from PIL import Image
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
