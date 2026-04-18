@@ -26,6 +26,7 @@ class PersonalizedBase(Dataset):
         self.mixing_prob = mixing_prob
         self.flip_p = flip_p
         self.size = size
+        self.sz = (self.size, self.size) 
         self.repeats = repeats
         self.reg = reg
         self.placeholder_token = placeholder_token
@@ -49,15 +50,15 @@ class PersonalizedBase(Dataset):
             v2.RGB(),
             v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop((crop, crop)),
-            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.CenterCrop(crop),
+            v2.Resize(self.sz, interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5]),
-            v2.Lambda(lambda x: x.detach().clone().permute(1, 2, 0).numpy())
+            v2.Normalize(mean=[0.5], std=[0.5])
         ])
-        example['image'] = transform(image)
+        image = transform(image)
+        example['image'] = np.array(image.permute(1, 2, 0)).astype(np.float32)
 
         img_class = img_path.rsplit('/')[1]
         if self.reg:
