@@ -2,8 +2,8 @@ import os, torch, random, sys
 import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from torchvision.io import decode_image
 import glob
+from PIL import Image
 
 imagenet_templates_small = [
     'a painting in the style of {}',
