@@ -72,6 +72,7 @@ class PersonalizedBase(Dataset):
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
+        self.sz = (self.size, self.size)
         self.repeats = repeats
                         
         if per_image_tokens:
@@ -84,19 +85,26 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
+        example = {}
         img_path = self.image_paths[i % self.num_images]
-        image = decode_image(img_path, mode='RGB')
+        image = Image.open(img_path)
+        crop = min(image.size)
         transform = v2.Compose([
-            v2.CenterCrop(min(image.size(1), image.size(2))),
-            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
+            v2.RGB(),
+            v2.PILToTensor(),
+            v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=0.2),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.CenterCrop(crop),
+            v2.Resize(self.sz, interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda x: ((x.clone().detach() - 0.5) / 0.5).permute(1, 2, 0).cpu().numpy())
+            v2.Normalize(mean=[0.5], std=[0.5])
         ])
-        example = {'image': transform(image)}
-        img_class = img_path.split('/')[-2]
-        img_token = img_path.split('/')[-3]
+        image = transform(image)
+        example['image'] = np.array(image.permute(1, 2, 0)).astype(np.float32)
+
+        img_class = img_path.rsplit('/')[1]
+        img_token = img_path.rsplit('/')[2]
         if self.per_image_tokens and random.random() < 0.25:
             example["caption"] = random.choice(imagenet_dual_templates_small).format(img_token, per_img_token_list[i % self.num_images])
         else:
