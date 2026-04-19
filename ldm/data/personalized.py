@@ -42,25 +42,23 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.image_paths[i % self.num_images]
         image = Image.open(img_path)
-        crop = min(image.size)
         transform = v2.Compose([
             v2.RGB(),
             v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop(min(image.size)),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.CenterCrop(crop),
-            v2.Resize(self.sz, interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5])
+            v2.Normalize(mean=[0.5], std=[0.5]),
+            v2.Lambda(lambda img : img.clone().detach().permute(1, 2, 0).numpy())
         ])
         image = transform(image)
-        example['image'] = np.array(image.permute(1, 2, 0)).astype(np.float32)
-
         img_class = img_path.rsplit('/')[1]
+        example = {'image': image}
         if self.reg:
             reg_tokens = OrderedDict([('C', img_class)])
             example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
