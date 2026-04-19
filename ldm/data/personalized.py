@@ -31,6 +31,7 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
+        self.normal = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
 
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -53,12 +54,12 @@ class PersonalizedBase(Dataset):
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5]),
-            v2.Lambda(lambda img : img.clone().detach().permute(1, 2, 0).numpy())
+            v2.Normalize(mean=self.normal, std=self.normal),
+            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy())
         ])
         image = transform(image)
         img_class = img_path.rsplit('/')[1]
-        example = {'image': image}
+        examples = {'image': image}
         if self.reg:
             reg_tokens = OrderedDict([('C', img_class)])
             example["caption"] = generic_captions_from_path(img_path, self.data_root, reg_tokens)
