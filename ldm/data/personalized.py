@@ -31,7 +31,7 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.normal = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
+        self.normal = torch.tensor([0.5, 0.5, 0.5])
 
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
