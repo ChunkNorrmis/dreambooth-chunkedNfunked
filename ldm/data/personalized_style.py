@@ -72,8 +72,9 @@ class PersonalizedBase(Dataset):
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
-        self.sz = (self.size, self.size)
         self.repeats = repeats
+        self.placeholder_token = placeholder_token
+        
                         
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -85,31 +86,29 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.image_paths[i % self.num_images]
         image = Image.open(img_path)
-        crop = min(image.size)
         transform = v2.Compose([
             v2.RGB(),
             v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop(min(image.size)),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.CenterCrop(crop),
-            v2.Resize(self.sz, interpolation=3, antialias=True),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5])
+            v2.Normalize(mean=self.normal, std=self.normal),
+            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy())
         ])
         image = transform(image)
-        example['image'] = np.array(image.permute(1, 2, 0)).astype(np.float32)
-
-        img_class = img_path.rsplit('/')[1]
-        img_token = img_path.rsplit('/')[2]
+        self.placeholder_token = img_path.rsplit('/')[1]
+        
         if self.per_image_tokens and random.random() < 0.25:
-            example["caption"] = random.choice(imagenet_dual_templates_small).format(img_token, per_img_token_list[i % self.num_images])
+            caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
         else:
-            example["caption"] = random.choice(imagenet_templates_small).format(img_token)
+            caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
 
+        example = {'image': image, 'caption': caption}
         return example
 
 
