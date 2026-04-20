@@ -76,7 +76,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self._token = os.listdir(self.training_images_folder_path)
         self.tokens = {}
         for token in self._token:
-            self.tokens[token] = os.listdir(f"{self.training_images_folder_path}/{self._token}") 
+            self.tokens[token] = os.listdir(f"{self.training_images_folder_path}/{token}") 
         
         
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
