@@ -62,8 +62,6 @@ class JoePennaDreamboothConfigSchemaV1():
         else:
             self.config_date_time = config_date_time
             
-        self.project_config_filename = f"{self.config_date_time}-{self.project_name}-config.json"
-
         if run_seed_everything:
             seed_everything(self.seed)
 
@@ -71,12 +69,13 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception("--save_every_x_steps: must be greater than or equal to 0")
 
         self.training_images_folder_path = os.path.relpath(training_images_folder_path)
-        self.init_words = os.listdir(self.training_images_folder_path)
-        self.tokens, self.class_words = [os.path.split(c) for c in glob.glob(f"{self.training_images_folder_path}/**/*")]
-        self.tokens = [os.path.basename(t) for t in self.tokens]
+
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
+        self.tokens, self.class_words = [os.path.split(c) for c in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.tokens = [os.path.basename(t) for t in self.tokens]
+        
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
                                  glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
                                  glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpeg'), recursive=True) +
@@ -112,12 +111,11 @@ class JoePennaDreamboothConfigSchemaV1():
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
         self.precision = precision
-        self.safetensors = safetensors
-        if self.safetensors:
-            self.format = '.safetensors'
-        else: self.format = '.ckpt'
+        self.format = safetensors
+        
         self.project_name = f"{self.tokens[0]}-{self.class_words[0]}_{self.tokens[1]}-{self.class_words[1]}"
-
+        self.project_config_filename = f"{self.config_date_time}-{self.project_name}-config.json"
+        
         self.model_path = model_path
         if not os.path.exists(self.model_path):
             raise Exception(f"Model Path Not Found: '{self.model_path}'.")
