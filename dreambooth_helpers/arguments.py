@@ -128,8 +128,11 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
         )
         parser.add_argument(
             '--safetensors',
-            action='store_true'
-        )        
+            type=str,
+            nargs='?',
+            const='.safetensors',
+            default='.ckpt'
+        )
 
         return parser
 
