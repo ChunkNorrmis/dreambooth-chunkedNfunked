@@ -116,7 +116,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.precision = precision
         self.format = safetensors
         
-        self.project_name = f"{self.tokens[0]}-{self.class_words[0]}_{self.tokens[1]}-{self.class_words[1]}"
+        self.project_name = f"{self.token}-{self.class_word}_{self._token[1]}-{self.tokens[self._token[1]]}"
         self.project_config_filename = f"{self.config_date_time}-{self.project_name}-config.json"
         
         self.model_path = model_path
