@@ -26,7 +26,6 @@ class PersonalizedBase(Dataset):
         self.mixing_prob = mixing_prob
         self.flip_p = flip_p
         self.size = size
-        self.sz = (self.size, self.size) 
         self.repeats = repeats
         self.reg = reg
         self.placeholder_token = placeholder_token
