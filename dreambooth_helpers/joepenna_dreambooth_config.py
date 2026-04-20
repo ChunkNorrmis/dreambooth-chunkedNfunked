@@ -51,15 +51,11 @@ class JoePennaDreamboothConfigSchemaV1():
         self.accumed_grads = accumed_grads
         self.res = res
         self.crop = crop
-        self.project_name = project_name
         self.seed = seed
         self.save_every_x_steps = save_every_x_steps
         self.debug = debug
         self.gpu = gpu
         self.token_only = token_only
-
-        if self.project_name is None or self.project_name == '':
-            raise Exception("'--project_name': Required.")
 
         if config_date_time is None:
             self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
@@ -76,7 +72,8 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.training_images_folder_path = os.path.relpath(training_images_folder_path)
         self.init_words = os.listdir(self.training_images_folder_path)
-        
+        self.tokens, self.class_words = [os.path.split(c) for c in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.tokens = [os.path.basename(t) for t in self.tokens]
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
@@ -101,12 +98,12 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = token
+        self.token = self.tokens[0]
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
         if not self.token_only:
-            self.class_word = class_word
+            self.class_word = self.class_words[0]
 
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
@@ -119,6 +116,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if self.safetensors:
             self.format = '.safetensors'
         else: self.format = '.ckpt'
+        self.project_name = f"{self.tokens[0]}-{self.class_words[0]}_{self.tokens[1]}-{self.class_words[1]}"
 
         self.model_path = model_path
         if not os.path.exists(self.model_path):
