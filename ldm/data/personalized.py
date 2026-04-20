@@ -57,12 +57,12 @@ class PersonalizedBase(Dataset):
             v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy())
         ])
         image = transform(image)
-        self.coarse_class_text = img_path.rsplit('/')[1]
+        self.coarse_class_text = img_path.split('/')[-2]
         if self.reg:
             reg_tokens = OrderedDict([('C', self.coarse_class_text)])
             caption = generic_captions_from_path(img_path, self.data_root, reg_tokens)
         else:
-            self.placeholder_token = img_path.rsplit('/')[2]
+            self.placeholder_token = img_path.split('/')[-3]
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         example = {'image': image, 'caption': caption}
         return example
