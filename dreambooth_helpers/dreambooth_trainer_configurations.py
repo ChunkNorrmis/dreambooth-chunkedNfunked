@@ -173,7 +173,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "repeats": 10,
             "flip_p": config.flip_percent,
             "center_crop": config.crop,
-            "placeholder_token": config.token,
+            "placeholder_token": '*',
             "coarse_class_text": config.class_word,
             "mixing_prob": 0.25
         }
