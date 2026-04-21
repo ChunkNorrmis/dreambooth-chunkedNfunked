@@ -75,10 +75,12 @@ def count_params(model, verbose=False):
 
 def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
-
-    pl_sd = torch.load(ckpt, map_location="cpu")
-    if "state_dict" in pl_sd:
-        sd = pl_sd["state_dict"]
+    if ckpt.endswith('.safetensors'):
+        pl_sd = safetensors.torch.safe_open(ckpt, framework='pt', device='cpu')
+        sd = {k, pl_sd.get_tensor(k) for k in pl_sd.keys()}
+    else:
+        pl_sd = torch.load(ckpt, map_location="cpu", weights_only=False)
+        sd = {k: v for k, v in pl_sd["state_dict"].items()}
     else:
         print(f"Warning: 'state_dict' key not found in the checkpoint file {ckpt}. Attempting to load the entire checkpoint as the model state.")
         sd = pl_sd
@@ -233,9 +235,3 @@ def parallel_data_prefetch(
     else:
         return gather_res
 
-def load_from_safetensor(ckpt):
-    loaded = safetensors.torch.safe_open(ckpt, framework='pt', device='cpu')
-    model = {k: v for k, v in loaded.metadata().items()}
-    state_dict = {k, loaded.get_tensor(k) for k in loaded.keys()}
-    model['state_dict'] = state_dict
-    return model
