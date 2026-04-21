@@ -74,8 +74,7 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
         self.tokens = os.listdir(self.training_images_folder_path)
-        for token in self.tokens:
-            self.classes = os.listdir(f"{self.training_images_folder_path}/{token}") 
+        self.classes = [os.listdir(f"{self.training_images_folder_path}/{token}") for token in self.tokens]
         
         
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
@@ -115,7 +114,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.precision = precision
         self.format = safetensors
         
-        self.project_name = f"{self.token}-{self.class_word}_{self.tokens[1]}-{self.classes[1]}"
+        self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
         self.project_config_filename = f"{self.config_date_time}-{self.project_name}-config.json"
         
         self.model_path = model_path
