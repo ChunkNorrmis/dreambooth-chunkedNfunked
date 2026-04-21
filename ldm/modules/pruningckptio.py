@@ -4,7 +4,7 @@ from pytorch_lightning.plugins.io.torch_plugin import TorchCheckpointIO
 from typing import Any, Callable, Dict, Optional
 from pytorch_lightning.utilities.types import _PATH
 from ldm.pruner import prune_checkpoint, prune_pickle
-import safetensors.torch import save_file, save_model
+from safetensors.torch import save_file, save_model
  
 class PruningCheckpointIO(TorchCheckpointIO):
     def __init__(self, precision='float16', format=None):
