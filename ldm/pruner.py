@@ -20,11 +20,11 @@ def prune_pickle(checkpoint, precision='float16'):
         metadata['format'] = 'pt'
         metadata['dtype'] = precision
         if precision == 'float16':
-            pruned_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
+            nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
         else:
-            pruned_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+            nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
         keys = [k for k in metadata.keys()]
         keys += ['state_dict']
         
         print(f"Checkpoint Keys: {keys}")
-        return pruned_pickle, metadata
+        return nil_pickle, metadata
