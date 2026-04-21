@@ -98,12 +98,12 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = self.tokens[0]
+        self.token = token
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
         if not self.token_only:
-            self.class_word = self.classes[0]
+            self.class_word = class_word
 
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
@@ -113,10 +113,10 @@ class JoePennaDreamboothConfigSchemaV1():
         self.model_repo_id = model_repo_id
         self.precision = precision
         if safetensors:
-            self.format = '.safetensors'
-        else: self.format = '.ckpt'
+            self.format = 'safetensors'
+        else: self.format = 'ckpt'
         
-        self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
+        self.project_name = project_name
         self.project_config_filename = f"{self.config_date_time}-{self.project_name}-config.json"
         
         self.model_path = model_path
@@ -184,7 +184,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def create_checkpoint_file_name(self, steps: str):
         date_string = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps{self.format}".replace(" ", "_")
+        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps.{self.format}".replace(" ", "_")
 
     def save_config_to_file(
             self,
