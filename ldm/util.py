@@ -4,7 +4,7 @@ from collections import abc
 from inspect import isfunction
 from queue import Queue
 from threading import Thread
-
+import safetensors.torch
 import numpy as np
 import torch
 from PIL import Image, ImageDraw, ImageFont
@@ -232,3 +232,10 @@ def parallel_data_prefetch(
         return out
     else:
         return gather_res
+
+def load_from_safetensor(ckpt):
+    loaded = safetensors.torch.safe_open(ckpt, framework='pt', device='cpu')
+    model = {k: v for k, v in loaded.metadata().items()}
+    state_dict = {k, loaded.get_tensor(k) for k in loaded.keys()}
+    model['state_dict'] = state_dict
+    return model
