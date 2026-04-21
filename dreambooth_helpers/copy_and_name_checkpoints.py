@@ -26,13 +26,13 @@ def copy_and_name_checkpoints(
     if config.save_every_x_steps == 0:
         checkpoints_and_steps.append(
             (
-                os.path.join(config.log_checkpoint_directory(), f"last{config.format}"),
+                os.path.join(config.log_checkpoint_directory(), f"last.{config.format}"),
                 str(config.max_training_steps)
             )
         )
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, f"*{config.format}"))
+        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, f"*.{config.format}"))
 
         for i, original_file_path in enumerate(file_paths):
             # Grab the steps from the filename
@@ -43,14 +43,14 @@ def copy_and_name_checkpoints(
 
             # Remove the .ckpt
             # "250.ckpt" => "250"
-            checkpoint_steps = checkpoint_steps.replace(f"{config.format}", "")
+            checkpoint_steps = checkpoint_steps.replace(f".{config.format}", "")
             checkpoints_and_steps.append(
                 (
                     original_file_path,
                     checkpoint_steps
                 )
             )
-    checkpoints_found = True
+    checkpoints_found = False
     for i, file_and_steps in enumerate(checkpoints_and_steps):
 
         original_file_name, steps = file_and_steps[0], file_and_steps[1]
@@ -62,7 +62,7 @@ def copy_and_name_checkpoints(
         if os.path.exists(original_file_name):
             print(f"Moving {original_file_name} to {output_file_name}")
             shutil.move(original_file_name, output_file_name)
-        else: checkpoints_found = False
+            checkpoints_found = True
         
 
     if checkpoints_found:
