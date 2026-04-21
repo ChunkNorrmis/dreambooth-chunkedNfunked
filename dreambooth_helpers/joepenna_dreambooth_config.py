@@ -112,7 +112,9 @@ class JoePennaDreamboothConfigSchemaV1():
         self.learning_rate = learning_rate
         self.model_repo_id = model_repo_id
         self.precision = precision
-        self.format = safetensors
+        if safetensors:
+            self.format = '.safetensors'
+        else: self.format = '.ckpt'
         
         self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
         self.project_config_filename = f"{self.config_date_time}-{self.project_name}-config.json"
