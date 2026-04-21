@@ -204,8 +204,8 @@ if __name__ == "__main__":
         def melk(*args, **kwargs):
             # run all checkpoint hooks
             if trainer.global_rank == 0 and trainer.global_step > 0:
-                print(f"We encountered an error at step {trainer.global_step}. Saving checkpoint 'last.ckpt'...")
-                ckpt_path = os.path.join(dreambooth_config.log_checkpoint_directory(), "last.ckpt")
+                print(f"We encountered an error at step {trainer.global_step}. Saving checkpoint 'last.{dreambooth_config.format}'...")
+                ckpt_path = os.path.join(dreambooth_config.log_checkpoint_directory(), f"last.{dreambooth_config.format}")
                 trainer.save_checkpoint(ckpt_path)
 
                 print(f"Copying trained model(s) to {dreambooth_config.trained_models_directory()}")
