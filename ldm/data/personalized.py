@@ -30,8 +30,8 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.normal = torch.tensor([0.5, 0.5, 0.5])
-
+        self.normal = [0.5, 0.5, 0.5]
+        self.reg_tokens = None
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
@@ -42,28 +42,28 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        img_path = self.image_paths[i % self.num_images]
-        image = Image.open(img_path)
+        example = {}
+        image_path = self.image_paths[i % self.num_images]
         transform = v2.Compose([
-            v2.RGB(),
-            v2.PILToTensor(),
+            v2.Lambda(lambda x : decode_image(x, mode='RGB'),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.size)),
+            v2.CenterCrop((min(image.height, image.width))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=self.normal, std=self.normal),
-            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy())
+            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy().astype(np.float32))
         ])
-        image = transform(image)
-        self.coarse_class_text = img_path.split('/')[-2]
+        self.coarse_class_text = image_path.split('/')[-2]
         if self.reg:
-            reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-            caption = generic_captions_from_path(img_path, self.data_root, reg_tokens)
+            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
+            caption = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
         else:
-            self.placeholder_token = img_path.split('/')[-3]
-            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'image': image, 'caption': caption}
+            self.placeholder_token = image_path.split('/')[-3]
+            caption = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example['caption'] = caption
+        example['image'] = transform(image_path)
+        
         return example
 
