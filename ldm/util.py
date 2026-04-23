@@ -76,6 +76,7 @@ def count_params(model, verbose=False):
 def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
     if ckpt.endswith('.safetensors'):
+        sd = {}
         pl_sd = safetensors.torch.safe_open(ckpt, framework='pt', device='cpu')
         for k in pl_sd.keys():
             sd[k] = pl_sd.get_tensor(k)
