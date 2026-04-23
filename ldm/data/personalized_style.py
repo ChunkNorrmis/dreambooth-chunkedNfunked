@@ -86,29 +86,28 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        img_path = self.image_paths[i % self.num_images]
-        image = Image.open(img_path)
+        example = {}
+        image_path = self.image_paths[i % self.num_images]
         transform = v2.Compose([
-            v2.RGB(),
-            v2.PILToTensor(),
+            v2.Lambda(lambda x : decode_image(x, mode='RGB'),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.size)),
+            v2.Lambda(lambda x : fun.center_crop(x, (min(x.shape[1], x.shape[2]))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=self.normal, std=self.normal),
-            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy())
+            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy().astype(np.float32))
         ])
-        image = transform(image)
-        self.placeholder_token = img_path.rsplit('/')[1]
+        self.placeholder_token = image_path.split('/')[-3]
         
         if self.per_image_tokens and random.random() < 0.25:
             caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
         else:
             caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
 
-        example = {'image': image, 'caption': caption}
+        example['image'] = transform(image_path)
+        example['caption'] = caption
         return example
 
 
