@@ -12,9 +12,9 @@ class PruningCheckpointIO(TorchCheckpointIO):
         self.format = format
      
     def save_checkpoint(self, checkpoint, path, storage_options=None):
-        if self.format == '.safetensors':
+        if self.format == 'safetensors':
             if path.endswith('.ckpt'):
-                path = path.replace('.ckpt', self.format)
+                path = os.path.splitext(path)[0] + f".{self.format}"
             nil_pickle, metadata = prune_pickle(checkpoint, precision=self.precision)
             save_file(nil_pickle, path, metadata=metadata)
         else:
