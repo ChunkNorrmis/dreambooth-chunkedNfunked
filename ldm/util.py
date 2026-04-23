@@ -79,7 +79,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         pl_sd = safetensors.torch.safe_open(ckpt, framework='pt', device='cpu')
         for k in pl_sd.keys():
             sd[k] = pl_sd.get_tensor(k)
-    else:
+    elif ckpt.endswith('.ckpt'):
         pl_sd = torch.load(ckpt, map_location="cpu", weights_only=True)
         sd = {k: v for k, v in pl_sd["state_dict"].items()}
     else:
