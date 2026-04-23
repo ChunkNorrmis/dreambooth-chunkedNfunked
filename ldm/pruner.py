@@ -23,8 +23,8 @@ def prune_pickle(checkpoint, precision='float16'):
             nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
         else:
             nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-        keys = [k for k in metadata.keys()]
-        keys += ['state_dict']
+        keys = [k for k in metadata.keys() ]
+        keys += 'state_dict'
         
         print(f"Checkpoint Keys: {keys}")
         return nil_pickle, metadata
