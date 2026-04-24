@@ -31,7 +31,6 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.normal = [0.5, 0.5, 0.5]
         self.reg_tokens = None
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -46,15 +45,15 @@ class PersonalizedBase(Dataset):
         example = {}
         image_path = self.image_paths[i % self.num_images]
         transform = v2.Compose([
-            v2.Lambda(lambda x : decode_image(x, mode='RGB')),
+            v2.Lambda(lambda image : decode_image(image, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda x : fun.center_crop(x, min(x.shape[1], x.shape[2]))),
+            v2.Lambda(lambda image : fun.center_crop(image, min(x.shape[1], x.shape[2]))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.Lambda(lambda image : fun.random_horizontal_flip(image, p=1.0) if random.random() < self.flip_p else x),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=self.normal, std=self.normal),
-            v2.Lambda(lambda x : x.detach().permute(1, 2, 0).numpy().astype(np.float32))
+            v2.Lambda(lambda image : ((image \ 255.0 - 0.5) / 0.5).detach().permute(1, 2, 0)),
+            v2.Lambda(lambda image : np.array(image).astype(np.float32))
         ])
         self.coarse_class_text = image_path.split('/')[-2]
         if self.reg:
