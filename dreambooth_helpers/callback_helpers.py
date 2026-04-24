@@ -24,8 +24,8 @@ class SetupCallback(Callback):
 
     def on_keyboard_interrupt(self, trainer, pl_module):
         if trainer.global_rank == 0 and trainer.global_step > 0:
-            print(f"Keyboard Interrupt: Saving checkpoint 'last.ckpt' at step {trainer.global_step}...")
-            ckpt_path = os.path.join(self.ckptdir, "last.ckpt")
+            print(f"Keyboard Interrupt: Saving checkpoint 'last.{config.format}' at step {trainer.global_step}...")
+            ckpt_path = os.path.join(self.ckptdir, f"last.{config.format}")
             trainer.save_checkpoint(ckpt_path)
 
     def on_fit_start(self, trainer, pl_module):
@@ -51,7 +51,7 @@ class ImageLogger(Callback):
         self.log_steps = [2 ** n for n in range(int(np.log2(self.batch_freq)) + 1)]
         if not increase_log_steps:
             self.log_steps = [self.batch_freq]
-        self.clamp = clamp
+        self.clamp = clamp1
         self.disabled = disabled
         self.log_on_batch_idx = log_on_batch_idx
         self.log_images_kwargs = log_images_kwargs if log_images_kwargs else {}
