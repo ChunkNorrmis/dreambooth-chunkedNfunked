@@ -73,12 +73,8 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        class_words = []
-        tokens = []
-        for tc in glob.glob(f"{self.training_images_folder_path}/**/*"):
-            class_words += tc.split('/')[-1]
-            tokens += tc.split('/')[-2]
-        
+        self.tokens = [tk.split('/')[-2] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.classes = [cl.split('/')[-1] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
         
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
                                  glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
@@ -101,12 +97,13 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = tokens[0]
+        self.token = self.tokens[1]
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
         if not self.token_only:
-            self.class_word = class_words[0]
+            self.class_word = self.classes[1]
+        else: self.token = self.classes[0]
 
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
@@ -186,8 +183,8 @@ class JoePennaDreamboothConfigSchemaV1():
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
     def create_checkpoint_file_name(self, steps: str):
-        date_string = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps.{self.format}".replace(" ", "_")
+        date_string = datetime.now(timezone.utc).strftime('%m-%d-%Y')
+        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps.{self.format}".replace(' ', '_')
 
     def save_config_to_file(
             self,
