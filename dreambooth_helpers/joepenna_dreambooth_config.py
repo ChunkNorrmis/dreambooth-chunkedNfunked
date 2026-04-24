@@ -5,13 +5,6 @@ import glob
 import shutil
 import sys
 from datetime import datetime, timezone
-
-import torch
-from torchvision.transforms.v2 import functional as fun
-from torchvision.transforms import v2
-from torchvision import datasets
-from torchvision.io import decode_image
-from torch.utils.data import DataLoader
 from pytorch_lightning import seed_everything
 
 
