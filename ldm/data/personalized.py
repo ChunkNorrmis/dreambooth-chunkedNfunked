@@ -54,7 +54,7 @@ class PersonalizedBase(Dataset):
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=self.normal, std=self.normal),
-            v2.Lambda(lambda x : x.clone().detach().permute(1, 2, 0).numpy().astype(np.float32))
+            v2.Lambda(lambda x : x.detach().permute(1, 2, 0).numpy().astype(np.float32))
         ])
         self.coarse_class_text = image_path.split('/')[-2]
         if self.reg:
