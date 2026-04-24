@@ -48,7 +48,7 @@ class PersonalizedBase(Dataset):
         transform = v2.Compose([
             v2.Lambda(lambda x : decode_image(x, mode='RGB'),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda x : fun.center_crop(x, (min(x.shape[1], x.shape[2]))),
+            v2.Lambda(lambda x : fun.center_crop(x, min(x.shape[1], x.shape[2]))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
