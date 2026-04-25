@@ -52,10 +52,10 @@ class PersonalizedBase(Dataset):
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(lambda image : fun.center_crop(image, min(x.shape[1], x.shape[2]))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.Lambda(lambda image : fun.random_horizontal_flip(image, p=1.0) if random.random() < self.flip_p else x),
+            v2.Lambda(lambda image : fun.random_horizontal_flip(image, p=1.0) if random.random() < self.flip_p else image),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda image : ((image \ 255.0 - 0.5) / 0.5).detach().permute(1, 2, 0)),
+            v2.Lambda(lambda image : ((image / 255.0 - 0.5) / 0.5).detach().permute(1, 2, 0)),
             v2.Lambda(lambda image : np.array(image).astype(np.float32))
         ])
         self.coarse_class_text = image_path.split('/')[-2]
