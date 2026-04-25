@@ -110,7 +110,7 @@ class JoePennaDreamboothConfigSchemaV1():
             self.format = 'safetensors'
         else: self.format = 'ckpt'
         
-        self.project_name = f"{self.config_date_time}_{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
+        self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
         self.project_config_filename = f"{self.project_name}-config.json"
         
         self.model_path = model_path
