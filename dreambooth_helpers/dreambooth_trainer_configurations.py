@@ -1,3 +1,4 @@
+import os, sys
 from ldm.util import instantiate_from_config
 from ldm.modules.pruningckptio import PruningCheckpointIO
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
