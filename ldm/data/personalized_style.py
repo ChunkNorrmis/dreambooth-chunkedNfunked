@@ -91,7 +91,7 @@ class PersonalizedBase(Dataset):
         transform = v2.Compose([
             v2.Lambda(lambda image : decode_image(image, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda image : fun.center_crop(image, min(x.shape[1], x.shape[2]))),
+            v2.Lambda(lambda image : fun.center_crop(image, min(image.shape[1], image.shape[2]))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.Lambda(lambda image : fun.random_horizontal_flip(image, p=1.0) if random.random() < self.flip_p else image),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
