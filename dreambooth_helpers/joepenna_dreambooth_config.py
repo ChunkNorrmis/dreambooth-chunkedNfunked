@@ -4,10 +4,8 @@ from pytorch_lightning import seed_everything
 
 
 class JoePennaDreamboothConfigSchemaV1():
-    def __init__(self, args):
+    def __init__(self):
         self.schema = 1
-        for arg in args:
-            self.arg = arg
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
         self.project_name = None
         self.token = None
