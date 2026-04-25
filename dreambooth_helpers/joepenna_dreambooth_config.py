@@ -120,7 +120,8 @@ class JoePennaDreamboothConfigSchemaV1():
                 subfolder = f"{model_path.split('/')[-2]}"
                 local_dir = os.path.abspath(sys.path[0])
                 self.model_path = os.path.join(local_dir, model_file)
-                hf_hub_download(repo_id, model_file, sub_folder=None if subfolder == 'main' else subfolder, local_dir=local_dir)
+                if not os.path.exists(self.model_path):
+                    hf_hub_download(repo_id, model_file, sub_folder=None if subfolder == 'main' else subfolder, local_dir=local_dir)
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = model_path 
             
