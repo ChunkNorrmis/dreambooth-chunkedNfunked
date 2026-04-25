@@ -141,27 +141,26 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
         config.saturate_from_file(config_file_path=opt.config_file_path)
     else:
         config.saturate(
-            project_name=opt.project_name,
-            seed=random.randint(1, int(1e05)),
-            debug=opt.debug,
-            gpu=opt.gpu,
-            save_every_x_steps=opt.save_every_x_steps,
-            training_images_folder_path=opt.training_images,
-            regularization_images_folder_path=opt.regularization_images,
-            token=opt.token,
-            token_only=opt.token_only,
-            class_word=opt.class_word,
-            flip_percent=opt.flip_p,
-            learning_rate=opt.learning_rate,
-            model_repo_id='',
-            model_path=opt.training_model,
-            repeats=opt.repeats,
-            batch_size=opt.batch_size,
-            accumed_grads=opt.accumed_grads,
-            res=opt.resolution,
-            crop=opt.center_crop,
-            precision=opt.fp32,
-            safetensors=opt.safetensors
+            opt.project_name,
+            opt.token,
+            opt.token_only,
+            opt.class_word,
+            opt.training_images,
+            opt.regularization_images,
+            opt.training_model,
+            opt.fp32,
+            opt.safetensors,
+            opt.repeats,
+            opt.learning_rate,
+            opt.batch_size,
+            opt.accumed_grads,
+            opt.resolution,
+            opt.center_crop,
+            opt.flip_p,
+            opt.save_every_x_steps,
+            random.randrange(1, int(1e+05)),
+            opt.gpu,
+            opt.debug
         )
 
     return config
