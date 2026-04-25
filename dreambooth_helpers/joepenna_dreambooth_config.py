@@ -1,43 +1,56 @@
-import json
-import math
-import os
-import glob
-import shutil
-import sys
-import torch
+import os, json, math, glob, shutil, sys, torch
 from datetime import datetime, timezone
 from pytorch_lightning import seed_everything
 
 
 class JoePennaDreamboothConfigSchemaV1():
-    def __init__(self, schema=1):
-        self.schema = schema
+    def __init__(self):
+        self.schema = 1
+        self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
+        self.project_name = None
+        self.token = None
+        self.token_only = False
+        self.class_word = None
+        self.training_images_folder_path = None
+        self.regularization_images_folder_path = None
+        self.model = None
+        self.precision = None
+        self.safetensors = False
+        self.repeats = 100
+        self.learning_rate = 1.0e-06
+        self.batch_size = 1
+        self.accumed_grads = 1
+        self.res = 512
+        self.crop = False
+        self.flip_percent = 0.5
+        self.seed = 1337
+        self.save_every_x_steps = 0
+        self.gpu = 0
+        self.debug = False        
+        self.model_repo_id = None
 
     def saturate(
-            self,
-            project_name=None,
-            save_every_x_steps=0,
-            training_images_folder_path=None,
-            regularization_images_folder_path=None,
-            token=None,
-            class_word=None,
-            flip_percent=0.5,
-            learning_rate=1e-06,
-            model_path=None,
-            repeats=100,
-            batch_size=1,
-            accumed_grads=1,
-            res=512,
-            crop=True,
-            seed=1337,
-            token_only=False,
-            debug=False,
-            gpu=0,
-            precision='float16',
-            safetensors=False,
-            model_repo_id=None,
-            run_seed_everything=True,
-            config_date_time=None,
+        self,
+        project_name,
+        token,
+        token_only,
+        class_word,
+        training_images_folder_path,
+        regularization_images_folder_path,
+        model_path,
+        precision,
+        safetensors,
+        repeats,
+        learning_rate,
+        batch_size,
+        accumed_grads,
+        res,
+        crop,
+        flip_percent,
+        save_every_x_steps,
+        seed,
+        gpu,
+        debug
     ):
 
         self.repeats = repeats
@@ -50,14 +63,8 @@ class JoePennaDreamboothConfigSchemaV1():
         self.debug = debug
         self.gpu = gpu
         self.token_only = token_only
-
-        if config_date_time is None:
-            self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        else:
-            self.config_date_time = config_date_time
-            
-        if run_seed_everything:
-            seed_everything(self.seed)
+        
+        seed_everything(self.seed)
 
         if self.save_every_x_steps < 0:
             raise Exception("--save_every_x_steps: must be greater than or equal to 0")
@@ -69,24 +76,21 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.tokens = [tk.split('/')[-2] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
         self.classes = [cl.split('/')[-1] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
-        
+
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
-                                 glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
-                                 glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpeg'), recursive=True) +
-                                 glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
-                             ]
-        #_training_image_paths = [os.path.relpath(f, self.training_images_folder_path) for f in _training_image_paths]
+            glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
+            glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpeg'), recursive=True) +
+            glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
+        ]
 
         self.training_images_count = len(self.training_images)
         if self.training_images_count <= 0:
             raise Exception(f"No Training Images (*.png, *.jpg, *.jpeg) found in '{self.training_images_folder_path}'.")
         self.max_training_steps = int(self.training_images_count * self.repeats / (self.batch_size * self.accumed_grads))
-        
-        #self.training_images = _training_image_paths
-        if not self.token_only and regularization_images_folder_path is not None and regularization_images_folder_path != '':
+
+        if not self.token_only:
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            #self.r_token = os.path.basename((self.regularization_images_folder_path))
-            #self.r_class_word = os.path.basename(os.listdir(os.path.join(self.regularization_images_folder_path, self.r_token)))
+            self.class_word = self.classes[1]
 
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
@@ -95,33 +99,36 @@ class JoePennaDreamboothConfigSchemaV1():
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
-        if not self.token_only:
-            self.class_word = self.classes[1]
-        else: self.token = self.classes[0]
-
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
             raise Exception("--flip_p: must be between 0 and 1")
 
         self.learning_rate = learning_rate
-        self.model_repo_id = model_repo_id
         self.precision = precision
         if safetensors:
             self.format = 'safetensors'
         else: self.format = 'ckpt'
-        
+
         self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
         self.project_config_filename = f"{self.project_name}-config.json"
-        
-        self.model_path = model_path
-        if not os.path.exists(self.model_path):
-            raise Exception(f"Model Path Not Found: '{self.model_path}'.")
+
+        if not os.path.exists(model_path):
+            if model_path.startswith('https://huggingface.co'):
+                from huggingface_hub.file_download import hf_hub_download
+                repo_id = f"{model_path.split('/')[3]}/{model_path.split('/')[4]}"
+                model_file = f"{model_path.split('/')[-1]}"
+                subfolder = f"{model_path.split('/')[-2]}"
+                local_dir = os.path.abspath(sys.path[0])
+                self.model_path = os.path.join(local_dir, model_file)
+                hf_hub_download(repo_id, model_file, sub_folder=None if subfolder == 'main' else subfolder, local_dir=local_dir)
+            else: raise Exception(f"Model Path Not Found: '{model_path}'.")
+        else: self.model_path = model_path 
+            
 
         self.validate_gpu_vram()
         self._create_log_folders()
-        
 
-    
+
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
             if size_bytes == 0:
