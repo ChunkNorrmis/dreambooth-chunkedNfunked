@@ -39,7 +39,7 @@ class PersonalizedBase(Dataset):
             self._length = self.num_images * self.repeats
 
         if self.reg:
-            self.reg_tokens = {}
+            self.reg_tokens = None
 
     def __len__(self):
         return self._length
@@ -60,7 +60,7 @@ class PersonalizedBase(Dataset):
         ])
         self.coarse_class_text = image_path.split('/')[-2]
         if self.reg:
-            self.reg_tokens['C'] = self.coarse_class_text
+            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
             caption = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
         else:
             self.placeholder_token = image_path.split('/')[-3]
