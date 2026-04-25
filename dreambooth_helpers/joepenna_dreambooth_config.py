@@ -4,8 +4,10 @@ from pytorch_lightning import seed_everything
 
 
 class JoePennaDreamboothConfigSchemaV1():
-    def __init__(self):
+    def __init__(self, args):
         self.schema = 1
+        for arg in args:
+            self.arg = arg
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
         self.project_name = None
         self.token = None
@@ -74,8 +76,8 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        self.tokens = [tk.split('/')[-2] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
-        self.classes = [cl.split('/')[-1] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.tokens = [tk.rsplit('/', 3)[1] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.classes = [cl.rsplit('/', 3)[2] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
 
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
@@ -117,11 +119,11 @@ class JoePennaDreamboothConfigSchemaV1():
                 from huggingface_hub.file_download import hf_hub_download
                 import hf_xet
                 repo_id = f"{model_path.split('/')[3]}/{model_path.split('/')[4]}"
-                model_file = f"{model_path.split('/')[-1]}"
+                model_file = f"{model_path.rsplit('/', 1)[1]}"
                 local_dir = os.path.abspath(sys.path[0])
                 self.model_path = os.path.join(local_dir, model_file)
                 if not os.path.exists(self.model_path):
-                    print(f"downloading {model_file}")
+                    print(f"Downloading {model_file}")
                     hf_hub_download(repo_id, model_file, local_dir=local_dir)
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = model_path 
