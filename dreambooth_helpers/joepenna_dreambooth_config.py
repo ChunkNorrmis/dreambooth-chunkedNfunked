@@ -90,12 +90,12 @@ class JoePennaDreamboothConfigSchemaV1():
 
         if not self.token_only:
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            self.class_word = self.classes[1]
+            self.class_word = self.classes[0]
 
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = self.tokens[1]
+        self.token = self.tokens[0]
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
