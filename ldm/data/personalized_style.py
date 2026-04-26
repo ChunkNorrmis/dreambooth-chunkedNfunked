@@ -86,28 +86,30 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         image_path = self.image_paths[i % self.num_images]
+        image = decode_image(image_path, mode='RGB')
+        crop = min(image.size(1), image.size(2))
         transform = v2.Compose([
-            v2.Lambda(lambda image : decode_image(image, mode='RGB')),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda image : fun.center_crop(image, min(image.shape[1], image.shape[2]))),
+            v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.Lambda(lambda image : fun.random_horizontal_flip(image, p=1.0) if random.random() < self.flip_p else image),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Lambda(lambda image : ((image / 255.0 - 0.5) / 0.5).detach().permute(1, 2, 0)),
-            v2.Lambda(lambda image : np.array(image).astype(np.float32))
+            v2.RandomHorizontalFlip(p=self.flip_p),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.ToDtype(dtype=torch.float32, scale=False),
+            v2.Lambda(lambda img : ((img / 255.0 - 0.5) / 0.5).detach().permute(1, 2, 0)),
+            v2.Lambda(lambda img : np.array(img).astype(np.float32))
         ])
-        self.placeholder_token = image_path.split('/')[-3]
+        self.coarse_class_text = image_path.rsplit('/', 3)[2]
+        self.placeholder_token = image_path.rsplit('/', 3)[1]
         
         if self.per_image_tokens and random.random() < 0.25:
             caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
         else:
             caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
+        example = {'image': transform(image), 'caption': caption}
 
-        example['image'] = transform(image_path)
-        example['caption'] = caption
         return example
+
+
 
 
