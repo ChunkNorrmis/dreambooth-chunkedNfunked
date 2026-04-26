@@ -74,8 +74,8 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        self.tokens = [tk.rsplit('/', 3)[1] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
-        self.classes = [cl.rsplit('/', 3)[2] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.tokens = [tk.rsplit('/', 2)[1] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        self.classes = [cl.rsplit('/', 2)[2] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
 
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
