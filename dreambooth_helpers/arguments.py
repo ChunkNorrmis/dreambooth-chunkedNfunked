@@ -16,7 +16,6 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             "--project_name",
             type=str,
             required=False,
-            default=None,
             help="Name of the project"
         )
         parser.add_argument(
@@ -73,7 +72,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             "--learning_rate",
             type=float,
             required=False,
-            default=1e-06,
+            default=1.0e-06,
             help="Set the learning rate. Defaults to 1.0e-06 (0.000001).  Accepts scientific notation."
         )
         parser.add_argument(
