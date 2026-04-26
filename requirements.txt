@@ -1,9 +1,7 @@
 --extra-index-url https://download.pytorch.org/whl/cu121
 torch==2.5.1+cu121
 torchvision
-gdown
 huggingface_hub
-hf_transfer
 hf_xet
 setuptools==76.0
 safetensors
