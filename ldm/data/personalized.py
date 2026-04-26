@@ -45,7 +45,6 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode='RGB')
         crop = min(image.size(1), image.size(2))
