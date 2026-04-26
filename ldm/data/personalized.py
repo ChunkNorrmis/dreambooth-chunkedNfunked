@@ -1,10 +1,7 @@
 import os, torch, random
 import numpy as np
-from PIL import Image
-from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
 from torchvision.io import decode_image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
