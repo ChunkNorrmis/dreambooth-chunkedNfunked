@@ -27,7 +27,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             "--token",
             type=str,
             required=False,
-            help="Unique token you want to represent your trained model. Ex: firstNameLastName."
+            help="Unique token you want to represent your trained model. will resolve token name from directory structure automatically "
         )
         parser.add_argument(
             "--token_only",
@@ -38,7 +38,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             "--training_model",
             type=str,
             required=True,
-            help="Path to model to train (model.ckpt)"
+            help="Path to local model to train, or url for hosted model in a huggingface repo. (e.g './v1-5-pruned.ckpt' -- 'https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt')"
         )
         parser.add_argument(
             "--training_images",
