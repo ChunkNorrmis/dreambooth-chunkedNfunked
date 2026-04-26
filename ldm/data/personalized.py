@@ -30,6 +30,9 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
 
+        if self.reg:
+            self.reg_tokens = ''
+            
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
@@ -59,8 +62,8 @@ class PersonalizedBase(Dataset):
         self.coarse_class_text = image_path.rsplit('/', 3)[2]
         self.placeholder_token = image_path.rsplit('/', 3)[1]
         if self.reg:
-            reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-            example['caption'] = generic_captions_from_path(image_path, self.data_root, reg_tokens)
+            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
+            example['caption'] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
 
