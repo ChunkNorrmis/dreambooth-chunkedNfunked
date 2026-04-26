@@ -58,7 +58,7 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(lambda img : img.detach().permute(1, 2, 0).numpy())
         ])
-        example['image'] = transform(image)}
+        example['image'] = transform(image)
         self.coarse_class_text = image_path.rsplit('/', 3)[2]
         self.placeholder_token = image_path.rsplit('/', 3)[1]
         if self.reg:
