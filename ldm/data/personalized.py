@@ -1,5 +1,6 @@
 import os, torch, random
 import numpy as np
+from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 from torchvision.io import decode_image
@@ -35,13 +36,12 @@ class PersonalizedBase(Dataset):
         if set == 'train':
             self._length = self.num_images * self.repeats
 
-        if self.reg:
-            self.reg_tokens = {}
 
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
+        example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode='RGB')
         crop = min(image.size(1), image.size(2))
@@ -50,20 +50,20 @@ class PersonalizedBase(Dataset):
             v2.CenterCrop((crop, crop)),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
-            v2.ToDtype(dtype=torch.float32, scale=False),
-            v2.Lambda(lambda img : ((img / 255.0 - 0.5) / 0.5).detach().permute(1, 2, 0)),
-            v2.Lambda(lambda img : np.array(img).astype(np.float32))
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[0.5], std=[0.5]),
+            v2.Lambda(lambda img : img.detach().permute(1, 2, 0).numpy())
         ])
+        example['image'] = transform(image)}
         self.coarse_class_text = image_path.rsplit('/', 3)[2]
         self.placeholder_token = image_path.rsplit('/', 3)[1]
         if self.reg:
-            self.reg_tokens['C'] = self.coarse_class_text
-            caption = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
+            reg_tokens = OrderedDict([('C', self.coarse_class_text)])
+            example['caption'] = generic_captions_from_path(image_path, self.data_root, reg_tokens)
         else:
-            caption = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': caption, 'image': transform(image)}
-        
+            example['caption'] = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+
         return example
 
         
