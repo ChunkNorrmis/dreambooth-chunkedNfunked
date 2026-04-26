@@ -130,9 +130,6 @@ class JoePennaDreamboothConfigSchemaV1():
         self.validate_gpu_vram()
         self._create_log_folders()
 
-        print(self.tokens)
-        print(self.classes)
-
 
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
