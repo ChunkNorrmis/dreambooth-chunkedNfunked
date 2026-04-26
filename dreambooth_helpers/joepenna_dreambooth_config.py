@@ -111,7 +111,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
         self.project_config_filename = f"{self.project_name}-config.json"
-
+        
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
                 from huggingface_hub.file_download import hf_hub_download
@@ -129,6 +129,9 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.validate_gpu_vram()
         self._create_log_folders()
+
+        print(self.tokens)
+        print(self.classes)
 
 
     def validate_gpu_vram(self):
