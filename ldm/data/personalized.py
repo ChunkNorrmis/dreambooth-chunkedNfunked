@@ -40,21 +40,6 @@ class PersonalizedBase(Dataset):
         if set == 'train':
             self._length = self.num_images * self.repeats
 
-        self.transform = v2.Compose([
-            v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(lambda image: fun.center_crop(image, min(image.shape[1], image.shape[2]))),
-            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(self.normalize_data)
-        ])
-        
-    def normalize_data(self, image):
-        image = image.clone().detach().to(torch.float32).permute(1, 2, 0)
-        image = (image / 255 - 0.5) / 0.5
-        image = np.array(image)
-        return image
-
     def __len__(self):
         return self._length
 
@@ -62,6 +47,15 @@ class PersonalizedBase(Dataset):
         example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode='RGB')
+        transform = v2.Compose([
+            v2.ToDtype(dtype=torch.uint8, scale=True),
+            v2.CenterCrop(min(image.size(1), image.size(2))),
+            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
+            v2.RandomHorizontalFlip(p=self.flip_p),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.Lambda(lambda x : ((x.to(torch.float32) / 255 - 0.5) / 0.5).permute(1, 2, 0).numpy())
+        ])
+        img = transform(image)
         self.coarse_class_text = image_path.rsplit('/', 2)[1]
         
         if self.reg:
@@ -70,7 +64,7 @@ class PersonalizedBase(Dataset):
             self.placeholder_token = image_path.rsplit('/', 3)[1]
             example['caption'] = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         
-        example['image'] = self.transform(image)
+        example['image'] = img
         
         return example
 
