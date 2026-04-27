@@ -53,18 +53,19 @@ class PersonalizedBase(Dataset):
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(lambda x : ((x.to(torch.float32) / 255 - 0.5) / 0.5).permute(1, 2, 0).numpy())
+            v2.Lambda(lambda x : ((x.clone().detach().to(torch.float32) / 255 - 0.5) / 0.5).permute(1, 2, 0).numpy())
         ])
-        img = transform(image)
+        image = transform(image)
         self.coarse_class_text = image_path.rsplit('/', 2)[1]
         
         if self.reg:
+            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
             example['caption'] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
         else:
             self.placeholder_token = image_path.rsplit('/', 3)[1]
             example['caption'] = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         
-        example['image'] = img
+        example['image'] = image
         
         return example
 
