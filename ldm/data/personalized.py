@@ -59,17 +59,19 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
+        example = {}
         image_path = self.image_paths[i % self.num_images]
         image = decode_image(image_path, mode='RGB')
-        self.coarse_class_text = image_path.rsplit('/', 3)[2]
-        self.placeholder_token = image_path.rsplit('/', 3)[1]
-        example = {'image': self.transform(image)}
+        self.coarse_class_text = image_path.rsplit('/', 2)[1]
         
         if self.reg:
             example['caption'] = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
         else:
+            self.placeholder_token = image_path.rsplit('/', 3)[1]
             example['caption'] = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-
+        
+        example['image'] = self.transform(image)
+        
         return example
 
         
