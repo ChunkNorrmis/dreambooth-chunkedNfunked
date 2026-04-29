@@ -121,7 +121,7 @@ class JoePennaDreamboothConfigSchemaV1():
                 local_dir = os.path.abspath(sys.path[0])
                 self.model_path = os.path.join(local_dir, model_file)
                 print(f"Downloading {model_file}")
-                huggingface_hub.file_download.hf_hub_download(repo_id, model_file, local_dir=local_dir)
+                hf_hub_download(repo_id, model_file, local_dir=local_dir)
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = model_path 
             
