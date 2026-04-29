@@ -114,15 +114,13 @@ class JoePennaDreamboothConfigSchemaV1():
         
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
-                from huggingface_hub.file_download import hf_hub_download
-                import hf_xet
+                import huggingface_hub.file_download.hf_hub_download, hf_xet, hf_transfer
                 repo_id = f"{model_path.split('/')[3]}/{model_path.split('/')[4]}"
-                model_file = f"{model_path.rsplit('/', 1)[1]}"
+                model_file = os.path.basename(model_path)
                 local_dir = os.path.abspath(sys.path[0])
                 self.model_path = os.path.join(local_dir, model_file)
-                if not os.path.exists(self.model_path):
-                    print(f"Downloading {model_file}")
-                    hf_hub_download(repo_id, model_file, local_dir=local_dir)
+                print(f"Downloading {model_file}")
+                huggingface_hub.file_download.hf_hub_download(repo_id, model_file, local_dir=local_dir)
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = model_path 
             
