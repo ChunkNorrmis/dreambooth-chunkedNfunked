@@ -32,7 +32,7 @@ class PersonalizedBase(Dataset):
         self.coarse_class_text = coarse_class_text
 
         if self.reg:
-            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
+            self.reg_tokens = OrderedDict([('C', '')])
             
         if per_image_tokens:
             assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
