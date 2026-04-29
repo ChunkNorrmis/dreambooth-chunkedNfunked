@@ -3,13 +3,11 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
-from from dreambooth_helpers.argumetns import parse_arguments
 
 
 def copy_and_name_checkpoints(
     config: JoePennaDreamboothConfigSchemaV1,
 ):
-    config = parse_arguments()
     checkpoints_found = False
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
