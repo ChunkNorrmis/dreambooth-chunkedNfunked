@@ -8,14 +8,19 @@ from safetensors.torch import save_file
  
 class PruningCheckpointIO(TorchCheckpointIO):
     def __init__(self, dtype='float16', format='safetensors'):
+        super().__init__()
         self.dtype = dtype
         self.format = format
      
     def save_checkpoint(self, checkpoint, path, storage_options=None):
-        if self.format == 'safetensors':
+        if path.endswith('.safetensors'):
+            if not path.endswith(f".{self.format}"):
+                path = os.path.splitext[0] + f".{self.format}"
             nil_pickle, path, metadata = prune_pickle(checkpoint, dtype=self.dtype)
             save_file(nil_pickle, path, metadata=metadata)
-        else:
+        elif path.endswith('.ckpt'):
+            if not path.endswith(f".{self.format}"):
+                path = os.path.splitext[0] + f".{self.format}"
             pruned_checkpoint = prune_checkpoint(checkpoint, dtype=self.dtype)
             TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
 
