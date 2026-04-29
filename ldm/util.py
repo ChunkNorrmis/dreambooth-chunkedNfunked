@@ -81,11 +81,10 @@ def load_model_from_config(config, ckpt, verbose=False):
         for k in pl_sd.keys():
             sd[k] = pl_sd.get_tensor(k)
     elif ckpt.endswith('.ckpt'):
-        pl_sd = torch.load(ckpt, map_location="cpu", weights_only=False)
-        sd = {k: v for k, v in pl_sd["state_dict"].items()}
+        sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=False)['state_dict']
     else:
         print(f"Warning: 'state_dict' key not found in the checkpoint file {ckpt}. Attempting to load the entire checkpoint as the model state.")
-        sd = pl_sd
+        sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=False)
 
     config["model"]["params"]["ckpt_path"] = ckpt
 
