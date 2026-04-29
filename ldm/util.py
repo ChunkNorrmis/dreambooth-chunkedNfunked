@@ -75,7 +75,7 @@ def count_params(model, verbose=False):
 
 def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
-    pl_sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=True)
+    pl_sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=False)
     if 'state_dict' not in pl_sd.keys():
         print(f"Warning: 'state_dict' key not found in the checkpoint file {ckpt}. Attempting to load the entire checkpoint as the model state.")
     else:
