@@ -10,7 +10,7 @@ def prune_checkpoint(checkpoint, dtype='float16'):
         if dtype == 'float16':
             pruned_checkpoint['state_dict'] = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
         else:
-            pruned_checkpoint['state_dict'] = {k: v.float().contiguous() for k, v in checkpoint['state_dict'].items()}
+            pruned_checkpoint['state_dict'] = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
       
         print(f"Checkpoint Keys: {pruned_checkpoint.keys()}")
         return pruned_checkpoint
@@ -23,7 +23,7 @@ def prune_pickle(checkpoint, dtype='float16', path=None):
         if dtype == 'float16':
             nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
         else:
-            nil_pickle = {k: v.float().contiguous() for k, v in checkpoint['state_dict'].items()}
+            nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
         metadata = {k: f"{checkpoint[k]}" for k in checkpoint.keys() if k != 'optimizer_states' and k != 'state_dict'}
         metadata['format'] = 'pt'
         metadata['precision'] = dtype
