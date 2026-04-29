@@ -16,11 +16,6 @@ def prune_checkpoint(checkpoint, dtype='float16'):
         return pruned_checkpoint
 
 
-def savetensors(fun):
-    checkpoint, location, data = fun
-    return save_file(checkpoint, location, metadata=data)
-
-@ savetensors
 def prune_pickle(checkpoint, dtype='float16', path=None):
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
@@ -35,4 +30,4 @@ def prune_pickle(checkpoint, dtype='float16', path=None):
         keys_list = metadata.keys() + 'state_dict'
          
         print(f"Checkpoint Keys: {keys_list}")
-        return nil_pickle, path, metadata
+        save_file(nil_pickle, path, metadata=metadata)
