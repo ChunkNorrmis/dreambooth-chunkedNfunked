@@ -1,3 +1,6 @@
+import os, sys, torch
+from safetensors.torch import save_file
+
 def prune_checkpoint(checkpoint, dtype='float16'):
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
