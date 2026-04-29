@@ -15,12 +15,12 @@ class PruningCheckpointIO(TorchCheckpointIO):
     def save_checkpoint(self, checkpoint, path, storage_options=None):
         if path.endswith('.safetensors'):
             if not path.endswith(f".{self.format}"):
-                path = os.path.splitext[0] + f".{self.format}"
+                path = os.path.splitext(path)[0] + f".{self.format}"
             nil_pickle, metadata = prune_pickle(checkpoint, dtype=self.dtype)
             save_file(nil_pickle, path, metadata=metadata)
         elif path.endswith('.ckpt'):
             if not path.endswith(f".{self.format}"):
-                path = os.path.splitext[0] + f".{self.format}"
+                path = os.path.splitext(path)[0] + f".{self.format}"
             pruned_checkpoint = prune_checkpoint(checkpoint, dtype=self.dtype)
             TorchCheckpointIO.save_checkpoint(self, pruned_checkpoint, path, storage_options)
 
