@@ -27,7 +27,7 @@ def prune_pickle(checkpoint, dtype='float16'):
             nil_pickle = {k: v.half().contiguous() for k, v in state_dict.items()}
         else:
             nil_pickle = {k: v.contiguous() for k, v in state_dict.items()}
-        metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+        metadata = {k: f"{v}" for k, v in checkpoint.items() if (k != 'optimizer_states' and k != 'state_dict')}
         metadata['format'] = 'pt'
         metadata['precision'] = dtype
         keys_list = [k for k in metadata.keys()]
