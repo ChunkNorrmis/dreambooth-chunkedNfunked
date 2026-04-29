@@ -16,7 +16,7 @@ def prune_checkpoint(checkpoint, dtype='float16'):
         return pruned_checkpoint
 
 
-def prune_pickle(checkpoint, dtype='float16', path=None):
+def prune_pickle(checkpoint, dtype='float16'):
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
         print('Removing optimizer states from checkpoint')
@@ -32,4 +32,4 @@ def prune_pickle(checkpoint, dtype='float16', path=None):
         keys_list += ['state_dict']
          
         print(f"Checkpoint Keys: {keys_list}")
-        return nil_pickle, path, metadata
+        return nil_pickle, metadata
