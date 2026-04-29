@@ -75,16 +75,11 @@ def count_params(model, verbose=False):
 
 def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
-    if ckpt.endswith('.safetensors'):
-        sd = {}
-        pl_sd = safetensors.torch.safe_open(ckpt, framework='pt', device='cpu')
-        for k in pl_sd.keys():
-            sd[k] = pl_sd.get_tensor(k)
-    elif ckpt.endswith('.ckpt'):
-        sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=False)['state_dict']
-    else:
+    pl_sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=False)
+    if 'state_dict' not in pl_sd.keys():
         print(f"Warning: 'state_dict' key not found in the checkpoint file {ckpt}. Attempting to load the entire checkpoint as the model state.")
-        sd = torch.load(ckpt, map_location=torch.device('cpu'), weights_only=False)
+    else:
+        sd = pl_sd['state_dict']
 
     config["model"]["params"]["ckpt_path"] = ckpt
 
