@@ -1,5 +1,5 @@
 def prune_checkpoint(checkpoint, precision='float16'):
-    dtype = {'float16': half(), 'float32': float()}
+    dtype = {'float16': .half(), 'float32': .float()}
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
         print('Removing optimizer states from checkpoint')
@@ -11,7 +11,7 @@ def prune_checkpoint(checkpoint, precision='float16'):
         return pruned_checkpoint
 
 def prune_pickle(checkpoint, precision='float16'):
-    dtype = {'float16': half(), 'float32': float()}
+    dtype = {'float16': .half(), 'float32': .float()}
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
         print('Removing optimizer states from checkpoint')
