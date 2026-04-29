@@ -3,10 +3,14 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
+from from dreambooth_helpers.argumetns import parse_arguments
+
 
 def copy_and_name_checkpoints(
     config: JoePennaDreamboothConfigSchemaV1,
 ):
+    config = parse_arguments()
+    checkpoints_found = False
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
@@ -50,7 +54,7 @@ def copy_and_name_checkpoints(
                     checkpoint_steps
                 )
             )
-    checkpoints_found = False
+    checkpoints_found = True
     for i, file_and_steps in enumerate(checkpoints_and_steps):
 
         original_file_name, steps = file_and_steps[0], file_and_steps[1]
@@ -62,8 +66,7 @@ def copy_and_name_checkpoints(
         if os.path.exists(original_file_name):
             print(f"Moving {original_file_name} to {output_file_name}")
             shutil.move(original_file_name, output_file_name)
-            checkpoints_found = True
-        
+                    
 
     if checkpoints_found:
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
