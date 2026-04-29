@@ -20,10 +20,11 @@ def prune_pickle(checkpoint, dtype='float16', path=None):
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
         print('Removing optimizer states from checkpoint')
+        state_dict = checkpoint['state_dict'].clone()
         if dtype == 'float16':
-            nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
+            nil_pickle = {k: v.half().contiguous() for k, v in state_dict.items()}
         else:
-            nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+            nil_pickle = {k: v.contiguous() for k, v in state_dict.items()}
         metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
         metadata['format'] = 'pt'
         metadata['precision'] = dtype
