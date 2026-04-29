@@ -7,7 +7,7 @@ from ldm.pruner import prune_checkpoint, prune_pickle
 from safetensors.torch import save_file
  
 class PruningCheckpointIO(TorchCheckpointIO):
-    def __init__(self, dtype='float16', format=None):
+    def __init__(self, dtype='float16', format='safetensors'):
         self.dtype = dtype
         self.format = format
      
