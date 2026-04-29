@@ -2,7 +2,7 @@ def prune_checkpoint(checkpoint, dtype='float16'):
     if int(checkpoint['global_step']) > 0:
         print(f"This is global step {checkpoint['global_step']}.")
         print('Removing optimizer states from checkpoint')
-        pruned_checkpoint = {k: checkpoint[k] for k in checkpoint.keys() if k != "optimizer_states" and k != 'state_dict'}
+        pruned_checkpoint = {k: checkpoint[k] for k in checkpoint.keys() if k != 'optimizer_states' and k != 'state_dict'}
         pruned_checkpoint['precision'] = dtype
         if dtype == 'float16':
             pruned_checkpoint['state_dict'] = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
