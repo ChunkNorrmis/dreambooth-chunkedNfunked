@@ -13,7 +13,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.class_word = None
         self.training_images_folder_path = None
         self.regularization_images_folder_path = None
-        self.model = None
+        self.model_path = None
         self.precision = None
         self.safetensors = False
         self.repeats = 100
