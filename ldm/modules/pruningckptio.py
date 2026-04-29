@@ -12,8 +12,6 @@ class PruningCheckpointIO(TorchCheckpointIO):
         self.format = format
      
     def save_checkpoint(self, checkpoint, path, storage_options=None):
-        filename, _ = os.path.splitext(path)
-        path = path.replace(_, f".{self.format}")
         if self.format == 'safetensors':
             nil_pickle, metadata = prune_pickle(checkpoint, dtype=self.dtype)
             save_file(nil_pickle, path, metadata=metadata)
