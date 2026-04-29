@@ -3,6 +3,8 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
+from safetensors.torch import save_file
+import torch
 
 
 def copy_and_name_checkpoints(
@@ -62,8 +64,11 @@ def copy_and_name_checkpoints(
         output_file_name = os.path.join(output_folder, new_file_name)
     
         if os.path.exists(original_file_name):
+            loaded = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
+            nil_pickle = {k: v.contiguous() for k, v in state_dict.items()}
+            metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
             print(f"Moving {original_file_name} to {output_file_name}")
-            shutil.move(original_file_name, output_file_name)
+            save_file(loaded, output_file_name, metadata=metadata)
                     
 
     if checkpoints_found:
