@@ -27,7 +27,7 @@ def prune_pickle(checkpoint, dtype='float16', path=None):
         metadata = {k: f"{checkpoint[k]}" for k in checkpoint.keys() if k != 'optimizer_states' and k != 'state_dict'}
         metadata['format'] = 'pt'
         metadata['precision'] = dtype
-        keys_list = [k for k in metadata.keys(), 'state_dict']
+        keys_list = [(k for k in metadata.keys()), 'state_dict']
          
         print(f"Checkpoint Keys: {keys_list}")
         save_file(nil_pickle, path, metadata=metadata)
