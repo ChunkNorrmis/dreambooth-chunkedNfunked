@@ -15,9 +15,7 @@ def copy_and_name_checkpoints(
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    config.save_config_to_file(
-        save_path=output_folder
-    )
+    config.save_config_to_file(save_path=output_folder)
 
     logs_directory = config.log_directory()
     if not os.path.exists(logs_directory):
@@ -51,12 +49,9 @@ def copy_and_name_checkpoints(
             # "250.ckpt" => "250"
             checkpoint_steps = os.path.splitext(checkpoint_steps)[0]
             checkpoints_and_steps.append(
-                (
-                    original_file_path,
-                    checkpoint_steps
-                )
+                (original_file_path, checkpoint_steps)
             )
-    checkpoints_found = True
+        checkpoints_found = True
         for i, file_and_steps in enumerate(checkpoints_and_steps):
             original_file_name, steps = file_and_steps[0], file_and_steps[1]
             new_file_name = config.create_checkpoint_file_name(steps)
