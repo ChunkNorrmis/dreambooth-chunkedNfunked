@@ -68,7 +68,10 @@ def copy_and_name_checkpoints(
             if config.format == 'safetensors':
                 device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
                 checkpoint = torch.load(original_file_name, map_location=device, weights_only=False)
-                nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+                if config.precision == 'float16':
+                    nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
+                else:
+                    nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
                 metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
                 safetensors.torch.save_file(checkpoint, output_file_name, metadata=metadata)
             else:
