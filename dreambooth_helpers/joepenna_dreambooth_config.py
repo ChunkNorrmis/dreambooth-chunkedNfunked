@@ -74,8 +74,11 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        self.tokens = [tk.rsplit('/', 2)[1] for tk in glob.glob(f"{self.training_images_folder_path}/**/*")]
-        self.classes = [cl.rsplit('/', 2)[2] for cl in glob.glob(f"{self.training_images_folder_path}/**/*")]
+        tkns = os.listdir(self.training_images_folder_path)
+        tkn_cls = {0: {'token': tkns[0]}, 1: {'token': tkns[1]}}
+        
+        for n in range(0, 1):
+            tkn_cls[n]['class'] = os.listdir(f"{self.training_images_folder_path}/{tkn_cls[n]['token']}/*")]
 
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
@@ -90,12 +93,12 @@ class JoePennaDreamboothConfigSchemaV1():
 
         if not self.token_only:
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            self.class_word = self.classes[0]
+            self.class_word = {tkn_cls[0]['class']}
 
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = self.tokens[0]
+        self.token = tkn_cls[0]['token']
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
@@ -106,10 +109,10 @@ class JoePennaDreamboothConfigSchemaV1():
         self.learning_rate = learning_rate
         self.precision = precision
         if safetensors:
-            self.format = 'safetensors'
-        else: self.format = 'ckpt'
+            self.model_format = '.safetensors'
+        else: self.model_format = '.ckpt'
 
-        self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
+        self.project_name = f"{tkn_cls[0]['token']}-{tkn_cls[0]['class']}_{tkn_cls[1]['token']}-{tkn_cls[1]['class']}"
         self.project_config_filename = f"{self.project_name}-config.json"
         
         if not os.path.exists(os.path.relpath(model_path)):
@@ -177,8 +180,8 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def create_checkpoint_file_name(self, steps: str):
         date_string = datetime.now(timezone.utc).strftime('%m-%d-%Y')
-        title = f"{date_string}_{self.project_name}_{int(steps):05d}_steps".replace(' ', '_')
-        return title + f".{self.format}"
+        title = f"{date_string}_{self.project_name}_{int(steps):05d}_steps".replace(' ', '_') + self.model_format
+        return title
 
     def save_config_to_file(
             self,
