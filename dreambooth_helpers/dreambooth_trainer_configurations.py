@@ -170,16 +170,16 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "set": "train",
             "reg": True,
             "data_root": config.regularization_images_folder_path,
+            "placeholder_token": None,
+            "coarse_class_text": config.class_word,
             "size": config.res,
             "repeats": 10,
+            "center_crop": False,
             "flip_p": config.flip_percent,
-            "center_crop": config.crop,
+            "mixing_prob": 0.25,
             "token_only": False,
-            "per_image_tokens": False,
-            "placeholder_token": config.token,
-            "coarse_class_text": config.class_word,
-            "mixing_prob": 0.25
-        }
+            "per_image_tokens": False
+        },
     }
 
     data_config = {
@@ -194,36 +194,36 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "set": "train",
                     "reg": False,
                     "data_root": config.training_images_folder_path,
+                    "placeholder_token": config.token,
+                    "coarse_class_text": config.class_word,
                     "size": config.res,
                     "repeats": config.repeats,
-                    "flip_p": config.flip_percent,
-                    "token_only": False,
-                    "per_image_tokens": False,
                     "center_crop": config.crop,
+                    "flip_p": config.flip_percent,
                     "mixing_prob": 0.25,
-                    "placeholder_token": config.token,
-                    "coarse_class_text": config.class_word
-                }
+                    "token_only": False,
+                    "per_image_tokens": False
+                },
             },
-            "reg": reg_block if os.path.exists(config.regularization_images_folder_path) else None,
+            "reg": reg_block,
             "validation": {
                 "target": "ldm.data.personalized.PersonalizedBase",
                 "params": {
                     "set": "val",
                     "reg": False,
                     "data_root": config.training_images_folder_path,
+                    "placeholder_token": config.token,
+                    "coarse_class_text": config.class_word,
                     "size": config.res,
                     "repeats": 10,
-                    "flip_p": config.flip_percent,
-                    "token_only": False,
-                    "per_image_tokens": False,
-                    "center_crop": config.crop,                    
+                    "center_crop": False,
+                    "flip_p": 0.0,
                     "mixing_prob": 0.25,
-                    "placeholder_token": config.token,
-                    "coarse_class_text": config.class_word
-                }
-            }
-        }
+                    "token_only": False,
+                    "per_image_tokens": False                    
+                },
+            },
+        },
     }
 
     return data_config
