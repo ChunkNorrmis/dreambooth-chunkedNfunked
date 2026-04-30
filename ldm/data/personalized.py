@@ -15,11 +15,11 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(self, set='train', data_root=None, size=512, repeats=100, center_crop=False, mixing_prob=0.25, flip_p=0.5, placeholder_token=None,
                 coarse_class_text=None, reg=False, token_only=False, per_image_tokens=False,):
-        super().__init__()
+
         self.data_root = data_root
-        self.image_paths = find_images(self.data_root)
-        self.num_images = len(self.image_paths)
-        self._length = self.num_images
+        self.imgs = find_images(self.data_root)
+        self.n_imgs = len(self.imgs)
+        self._length = self.n_imgs
         self.token_only = token_only
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
@@ -33,12 +33,12 @@ class PersonalizedBase(Dataset):
 
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-            
+
         if per_image_tokens:
-            assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
+            assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == 'train':
-            self._length = self.num_images * self.repeats
+            self._length = self.n_imgs * self.repeats
 
     def __len__(self):
         return self._length
@@ -51,7 +51,7 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         example = {}
-        image = decode_image(self.image_paths[i % self.num_images], mode='RGB')
+        image = decode_image(self.imgs[i % self.n_imgs], mode='RGB')
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.CenterCrop(min(image.size(1), image.size(2))),
@@ -60,14 +60,14 @@ class PersonalizedBase(Dataset):
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
             v2.Lambda(self.normpy)
         ])
+        self.placeholder_token = self.imgs[i % self.n_imgs].rsplit('/', 3)[1]
+        self.coarse_class_text = self.imgs[i % self.n_imgs].rsplit('/', 3)[2]
+
         example['image'] = transform(image)
         if self.reg:
-            example['caption'] = generic_captions_from_path(self.image_paths[i % self.num_images], self.data_root, self.reg_tokens)
+            example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
         else:
-            example['caption'] = caption_from_path(self.image_paths[i % self.num_images], self.data_root, self.coarse_class_text, self.placeholder_token)
-        
+            example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
+
         return example
 
-        
-
-        
