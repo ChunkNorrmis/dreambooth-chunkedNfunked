@@ -75,13 +75,13 @@ def copy_and_name_checkpoints(
                 shutil.move(original_file_name, output_file_name)
 
 
-last = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
+    last = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
 
-if os.path.exists(last):
-    loaded = torch.load(last, map_location='cpu', weights_only=False)
-    nil_pickle = {k: v.contiguous() for k, v in loaded['state_dict'].items()}
-    metadata = {k: f"{v}" for k, v in loaded.items() if k != 'optimizer_states' and k != 'state_dict'}
-    safetensors.torch.save_file(loaded, 'trained_models/last.safetensors', metadata=metadata)   
+    if os.path.exists(last):
+        loaded = torch.load(last, map_location='cpu', weights_only=False)
+        nil_pickle = {k: v.contiguous() for k, v in loaded['state_dict'].items()}
+        metadata = {k: f"{v}" for k, v in loaded.items() if k != 'optimizer_states' and k != 'state_dict'}
+        safetensors.torch.save_file(loaded, 'trained_models/last.safetensors', metadata=metadata)   
 
     if checkpoints_found:
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
