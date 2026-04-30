@@ -43,11 +43,7 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def normpy(self, t):
-        t = t.detach().to(torch.float32)
-        t = (t / 255 - 0.5) / 0.5
-        n = np.array(t.permute(1, 2, 0))
-        return n
+    def numpify(self, x): return x.clone().detach().permute(1, 2, 0).cpu().numpy()
 
     def __getitem__(self, i):
         example = {}
@@ -58,16 +54,19 @@ class PersonalizedBase(Dataset):
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(self.normpy)
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
+            v2.Lambda(self.numpify)
         ])
-        self.placeholder_token = self.imgs[i % self.n_imgs].rsplit('/', 3)[1]
-        self.coarse_class_text = self.imgs[i % self.n_imgs].rsplit('/', 3)[2]
-
-        example['image'] = transform(image)
+        image = transform(image)
+        self.coarse_class_text = self.imgs[i % self.n_imgs].rsplit('/', 2)[1]
+        
         if self.reg:
             example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
         else:
+            self.placeholder_token = self.imgs[i % self.n_imgs].rsplit('/', 3)[1]
             example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
-
+        example['image'] = image
+        
         return example
 
