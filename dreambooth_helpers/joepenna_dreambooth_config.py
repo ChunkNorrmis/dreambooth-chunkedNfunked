@@ -112,8 +112,8 @@ class JoePennaDreamboothConfigSchemaV1():
         self.project_name = f"{self.tokens[0]}-{self.classes[0]}_{self.tokens[1]}-{self.classes[1]}"
         self.project_config_filename = f"{self.project_name}-config.json"
         
-        if not os.path.exists(model_path):
-            if model_path.startswith('https://huggingface.co'):
+        if not os.path.exists(os.path.relpath(model_path)):
+            if model_path.startswith('https://huggingface.co') and not os.path.exists(os.path.basename(model_path):
                 self.model_path = self.get_model_from_hub(repo_url=model_path)    
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = os.path.relpath(model_path)
