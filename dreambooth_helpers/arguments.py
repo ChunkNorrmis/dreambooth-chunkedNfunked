@@ -37,8 +37,9 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
         parser.add_argument(
             "--training_model",
             type=str,
-            required=True,
-            help="Path to local model to train, or url for hosted model in a huggingface repo. (e.g './v1-5-pruned.ckpt' -- 'https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt')"
+            required=False,
+            default='https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt'
+            help="Path to a local model or the url of a huggingface model repo to use for training (e.g 'v1-5-pruned.ckpt' -- 'https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt')"
         )
         parser.add_argument(
             "--training_images",
