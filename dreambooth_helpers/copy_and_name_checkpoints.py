@@ -56,31 +56,34 @@ def copy_and_name_checkpoints(
                 )
             )
     checkpoints_found = True
-    for i, file_and_steps in enumerate(checkpoints_and_steps):
-
-        original_file_name, steps = file_and_steps[0], file_and_steps[1]
-
-        # Setup the filenames
-        new_file_name = config.create_checkpoint_file_name(steps)
-        output_file_name = os.path.join(output_folder, new_file_name)
-    
-        if os.path.exists(last):
-            if config.format == 'safetensors':
-                checkpoint = torch.load(last, map_location=torch.device('cpu'), weights_only=False)
-                nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-                metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
-                safetensors.torch.save_file(checkpoint, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)
+    if os.path.exists(last):
+        if config.format == 'safetensors':
+            checkpoint = torch.load(last, map_location=torch.device('cpu'), weights_only=False)
+            if config.precision == 'float16':
+                nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
             else:
-                shutil.move(last, config.create_checkpoint_file_name(config.max_training_steps))
-        elif os.path.exists(original_file_name):
-            print(f"Moving {original_file_name} to {output_file_name}")
-            if config.format == 'safetensors':
-                checkpoint = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
                 nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-                metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
-                safetensors.torch.save_file(checkpoint, output_file_name, metadata=metadata)
-            else:
-                shutil.move(original_file_name, output_file_name)
+            metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+            safetensors.torch.save_file(nil_pickle, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)
+        else:
+            shutil.move(last, config.create_checkpoint_file_name(config.max_training_steps))
+    else:
+        for i, file_and_steps in enumerate(checkpoints_and_steps):
+            original_file_name, steps = file_and_steps[0], file_and_steps[1]
+            new_file_name = config.create_checkpoint_file_name(steps)
+            output_file_name = os.path.join(output_folder, new_file_name)
+            if os.path.exists(original_file_name):
+                print(f"Moving {original_file_name} to {output_file_name}")
+                if config.format == 'safetensors':
+                    checkpoint = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
+                    if config.precision == 'float16':
+                        nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
+                    else:
+                        nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+                    metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+                    safetensors.torch.save_file(nil_pickle, output_file_name, metadata=metadata)
+                else:
+                    shutil.move(original_file_name, output_file_name)
 
     if checkpoints_found:
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
