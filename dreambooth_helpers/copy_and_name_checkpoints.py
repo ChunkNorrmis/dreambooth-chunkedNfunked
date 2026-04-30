@@ -59,11 +59,9 @@ def copy_and_name_checkpoints(
     if os.path.exists(last):
         if config.format == 'safetensors':
             checkpoint = torch.load(last, map_location=torch.device('cpu'), weights_only=False)
-            if config.precision == 'float16':
-                nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
-            else:
-                nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+            nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
             metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+            metadata['format'] = 'pt'
             safetensors.torch.save_file(nil_pickle, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)
         else:
             shutil.move(last, config.create_checkpoint_file_name(config.max_training_steps))
@@ -76,11 +74,9 @@ def copy_and_name_checkpoints(
                 print(f"Moving {original_file_name} to {output_file_name}")
                 if config.format == 'safetensors':
                     checkpoint = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
-                    if config.precision == 'float16':
-                        nil_pickle = {k: v.half().contiguous() for k, v in checkpoint['state_dict'].items()}
-                    else:
-                        nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+                    nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
                     metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+                    metadata['format'] = 'pt'
                     safetensors.torch.save_file(nil_pickle, output_file_name, metadata=metadata)
                 else:
                     shutil.move(original_file_name, output_file_name)
