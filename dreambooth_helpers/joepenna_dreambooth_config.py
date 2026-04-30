@@ -114,21 +114,12 @@ class JoePennaDreamboothConfigSchemaV1():
         
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
-                from huggingface_hub.file_download import hf_hub_download
-                import hf_xet, hf_transfer
-                repo_id = f"{model_path.split('/')[3]}/{model_path.split('/')[4]}"
-                model_file = os.path.basename(model_path)
-                local_dir = os.path.abspath(sys.path[0])
-                self.model_path = os.path.join(local_dir, model_file)
-                print(f"Downloading {model_file}")
-                hf_hub_download(repo_id, model_file, local_dir=local_dir)
+                self.model_path = self.get_model_from_hub(repo_url=model_path)    
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
-        else: self.model_path = model_path 
+        else: self.model_path = os.path.relpath(model_path)
             
-
         self.validate_gpu_vram()
         self._create_log_folders()
-
 
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
@@ -206,6 +197,15 @@ class JoePennaDreamboothConfigSchemaV1():
             print(project_config_json)
             print(f"✅ {self.project_config_filename} successfully generated.  Proceed to training.")
 
+    def get_model_from_hub(self, repo_url=None):
+        from huggingface_hub.file_download import hf_hub_download
+        import hf_xet
+        repo_id = f"{repo_url.split('/')[3]}/{repo_url.split('/')[4]}"
+        model_ckpt = os.path.basename(repo_url)
+        print(f"Downloading '{model_ckpt}'")
+        hf_hub_download(repo_id, model_ckpt, local_dir=sys.path[0])
+        return os.path.join(sys.path[0], model_ckpt)
+        
     def get_training_folder_name(self) -> str:
         return f"{self.config_date_time}_{self.project_name}"
 
