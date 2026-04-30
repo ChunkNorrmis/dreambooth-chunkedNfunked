@@ -15,7 +15,6 @@ def copy_and_name_checkpoints(
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    # copy the config file to the directory as well
     config.save_config_to_file(
         save_path=output_folder
     )
@@ -25,7 +24,6 @@ def copy_and_name_checkpoints(
         print(f"No checkpoints found in {logs_directory}")
         return
 
-    # Gather, name, and move the checkpoint files.
     checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
         last = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
