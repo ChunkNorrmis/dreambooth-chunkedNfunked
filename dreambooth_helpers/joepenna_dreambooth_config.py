@@ -78,7 +78,7 @@ class JoePennaDreamboothConfigSchemaV1():
         tkn_cls = {0: {'token': tkns[0]}, 1: {'token': tkns[1]}}
         
         for n in range(0, 1):
-            tkn_cls[n]['class'] = os.listdir(f"{self.training_images_folder_path}/{tkn_cls[n]['token']}/*")]
+            tkn_cls[n]['class'] += os.listdir(f"{self.training_images_folder_path}/{tkn_cls[n]['token']}/*")
 
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
