@@ -28,9 +28,10 @@ def copy_and_name_checkpoints(
     # Gather, name, and move the checkpoint files.
     checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
+        last = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
         checkpoints_and_steps.append(
             (
-                os.path.join(config.log_checkpoint_directory(), 'last.ckpt'),
+                last,
                 str(config.max_training_steps)
             )
         )
@@ -66,7 +67,6 @@ def copy_and_name_checkpoints(
         if os.path.exists(original_file_name):
             print(f"Moving {original_file_name} to {output_file_name}")
             if config.format == 'safetensors':
-                device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
                 checkpoint = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
                 nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
                 metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
@@ -74,14 +74,11 @@ def copy_and_name_checkpoints(
             else:
                 shutil.move(original_file_name, output_file_name)
 
-
-    last = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
-
-    if os.path.exists(last):
-        loaded = torch.load(last, map_location='cpu', weights_only=False)
-        nil_pickle = {k: v.contiguous() for k, v in loaded['state_dict'].items()}
-        metadata = {k: f"{v}" for k, v in loaded.items() if k != 'optimizer_states' and k != 'state_dict'}
-        safetensors.torch.save_file(loaded, 'trained_models/last.safetensors', metadata=metadata)   
+        if os.path.exists(last):
+            checkpoint = torch.load(last, map_location='cpu', weights_only=False)
+            nil_pickle = {k: v.contiguous() for k, v in loaded['state_dict'].items()}
+            metadata = {k: f"{v}" for k, v in loaded.items() if k != 'optimizer_states' and k != 'state_dict'}
+            safetensors.torch.save_file(checkpoint, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)   
 
     if checkpoints_found:
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
