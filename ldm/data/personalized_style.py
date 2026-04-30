@@ -63,11 +63,11 @@ class PersonalizedBase(Dataset):
         per_image_tokens,
         center_crop
     ):
-        super().__init__()
+
         self.data_root = data_root
-        self.image_paths = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
-        self.num_images = len(self.image_paths)
-        self._length = self.num_images
+        self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
+        self.n_imgs = len(self.imgs)
+        self._length = self.n_imgs
         self.flip_p = flip_p
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
@@ -77,35 +77,37 @@ class PersonalizedBase(Dataset):
         
                         
         if per_image_tokens:
-            assert self.num_images < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
+            assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == "train":
-            self._length = self.num_images * self.repeats
+            self._length = self.n_imgs * self.repeats
 
+    def normpy(self, t):
+        t = t.detach().to(torch.float32)
+        t = (t / 255 - 0.5) / 0.5
+        n = np.array(t.permute(1, 2, 0))
+        return n
+    
     def __len__(self):
         return self._length
 
     def __getitem__(self, i):
         example = {}
-        image_path = self.image_paths[i % self.num_images]
-        image = decode_image(image_path, mode='RGB')
-        crop = min(image.size(1), image.size(2))
+        image = decode_image(self.imgs[i % self.n_imgs], mode='RGB')
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop((crop, crop)),
+            v2.CenterCrop(min(image.size(1), image.size(2))),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
             v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5]),
-            v2.Lambda(lambda img : img.detach().permute(1, 2, 0).numpy())
+            v2.Lambda(self.normpy)
         ])
-        example['image'] = transform(image)}
-        self.coarse_class_text = image_path.rsplit('/', 3)[2]
-        self.placeholder_token = image_path.rsplit('/', 3)[1]
+        example['image'] = transform(image)
+        self.coarse_class_text = self.imgs[i % self.n_imgs].rsplit('/', 3)[2]
+        self.placeholder_token = self.imgs[i % self.n_imgs].rsplit('/', 3)[1]
         
         if self.per_image_tokens and random.random() < 0.25:
-            example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.num_images])
+            example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
             example['caption'] = random.choice(imagenet_templates_small).format(self.placeholder_token)
         
