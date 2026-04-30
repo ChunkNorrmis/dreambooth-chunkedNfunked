@@ -64,7 +64,15 @@ def copy_and_name_checkpoints(
         new_file_name = config.create_checkpoint_file_name(steps)
         output_file_name = os.path.join(output_folder, new_file_name)
     
-        if os.path.exists(original_file_name):
+        if os.path.exists(last):
+            if config.format == 'safetensors':
+                checkpoint = torch.load(last, map_location=torch.device('cpu'), weights_only=False)
+                nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+                metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+                safetensors.torch.save_file(checkpoint, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)
+            else:
+                shutil.move(last, config.create_checkpoint_file_name(config.max_training_steps))
+        elif os.path.exists(original_file_name):
             print(f"Moving {original_file_name} to {output_file_name}")
             if config.format == 'safetensors':
                 checkpoint = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
@@ -73,12 +81,6 @@ def copy_and_name_checkpoints(
                 safetensors.torch.save_file(checkpoint, output_file_name, metadata=metadata)
             else:
                 shutil.move(original_file_name, output_file_name)
-
-        if os.path.exists(last):
-            checkpoint = torch.load(last, map_location='cpu', weights_only=False)
-            nil_pickle = {k: v.contiguous() for k, v in loaded['state_dict'].items()}
-            metadata = {k: f"{v}" for k, v in loaded.items() if k != 'optimizer_states' and k != 'state_dict'}
-            safetensors.torch.save_file(checkpoint, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)   
 
     if checkpoints_found:
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
