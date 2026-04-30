@@ -26,13 +26,16 @@ def copy_and_name_checkpoints(
 
     checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
-        last = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
-        checkpoints_and_steps.append(
-            (
-                last,
-                str(config.max_training_steps)
-            )
-        )
+        first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
+        last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
+        if config.format == 'safetensors':
+            checkpoint = torch.load(first, map_location=torch.device('cpu'), weights_only=False)
+            nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+            metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+            metadata['format'] = 'pt'
+            safetensors.torch.save_file(nil_pickle, last, metadata=metadata)
+        else:
+            shutil.move(first, last)
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
         file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
@@ -54,16 +57,6 @@ def copy_and_name_checkpoints(
                 )
             )
     checkpoints_found = True
-    if os.path.exists(last):
-        if config.format == 'safetensors':
-            checkpoint = torch.load(last, map_location=torch.device('cpu'), weights_only=False)
-            nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-            metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
-            metadata['format'] = 'pt'
-            safetensors.torch.save_file(nil_pickle, config.create_checkpoint_file_name(config.max_training_steps), metadata=metadata)
-        else:
-            shutil.move(last, config.create_checkpoint_file_name(config.max_training_steps))
-    else:
         for i, file_and_steps in enumerate(checkpoints_and_steps):
             original_file_name, steps = file_and_steps[0], file_and_steps[1]
             new_file_name = config.create_checkpoint_file_name(steps)
