@@ -3,7 +3,7 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
-from safetensors.torch import save_file
+import safetensors.torch
 import torch
 
 
@@ -47,7 +47,7 @@ def copy_and_name_checkpoints(
 
             # Remove the .ckpt
             # "250.ckpt" => "250"
-            checkpoint_steps = checkpoint_steps.replace(f".{config.format}", "")
+            checkpoint_steps = os.path.splitext(checkpoint_steps)[0]
             checkpoints_and_steps.append(
                 (
                     original_file_path,
@@ -64,11 +64,15 @@ def copy_and_name_checkpoints(
         output_file_name = os.path.join(output_folder, new_file_name)
     
         if os.path.exists(original_file_name):
-            loaded = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
-            nil_pickle = {k: v.contiguous() for k, v in state_dict.items()}
-            metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
             print(f"Moving {original_file_name} to {output_file_name}")
-            save_file(loaded, output_file_name, metadata=metadata)
+            if config.format == 'safetensors':
+                device = 'cuda:0' if torch.cuda.is_available()
+                checkpoint = torch.load(original_file_name, map_location=device, weights_only=False)
+                nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
+                metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
+                safetensors.torch.save_file(checkpoint, output_file_name, metadata=metadata)
+            else:
+                shutil.move(original_file_name, output_file_name)
                     
 
     if checkpoints_found:
