@@ -66,7 +66,7 @@ def copy_and_name_checkpoints(
         if os.path.exists(original_file_name):
             print(f"Moving {original_file_name} to {output_file_name}")
             if config.format == 'safetensors':
-                device = 'cuda:0' if torch.cuda.is_available()
+                device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
                 checkpoint = torch.load(original_file_name, map_location=device, weights_only=False)
                 nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
                 metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'optimizer_states' and k != 'state_dict'}
