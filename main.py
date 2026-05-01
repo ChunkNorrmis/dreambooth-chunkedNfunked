@@ -134,7 +134,8 @@ class DataModuleFromConfig(pl.LightningDataModule):
 
 @JoePennaDreamboothConfigSchemaV1
 def populate():
-    return parse_arguments()
+    opts = parse_arguments()
+    return opts
 
 if __name__ == "__main__":
     # Generate the config from the input arguments
