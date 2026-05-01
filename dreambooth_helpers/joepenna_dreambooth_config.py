@@ -52,11 +52,11 @@ class JoePennaDreamboothConfigSchemaV1():
         self.project_name = f"{self.token}-{self.class_word}_{tkn_cls[0]['token']}-{tkn_cls[0]['class']}"
         self.project_config_filename = f"{self.project_name}-config.json"
 
-        if not os.path.exists(opt.training_model):
-            if opt.training_model.startswith('https://huggingface.co'):
-                self.model_path = self.get_model_from_hub(repo_url=opt.training_model)    
-            else: raise Exception(f"Model Path Not Found: '{opt.training_model}'.")
-        else: self.model_path = opt.training_model
+        if not os.path.exists(opt.model_path):
+            if opt.model_path.startswith('https://huggingface.co'):
+                self.model_path = self.get_model_from_hub(repo_url=opt.model_path)    
+            else: raise Exception(f"Model Path Not Found: '{opt.model_path}'.")
+        else: self.model_path = opt.model_path
 
         self.opts = opt
         self.validate_gpu_vram()
