@@ -62,7 +62,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self._create_log_folders()
     
     def __call__(self):
-        return
+        return self
         
 
     def validate_gpu_vram(self):
