@@ -2,7 +2,7 @@ import argparse, random
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
 
 
-@JoePennaDreamboothConfigSchemaV1(parse_arguments)
+@JoePennaDreamboothConfigSchemaV1
 def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
     def _get_parser():
         parser = argparse.ArgumentParser()
