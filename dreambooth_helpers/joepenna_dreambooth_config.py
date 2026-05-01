@@ -1,4 +1,4 @@
-import os, json, math, glob, shutil, sys, torch, random, safetensors.torch
+import os, json, math, glob, shutil, sys, torch, random, safetensors.torch, argparse
 from datetime import datetime, timezone
 from pytorch_lightning import seed_everything
 
@@ -60,6 +60,9 @@ class JoePennaDreamboothConfigSchemaV1():
             
         self.validate_gpu_vram()
         self._create_log_folders()
+    
+    def __call__(self):
+        return
         
 
     def validate_gpu_vram(self):
