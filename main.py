@@ -132,9 +132,13 @@ class DataModuleFromConfig(pl.LightningDataModule):
                           num_workers=self.num_workers, worker_init_fn=init_fn)
 
 
+@JoePennaDreamboothConfigSchemaV1
+def populate():
+    return parse_arguments()
+
 if __name__ == "__main__":
     # Generate the config from the input arguments
-    dreambooth_config = parse_arguments()
+    dreambooth_config = populate()
 
     # add cwd for convenience and to make classes in this file available when
     # running as `python main.py`
