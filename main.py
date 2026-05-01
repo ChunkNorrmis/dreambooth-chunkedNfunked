@@ -131,15 +131,12 @@ class DataModuleFromConfig(pl.LightningDataModule):
         return DataLoader(self.datasets["predict"], batch_size=self.batch_size,
                           num_workers=self.num_workers, worker_init_fn=init_fn)
 
-
-@JoePennaDreamboothConfigSchemaV1
-def populate():
-    opts = parse_arguments()
-    return opts
+    
 
 if __name__ == "__main__":
     # Generate the config from the input arguments
-    dreambooth_config = populate()
+    arguments = parse_arguments()
+    dreambooth_config = JoePennaDreamboothConfigSchemaV1(arguments)
 
     # add cwd for convenience and to make classes in this file available when
     # running as `python main.py`
