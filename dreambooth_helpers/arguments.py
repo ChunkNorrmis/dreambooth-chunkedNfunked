@@ -36,7 +36,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             help="Train only using the token and no class."
         )
         parser.add_argument(
-            "--training_model",
+            "--model_path",
             type=str,
             required=False,
             default='https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt',
