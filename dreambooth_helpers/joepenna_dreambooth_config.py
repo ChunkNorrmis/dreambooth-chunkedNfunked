@@ -116,7 +116,6 @@ class JoePennaDreamboothConfigSchemaV1():
         
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
-                model_name = model_path.split('/')[-1]
                 self.model_path = self.get_model_from_hub(repo_url=model_path)    
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = os.path.relpath(model_path)
@@ -206,9 +205,11 @@ class JoePennaDreamboothConfigSchemaV1():
         import hf_xet
         repo_id = f"{repo_url.split('/')[3]}/{repo_url.split('/')[4]}"
         model_ckpt = os.path.basename(repo_url)
-        print(f"Downloading '{model_ckpt}'")
-        hf_hub_download(repo_id, model_ckpt, local_dir=sys.path[0])
-        return os.path.join(sys.path[0], model_ckpt)
+        default_path = os.path.join(sys.path[0], model_ckpt)
+        if not os.path.exists(default_path):
+            print(f"Downloading '{model_ckpt}'")
+            hf_hub_download(repo_id, model_ckpt, local_dir=sys.path[0])
+        return default_path
         
     def get_training_folder_name(self) -> str:
         return f"{self.config_date_time}_{self.project_name}"
