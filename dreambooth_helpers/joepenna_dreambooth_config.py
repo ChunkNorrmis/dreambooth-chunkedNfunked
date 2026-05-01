@@ -92,12 +92,12 @@ class JoePennaDreamboothConfigSchemaV1():
 
         if not self.token_only:
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            self.class_word = tkn_cls[0]['class']
+            self.class_word = tkn_cls[1]['class']
 
         if not os.path.exists(self.regularization_images_folder_path):
             raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
 
-        self.token = tkn_cls[0]['token']
+        self.token = tkn_cls[1]['token']
         if self.token is None or self.token == '':
             raise Exception(f"Token not provided.")
 
@@ -111,7 +111,7 @@ class JoePennaDreamboothConfigSchemaV1():
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
 
-        self.project_name = f"{self.token}-{self.class_word}_{tkn_cls[1]['token']}-{tkn_cls[1]['class']}"
+        self.project_name = f"{self.token}-{self.class_word}_{tkn_cls[0]['token']}-{tkn_cls[0]['class']}"
         self.project_config_filename = f"{self.project_name}-config.json"
         
         if not os.path.exists(model_path):
