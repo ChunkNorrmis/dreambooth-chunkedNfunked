@@ -57,12 +57,14 @@ class JoePennaDreamboothConfigSchemaV1():
                 self.model_path = self.get_model_from_hub(repo_url=opt.training_model)    
             else: raise Exception(f"Model Path Not Found: '{opt.training_model}'.")
         else: self.model_path = opt.training_model
+
+        self.opts = opt
             
         self.validate_gpu_vram()
         self._create_log_folders()
     
     def __call__(self):
-        return self
+        return self.opts
         
 
     def validate_gpu_vram(self):
