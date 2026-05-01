@@ -5,6 +5,7 @@ from pytorch_lightning import seed_everything
 
 class JoePennaDreamboothConfigSchemaV1():
     def __init__(self, opts):
+        self.opts = opts()
         opt, ukopt = opts()
         
         self.schema = 1
@@ -58,13 +59,13 @@ class JoePennaDreamboothConfigSchemaV1():
             else: raise Exception(f"Model Path Not Found: '{opt.training_model}'.")
         else: self.model_path = opt.training_model
 
-        self.opts = opt
             
         self.validate_gpu_vram()
         self._create_log_folders()
     
     def __call__(self):
-        return self.opts
+        opt, ukopt = self.opts
+        return opt
         
 
     def validate_gpu_vram(self):
