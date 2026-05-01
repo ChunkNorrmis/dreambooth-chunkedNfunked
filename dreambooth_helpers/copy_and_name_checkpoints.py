@@ -26,7 +26,7 @@ def copy_and_name_checkpoints(
     if config.save_every_x_steps == 0:
         first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
         last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
-        if config.format == 'safetensors':
+        if config.model_format == '.safetensors':
             checkpoint = torch.load(first, map_location=torch.device('cpu'), weights_only=False)
             metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'state_dict'}
             metadata['format'] = 'pt'
@@ -58,7 +58,7 @@ def copy_and_name_checkpoints(
             output_file_name = os.path.join(output_folder, new_file_name)
             if os.path.exists(original_file_name):
                 print(f"Moving {original_file_name} to {output_file_name}")
-                if config.format == 'safetensors':
+                if config.model_format == '.safetensors':
                     checkpoint = torch.load(original_file_name, map_location=torch.device('cpu'), weights_only=False)
                     metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'state_dict'}
                     metadata['format'] = 'pt'
