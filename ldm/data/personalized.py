@@ -14,7 +14,6 @@ per_img_token_list = [
 
 class PersonalizedBase(Dataset):
     def __init__(self, set, reg, data_root, placeholder_token, coarse_class_text, size, repeats, center_crop, flip_p, mixing_prob=0.25, token_only=False, per_image_tokens=False,):
-
         self.data_root = data_root
         self.imgs = find_images(self.data_root)
         self.n_imgs = len(self.imgs)
@@ -42,30 +41,26 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def numpify(self, x): return x.clone().detach().permute(1, 2, 0).cpu().numpy()
+    def numpify(self, x): return x.detach().permute(1, 2, 0).numpy(force=True).contiguous()
 
     def __getitem__(self, i):
         example = {}
         image = decode_image(self.imgs[i % self.n_imgs], mode='RGB')
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.size(1), image.size(2))),
+            v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+            v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(self.numpify)
         ])
-        image = transform(image)
-        self.coarse_class_text = self.imgs[i % self.n_imgs].rsplit('/', 2)[1]
-        
+
         if self.reg:
             example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
         else:
-            self.placeholder_token = self.imgs[i % self.n_imgs].rsplit('/', 3)[1]
             example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
-        example['image'] = image
-        
-        return example
+        example['image'] = transform(image)
 
+        return example
