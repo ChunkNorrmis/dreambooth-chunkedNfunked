@@ -5,8 +5,6 @@ from pytorch_lightning import seed_everything
 
 class JoePennaDreamboothConfigSchemaV1():
     def __init__(self, opt):
-        self.opts = opt
-        
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
         self.token = opt.token
@@ -62,8 +60,26 @@ class JoePennaDreamboothConfigSchemaV1():
         self._create_log_folders()
     
     def __call__(self):
-        return self.opts
-        
+        self.conf = {
+            'project_name': self.project_name,
+            'token': self.token,
+            'class_word': self.class_word,
+            'training_images': self.training_images_folder_path,
+            'reg_images': self.regularization_images_folder_path,
+            'model_path': self.model_path,
+            'resolution': self.res,
+            'center_crop': self.crop,
+            'flip_p': self.flip_percent,
+            'token_only': self.token_only,
+            'fp32': self.precision,
+            'repeats': self.repeats,
+            'learning_rate': self.learning_rate,
+            'batch_size': self.batch_size,
+            'accumed_grads': self.accumed_grads,
+            'max_training_steps': self.max_training_steps,
+            'model_format': self.model_format
+        }
+        return self.conf
 
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
