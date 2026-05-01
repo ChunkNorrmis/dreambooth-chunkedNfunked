@@ -117,7 +117,6 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
                 model_name = model_path.split('/')[-1]
-                if not os.path.exists(os.path.join(sys.path[0], model_name)):
                     self.model_path = self.get_model_from_hub(repo_url=model_path)    
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = os.path.relpath(model_path)
