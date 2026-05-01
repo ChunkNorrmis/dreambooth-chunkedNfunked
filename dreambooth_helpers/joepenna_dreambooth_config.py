@@ -5,7 +5,7 @@ from pytorch_lightning import seed_everything
 
 class JoePennaDreamboothConfigSchemaV1():
     def __init__(self, opts):
-        self.opts = opts()
+        self.opts, self.ukopts = opts()
         opt, ukopt = opts()
         
         self.schema = 1
@@ -64,8 +64,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self._create_log_folders()
     
     def __call__(self):
-        opt, ukopt = self.opts
-        return opt
+        return = self.opts
         
 
     def validate_gpu_vram(self):
