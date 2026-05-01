@@ -41,7 +41,7 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def numpify(self, x): return x.detach().permute(1, 2, 0).numpy(force=True).contiguous()
+    def numpify(self, x): return x.detach().permute(1, 2, 0).contiguous().numpy(force=True)
 
     def __getitem__(self, i):
         example = {}
