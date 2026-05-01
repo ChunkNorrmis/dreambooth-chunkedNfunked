@@ -170,7 +170,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "set": "train",
             "reg": True,
             "data_root": config.regularization_images_folder_path,
-            "placeholder_token": None,
+            "placeholder_token": config.token,
             "coarse_class_text": config.class_word,
             "size": config.res,
             "repeats": 10,
