@@ -2,6 +2,7 @@ import argparse, random
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
 
 
+@JoePennaDreamboothConfigSchemaV1
 def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
     def _get_parser():
         parser = argparse.ArgumentParser()
@@ -50,7 +51,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
         parser.add_argument(
             "--regularization_images",
             type=str,
-            required=False,
+            required=True,
             help="Path to directory with regularization images"
         )
         parser.add_argument(
@@ -73,7 +74,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             "--learning_rate",
             type=float,
             required=False,
-            default=1.0e-06,
+            default=1e-06,
             help="Set the learning rate. Defaults to 1.0e-06 (0.000001).  Accepts scientific notation."
         )
         parser.add_argument(
@@ -127,40 +128,13 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             help='saves model state dict as float32, rather than float16 (the default)'
         )
         parser.add_argument(
-            '--safetensors',
-            action='store_true'
+            '--savetensors',
+            action='store_true',
+            help='saves model in safetensors format instead of a checkpoint file'
         )
 
         return parser
 
     parser = _get_parser()
-    opt, unknown = parser.parse_known_args()
-    config = JoePennaDreamboothConfigSchemaV1()
-
-    if opt.config_file_path is not None:
-        config.saturate_from_file(config_file_path=opt.config_file_path)
-    else:
-        config.saturate(
-            opt.project_name,
-            opt.token,
-            opt.token_only,
-            opt.class_word,
-            opt.training_images,
-            opt.regularization_images,
-            opt.training_model,
-            opt.fp32,
-            opt.safetensors,
-            opt.repeats,
-            opt.learning_rate,
-            opt.batch_size,
-            opt.accumed_grads,
-            opt.resolution,
-            opt.center_crop,
-            opt.flip_p,
-            opt.save_every_x_steps,
-            random.randrange(1, int(1e+05)),
-            opt.gpu,
-            opt.debug
-        )
-
-    return config
+    return parser.parse_known_args()
+        
