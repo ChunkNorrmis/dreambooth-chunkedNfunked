@@ -136,6 +136,5 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
         return parser
 
     parser = _get_parser()
-    opts, ukopts = parser.parse_known_args()
-    return opts
+    return parser.parse_known_args()
         
