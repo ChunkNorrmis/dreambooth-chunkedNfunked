@@ -4,8 +4,8 @@ from pytorch_lightning import seed_everything
 
 
 class JoePennaDreamboothConfigSchemaV1():
-    def __init__(self, opts):
-        opt, ukopt = opts()
+    def __init__(self, opt):
+        self.opts = opt
         
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
@@ -58,12 +58,11 @@ class JoePennaDreamboothConfigSchemaV1():
             else: raise Exception(f"Model Path Not Found: '{opt.model_path}'.")
         else: self.model_path = opt.model_path
 
-        self.opts = opt
         self.validate_gpu_vram()
         self._create_log_folders()
     
     def __call__(self):
-        return self
+        return self.opts
         
 
     def validate_gpu_vram(self):
