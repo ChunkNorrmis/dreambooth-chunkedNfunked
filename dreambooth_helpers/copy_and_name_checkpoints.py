@@ -3,7 +3,7 @@ import re
 import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
-import safetensors.torch
+from safetensors.torch import save_file
 import torch
 
 
@@ -31,7 +31,7 @@ def copy_and_name_checkpoints(
             metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'state_dict'}
             metadata['format'] = 'pt'
             nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-            safetensors.torch.save_file(nil_pickle, last, metadata=metadata)
+            save_file(nil_pickle, last, metadata=metadata)
         else:
             shutil.move(first, last)
     else:
@@ -63,7 +63,7 @@ def copy_and_name_checkpoints(
                     metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'state_dict'}
                     metadata['format'] = 'pt'
                     nil_pickle = {k: v.contiguous() for k, v in checkpoint['state_dict'].items()}
-                    safetensors.torch.save_file(nil_pickle, output_file_name, metadata=metadata)
+                    save_file(nil_pickle, output_file_name, metadata=metadata)
                 else:
                     shutil.move(original_file_name, output_file_name)
 
