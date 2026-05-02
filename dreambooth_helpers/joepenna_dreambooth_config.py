@@ -4,7 +4,9 @@ from pytorch_lightning import seed_everything
 
 
 class JoePennaDreamboothConfigSchemaV1():
-    def __init__(self, opt):
+    def __init__(self, opts):
+        opt, ukopt = opts()
+        
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
         self.token = opt.token
