@@ -74,10 +74,10 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        tkns = os.listdir(self.training_images_folder_path)
-        tkn_cls = {0: {'token': tkns[0]}, 1: {'token': tkns[1]}}
-        for n in [0, 1]:
-            tkn_cls[n]['class'] = os.listdir(os.path.join(self.training_images_folder_path, tkn_cls[n]['token']))
+        tkn_cls = {}
+        for idx, tc in enumerate(os.listdir(self.training_images_folder_path)):
+            tkn_cls[idx]['token'] = tc
+            tkn_cls[idx]['class'] = os.listdir(os.path.join(self.training_images_folder_path, tkn_cls[idx]['token']))
 
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
@@ -202,7 +202,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def get_model_from_hub(self, repo_url=None):
         from huggingface_hub.file_download import hf_hub_download
-        import hf_xet
+        import hf_xet, hf_transfer
         repo_id = f"{repo_url.split('/')[3]}/{repo_url.split('/')[4]}"
         model_ckpt = os.path.basename(repo_url)
         default_path = os.path.join(sys.path[0], model_ckpt)
