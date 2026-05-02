@@ -54,14 +54,14 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(
         self,
-        set,
-        data_root,
-        size,
-        repeats,
-        flip_p,
-        placeholder_token,
-        per_image_tokens,
-        center_crop
+        set='train',
+        data_root=None,
+        size=512,
+        repeats=100,
+        flip_p=0.5,
+        placeholder_token='sks',
+        per_image_tokens=False,
+        center_crop=False
     ):
 
         self.data_root = data_root
@@ -81,30 +81,26 @@ class PersonalizedBase(Dataset):
 
         if set == "train":
             self._length = self.n_imgs * self.repeats
-
-    def normpy(self, t):
-        t = t.detach().to(torch.float32)
-        t = (t / 255 - 0.5) / 0.5
-        n = np.array(t.permute(1, 2, 0))
-        return n
     
     def __len__(self):
         return self._length
+
+    def numpify(self, x): return x.detach().permute(1, 2, 0).contiguous().numpy(force=True)
 
     def __getitem__(self, i):
         example = {}
         image = decode_image(self.imgs[i % self.n_imgs], mode='RGB')
         transform = v2.Compose([
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.size(1), image.size(2))),
+            v2.CenterCrop(min(image.shape[1], image.shape[2])),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.3)),
-            v2.Lambda(self.normpy)
+            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[0.5], std=[0.5]),
+            v2.Lambda(self.numpify)
         ])
         example['image'] = transform(image)
-        self.coarse_class_text = self.imgs[i % self.n_imgs].rsplit('/', 3)[2]
-        self.placeholder_token = self.imgs[i % self.n_imgs].rsplit('/', 3)[1]
         
         if self.per_image_tokens and random.random() < 0.25:
             example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
