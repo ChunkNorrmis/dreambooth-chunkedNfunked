@@ -71,13 +71,22 @@ class JoePennaDreamboothConfigSchemaV1():
             'center_crop': self.crop,
             'flip_p': self.flip_percent,
             'token_only': self.token_only,
-            'fp32': self.precision,
+            'precision': self.precision,
+            'save_every_x_steps': self.save_every_x_steps,
             'repeats': self.repeats,
             'learning_rate': self.learning_rate,
             'batch_size': self.batch_size,
             'accumed_grads': self.accumed_grads,
             'max_training_steps': self.max_training_steps,
-            'model_format': self.model_format
+            'model_format': self.model_format,
+            'save_config_to_file': self.save_config_to_file(),
+            'get_training_folder_name': self.get_training_folder_name(),
+            'trained_models_directory': self.trained_models_directory(),
+            'log_config_directory': self.log_config_directory(),
+            'log_intermediate_checkpoints_directory': self.log_intermediate_checkpoints_directory(),
+            'log_checkpoint_directory': self.log_checkpoint_directory(),
+            'log_directory': self.log_directory(),
+            'create_checkpoint_file_name': self.create_checkpoint_file_name()
         }
         return self.conf
 
