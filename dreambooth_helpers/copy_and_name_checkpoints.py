@@ -11,22 +11,22 @@ def copy_and_name_checkpoints(
     config: JoePennaDreamboothConfigSchemaV1,
 ):
     checkpoints_found = False
-    output_folder = config['trained_models_directory']
+    output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
 
-    config['save_config_to_file'](save_path=output_folder)
+    config.save_config_to_file(save_path=output_folder)
 
-    logs_directory = config['log_directory']()
+    logs_directory = config.log_directory()
     if not os.path.exists(logs_directory):
         print(f"No checkpoints found in {logs_directory}")
         return
 
     checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
-        first = os.path.join(config['log_checkpoint_directory'], 'last.ckpt')
-        last = os.path.join(config['trained_models_directory'], config['create_checkpoint_file_name'](config['max_training_steps']))
-        if config['model_format'] == '.safetensors':
+        first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
+        last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
+        if config.model_format == '.safetensors':
             checkpoint = torch.load(first, map_location=torch.device('cpu'), weights_only=False)
             metadata = {k: f"{v}" for k, v in checkpoint.items() if k != 'state_dict'}
             metadata['format'] = 'pt'
@@ -35,7 +35,7 @@ def copy_and_name_checkpoints(
         else:
             shutil.move(first, last)
     else:
-        intermediate_checkpoints_directory = config['log_intermediate_checkpoints_directory']
+        intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
         file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
 
         for i, original_file_path in enumerate(file_paths):
@@ -54,7 +54,7 @@ def copy_and_name_checkpoints(
         checkpoints_found = True
         for i, file_and_steps in enumerate(checkpoints_and_steps):
             original_file_name, steps = file_and_steps[0], file_and_steps[1]
-            new_file_name = config['create_checkpoint_file_name'](steps)
+            new_file_name = config.create_checkpoint_file_name(steps)
             output_file_name = os.path.join(output_folder, new_file_name)
             if os.path.exists(original_file_name):
                 print(f"Moving {original_file_name} to {output_file_name}")
@@ -71,4 +71,3 @@ def copy_and_name_checkpoints(
         print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
     else:
         print("No checkpoints found.")
-
