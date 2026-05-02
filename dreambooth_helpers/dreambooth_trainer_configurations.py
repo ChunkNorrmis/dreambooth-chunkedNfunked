@@ -10,15 +10,15 @@ class callbacks():
         self.config = config
 
     def metrics_over_trainsteps_checkpoint(self) -> dict:
-        if self.config.save_every_x_steps > 0:
+        if self.config['save_every_x_steps'] > 0:
             return {
                 "target": 'pytorch_lightning.callbacks.ModelCheckpoint',
                 "params": {
-                    "dirpath": self.config.log_intermediate_checkpoints_directory(),
+                    "dirpath": self.config['log_intermediate_checkpoints_directory'],
                     "filename": "{epoch:06}-{step:09}",
                     "verbose": True,
                     "save_top_k": -1,
-                    "every_n_train_steps": self.config.save_every_x_steps,
+                    "every_n_train_steps": self.config['save_every_x_steps'],
                     "save_weights_only": True
                 }
             }
@@ -26,7 +26,7 @@ class callbacks():
             return {
                 "target": "pytorch_lightning.callbacks.ModelCheckpoint",
                 "params": {
-                    "every_n_train_steps": self.config.save_every_x_steps,
+                    "every_n_train_steps": self.config['save_every_x_steps'],
                     "save_weights_only": True,
                 }
             }
@@ -35,7 +35,7 @@ class callbacks():
         return {
             "target": "dreambooth_helpers.callback_helpers.ImageLogger",
             "params": {
-                "batch_frequency": 500 if self.config.save_every_x_steps <= 0 else self.config.save_every_x_steps,
+                "batch_frequency": 500 if self.config['save_every_x_steps'] <= 0 else self.config['save_every_x_steps'],
                 "max_images": 8,
                 "increase_log_steps": False,
             }
@@ -45,11 +45,11 @@ class callbacks():
         return {
             "target": "pytorch_lightning.callbacks.ModelCheckpoint",
             "params": {
-                "dirpath": self.config.log_checkpoint_directory(),
+                "dirpath": self.config['log_checkpoint_directory'],
                 "filename": "{epoch:06}",
                 "verbose": True,
                 "save_last": True,
-                "every_n_train_steps": self.config.save_every_x_steps,
+                "every_n_train_steps": self.config['save_every_x_steps'],
             }
         }
 
@@ -58,10 +58,10 @@ class callbacks():
             "target": "dreambooth_helpers.callback_helpers.SetupCallback",
             "params": {
                 "resume": "",
-                "now": self.config.get_training_folder_name(),
-                "logdir": self.config.log_directory(),
-                "ckptdir": self.config.log_checkpoint_directory(),
-                "cfgdir": self.config.log_config_directory(),
+                "now": self.config['get_training_folder_name'],
+                "logdir": self.config['log_directory'],
+                "ckptdir": self.config['log_checkpoint_directory'],
+                "cfgdir": self.config['log_config_directory'],
                 "config": model_data_config,
                 "lightning_config": lightning_config,
             }
@@ -104,7 +104,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
             "use_ema": False,
             "embedding_reg_weight": 0.0,
             "unfreeze_model": True,
-            "model_lr": config.learning_rate,
+            "model_lr": config['learning_rate'],
             "personalization_config": {
                 "target": "ldm.modules.embedding_manager.EmbeddingManager",
                 "params": {
@@ -158,7 +158,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
             "cond_stage_config": {
                 "target": "ldm.modules.encoders.modules.FrozenCLIPEmbedder"
             },
-            "ckpt_path": config.model_path
+            "ckpt_path": config'[model_path']
         }
     }
 
@@ -169,13 +169,13 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
         "params": {
             "set": "train",
             "reg": True,
-            "data_root": config.regularization_images,
-            "placeholder_token": config.token,
-            "coarse_class_text": config.class_word,
-            "size": config.resolution,
+            "data_root": config['regularization_images'],
+            "placeholder_token": config['token'],
+            "coarse_class_text": config['class_word'],
+            "size": config['resolution'],
             "repeats": 10,
-            "center_crop": config.center_crop,
-            "flip_p": config.flip_p,
+            "center_crop": config['center_crop'],
+            "flip_p": config['flip_p'],
             "mixing_prob": 0.25,
             "token_only": False,
             "per_image_tokens": False
@@ -185,7 +185,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
     data_config = {
         "target": "main.DataModuleFromConfig",
         "params": {
-            "batch_size": config.batch_size,
+            "batch_size": config['batch_size'],
             "num_workers": 1,
             "wrap": False,
             "train": {
@@ -193,13 +193,13 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                 "params": {
                     "set": "train",
                     "reg": False,
-                    "data_root": config.training_images,
-                    "placeholder_token": config.token,
-                    "coarse_class_text": config.class_word,
-                    "size": config.resolution,
-                    "repeats": config.repeats,
-                    "center_crop": config.center_crop,
-                    "flip_p": config.flip_p,
+                    "data_root": config['training_images'],
+                    "placeholder_token": config['token'],
+                    "coarse_class_text": config['class_word'],
+                    "size": config['resolution'],
+                    "repeats": config['repeats'],
+                    "center_crop": config['center_crop'],
+                    "flip_p": config['flip_p'],
                     "mixing_prob": 0.25,
                     "token_only": False,
                     "per_image_tokens": False
@@ -211,13 +211,13 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                 "params": {
                     "set": "val",
                     "reg": False,
-                    "data_root": config.training_images,
-                    "placeholder_token": config.token,
-                    "coarse_class_text": config.class_word,
-                    "size": config.resolution,
-                    "repeats": 10,
-                    "center_crop": config.center_crop,
-                    "flip_p": 0.0,
+                    "data_root": config['training_images'],
+                    "placeholder_token": config['token'],
+                    "coarse_class_text": config['class_word'],
+                    "size": config['resolution'],
+                    "repeats": config['repeats'],
+                    "center_crop": config['center_crop'],
+                    "flip_p": config['flip_p'],
                     "mixing_prob": 0.25,
                     "token_only": False,
                     "per_image_tokens": False                    
@@ -242,7 +242,7 @@ def get_dreambooth_lightning_config(config: JoePennaDreamboothConfigSchemaV1) ->
     lightning_config = {
         "modelcheckpoint": {
             "params": {
-                "every_n_train_steps": 500 if config.save_every_x_steps <= 0 else config.save_every_x_steps,
+                "every_n_train_steps": 500 if config['save_every_x_steps'] <= 0 else config['save_every_x_steps'],
             }
         },
         "callbacks": {
@@ -250,14 +250,14 @@ def get_dreambooth_lightning_config(config: JoePennaDreamboothConfigSchemaV1) ->
         },
         "trainer": {
             "accelerator": "gpu",
-            "devices": f"{config.gpu},",
+            "devices": f"{config['gpu']},",
             "benchmark": True,
-            "accumulate_grad_batches": config.accumed_grads,
-            "max_steps": config.max_training_steps,
+            "accumulate_grad_batches": config['accumed_grads'],
+            "max_steps": config['max_training_steps'],
         }
     }
 
-    if config.save_every_x_steps > 0:
+    if config['save_every_x_steps'] > 0:
         lightning_config["callbacks"]["metrics_over_trainsteps_checkpoint"] = cb.metrics_over_trainsteps_checkpoint()
 
     return lightning_config
@@ -269,7 +269,7 @@ def get_dreambooth_trainer_config(config: JoePennaDreamboothConfigSchemaV1, mode
             "target": "pytorch_lightning.loggers.CSVLogger",
             "params": {
                 "name": "CSVLogger",
-                "save_dir": config.log_directory(),
+                "save_dir": config['log_directory'],
             }
         },
         "checkpoint_callback": cb.model_checkpoint()
@@ -311,7 +311,7 @@ def get_dreambooth_callbacks_config(config: JoePennaDreamboothConfigSchemaV1, mo
         "checkpoint_callback": cb.model_checkpoint(),
     }
 
-    if config.save_every_x_steps > 0:
+    if config['save_every_x_steps'] > 0:
         callbacks_config["metrics_over_trainsteps_checkpoint"] = cb.metrics_over_trainsteps_checkpoint()
 
     return callbacks_config
