@@ -13,7 +13,21 @@ per_img_token_list = [
 ]
 
 class PersonalizedBase(Dataset):
-    def __init__(self, set, reg, data_root, placeholder_token, coarse_class_text, size, repeats, center_crop, flip_p, mixing_prob=0.25, token_only=False, per_image_tokens=False,):
+    def __init__(
+        self,
+        set='train',
+        reg=False,
+        data_root=None,
+        placeholder_token='sks',
+        coarse_class_text='aesthetic',
+        size=512,
+        repeats=100,
+        center_crop=False,
+        flip_p=0.5,
+        mixing_prob=0.25,
+        token_only=False,
+        per_image_tokens=False
+    ):
         self.data_root = data_root
         self.imgs = find_images(self.data_root)
         self.n_imgs = len(self.imgs)
