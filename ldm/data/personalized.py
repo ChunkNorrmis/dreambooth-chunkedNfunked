@@ -4,7 +4,7 @@ from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 from torchvision.transforms.v2 import functional as fun
-from torchvision.io import decode_image
+from PIL import Image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
 
@@ -18,8 +18,8 @@ class PersonalizedBase(Dataset):
         set='train',
         reg=False,
         data_root=None,
-        placeholder_token='sks',
-        coarse_class_text='aesthetic',
+        placeholder_token='rock',
+        coarse_class_text='lobster',
         size=512,
         repeats=100,
         center_crop=False,
@@ -55,17 +55,21 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def numpify(self, x): return x.detach().permute(1, 2, 0).contiguous().numpy(force=True)
+    def numpify(self, x): return x.clone().detach().permute(1, 2, 0).cpu().numpy()
+
+    def _center_crop(self, x): return fun.center_crop(x, min(x.size(1), x.size(2))) if self.center_crop and x.size(1) != x.size(2) else x
 
     def __getitem__(self, i):
         example = {}
-        image = decode_image(self.imgs[i % self.n_imgs], mode='RGB')
+        image = Image.open(self.imgs[i % self.n_imgs])
         transform = v2.Compose([
+            v2.PILToTensor(),
+            v2.RGB(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.CenterCrop(min(image.shape[1], image.shape[2])),
+            v2.Lambda(self._center_crop),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=(0.1, 0.5)),
+            v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(self.numpify)
