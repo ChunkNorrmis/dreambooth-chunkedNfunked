@@ -27,7 +27,7 @@ def copy_and_name_checkpoints(
         first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
         last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
         if config.model_format == '.safetensors':
-            depicklize(first, last)
+            depicklize(first, nil_pickle=last)
         else:
             shutil.move(first, last)
     else:
@@ -55,7 +55,7 @@ def copy_and_name_checkpoints(
             if os.path.exists(original_file_name):
                 print(f"Moving {original_file_name} to {output_file_name}")
                 if config.model_format == '.safetensors':
-                    depicklize(original_file_name, output_file_name)
+                    depicklize(original_file_name, nil_pickle=output_file_name)
                 else:
                     shutil.move(original_file_name, output_file_name)
 
