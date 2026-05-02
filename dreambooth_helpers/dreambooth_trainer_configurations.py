@@ -205,7 +205,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "coarse_class_text": config.class_word
                 }
             },
-            "reg": reg_block if os.path.exists(config.regularization_images_folder_path) else None,
+            "reg": reg_block,
             "validation": {
                 "target": "ldm.data.personalized.PersonalizedBase",
                 "params": {
