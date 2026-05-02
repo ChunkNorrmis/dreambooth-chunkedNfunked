@@ -76,6 +76,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         tkn_cls = {}
         for idx, tc in enumerate(os.listdir(self.training_images_folder_path)):
+            tkn_cls[idx] = {}
             tkn_cls[idx]['token'] = tc
             tkn_cls[idx]['class'] = os.listdir(os.path.join(self.training_images_folder_path, tkn_cls[idx]['token']))
 
