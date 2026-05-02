@@ -76,9 +76,9 @@ class JoePennaDreamboothConfigSchemaV1():
 
         tkn_cls = {}
         for idx, tc in enumerate(os.listdir(self.training_images_folder_path)):
-            tkn_cls[idx] = {}
-            tkn_cls[idx]['token'] = tc
-            tkn_cls[idx]['class'] = os.listdir(os.path.join(self.training_images_folder_path, tkn_cls[idx]['token']))
+            tkn_cls[f"{idx}"] = {}
+            tkn_cls[f"{idx}"]['token'] = tc
+            tkn_cls[f"{idx}"]['class'] = os.listdir(os.path.join(self.training_images_folder_path, tkn_cls[idx]['token']))
 
         self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
@@ -112,7 +112,7 @@ class JoePennaDreamboothConfigSchemaV1():
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
 
-        self.project_name = f"{self.token}-{self.class_word}_{tkn_cls[0]['token']}-{tkn_cls[0]['class']}"
+        self.project_name = f"{self.token}-{self.class_word}_{tkn_cls['0']['token']}-{tkn_cls['0']['class']}"
         self.project_config_filename = f"{self.project_name}-config.json"
         
         if not os.path.exists(model_path):
