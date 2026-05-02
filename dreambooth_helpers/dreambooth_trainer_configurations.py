@@ -158,7 +158,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
             "cond_stage_config": {
                 "target": "ldm.modules.encoders.modules.FrozenCLIPEmbedder"
             },
-            "ckpt_path": config'[model_path']
+            "ckpt_path": config['model_path']
         }
     }
 
