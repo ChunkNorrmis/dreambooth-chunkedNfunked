@@ -1,40 +1,85 @@
-import os, json, math, glob, shutil, sys, torch, random, safetensors.torch, argparse
+import os, json, math, glob, shutil, sys, torch
 from datetime import datetime, timezone
 from pytorch_lightning import seed_everything
 
 
 class JoePennaDreamboothConfigSchemaV1():
-    def __init__(self, opts):
-        opt, ukopt = opts
-        
+    def __init__(self):
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        self.token = opt.token
-        self.token_only = opt.token_only
-        self.class_word = opt.class_word
-        self.training_images_folder_path = opt.training_images
-        self.regularization_images_folder_path = opt.regularization_images
-        self.precision = opt.fp32
-        self.repeats = opt.repeats
-        self.learning_rate = opt.learning_rate
-        self.batch_size = opt.batch_size
-        self.accumed_grads = opt.accumed_grads
-        self.res = opt.resolution
-        self.crop = opt.center_crop
-        self.flip_percent = opt.flip_p
-        self.seed = random.randrange(1, 1e+05)
-        self.save_every_x_steps = opt.save_every_x_steps
-        self.gpu = opt.gpu
-        self.debug = opt.debug
+        self.project_name = None
+        self.token = None
+        self.token_only = False
+        self.class_word = None
+        self.training_images_folder_path = None
+        self.regularization_images_folder_path = None
+        self.model_path = None
+        self.precision = 'float16'
+        self.safetensors = False
+        self.repeats = 100
+        self.learning_rate = 1.0e-06
+        self.batch_size = 1
+        self.accumed_grads = 1
+        self.res = 512
+        self.crop = False
+        self.flip_percent = 0.5
+        self.seed = 1337
+        self.save_every_x_steps = 0
+        self.gpu = 0
+        self.debug = False        
 
-        seed_everything(self.seed)
+    def saturate(
+        self,
+        project_name=None,
+        token=None,
+        token_only=False,
+        class_word=None,
+        training_images_folder_path=None,
+        regularization_images_folder_path=None,
+        model_path=None,
+        precision='float16',
+        safetensors=False,
+        repeats=100,
+        learning_rate=1.0e-06,
+        batch_size=1,
+        accumed_grads=1,
+        res=512,
+        crop=False,
+        flip_percent=0.5,
+        save_every_x_steps=0,
+        seed=None,
+        gpu=0,
+        debug=False
+    ):
+
+        self.repeats = repeats
+        self.batch_size = batch_size
+        self.accumed_grads = accumed_grads
+        self.res = res
+        self.crop = crop
+        self.seed = seed
+        self.save_every_x_steps = save_every_x_steps
+        self.debug = debug
+        self.gpu = gpu
+        self.token_only = token_only
+        self.seed = random.randrange(0, 1e+04)
         
+        seed_everything(self.seed)
+
+        if self.save_every_x_steps < 0:
+            raise Exception("--save_every_x_steps: must be greater than or equal to 0")
+
+        self.training_images_folder_path = os.path.relpath(training_images_folder_path)
+
+        if not os.path.exists(self.training_images_folder_path):
+            raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
+
         tkns = os.listdir(self.training_images_folder_path)
         tkn_cls = {0: {'token': tkns[0]}, 1: {'token': tkns[1]}}
         for n in [0, 1]:
             tkn_cls[n]['class'] = os.listdir(os.path.join(self.training_images_folder_path, tkn_cls[n]['token']))
-        
-        self.training_images = [os.path.relpath(f) for f in
+
+        self.training_images = [os.path.relpath(f, sys.path[0]) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpeg'), recursive=True) +
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
@@ -45,51 +90,38 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"No Training Images (*.png, *.jpg, *.jpeg) found in '{self.training_images_folder_path}'.")
         self.max_training_steps = int(self.training_images_count * self.repeats / (self.batch_size * self.accumed_grads))
 
-        if opt.savetensors:
+        if not self.token_only:
+            self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
+            self.class_word = tkn_cls[1]['class']
+
+        if not os.path.exists(self.regularization_images_folder_path):
+            raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
+
+        self.token = tkn_cls[1]['token']
+        if self.token is None or self.token == '':
+            raise Exception(f"Token not provided.")
+
+        self.flip_percent = flip_percent
+        if self.flip_percent < 0 or self.flip_percent > 1:
+            raise Exception("--flip_p: must be between 0 and 1")
+
+        self.learning_rate = learning_rate
+        self.precision = precision
+        if safetensors:
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
 
         self.project_name = f"{self.token}-{self.class_word}_{tkn_cls[0]['token']}-{tkn_cls[0]['class']}"
         self.project_config_filename = f"{self.project_name}-config.json"
-
-        if not os.path.exists(opt.model_path):
-            if opt.model_path.startswith('https://huggingface.co'):
-                self.model_path = self.get_model_from_hub(repo_url=opt.model_path)    
-            else: raise Exception(f"Model Path Not Found: '{opt.model_path}'.")
-        else: self.model_path = opt.model_path
-
+        
+        if not os.path.exists(model_path):
+            if model_path.startswith('https://huggingface.co'):
+                self.model_path = self.get_model_from_hub(repo_url=model_path)    
+            else: raise Exception(f"Model Path Not Found: '{model_path}'.")
+        else: self.model_path = os.path.relpath(model_path)
+            
         self.validate_gpu_vram()
         self._create_log_folders()
-    
-    def __call__(self):
-        return {
-            'project_name': self.project_name,
-            'token': self.token,
-            'class_word': self.class_word,
-            'training_images': self.training_images_folder_path,
-            'reg_images': self.regularization_images_folder_path,
-            'model_path': self.model_path,
-            'resolution': self.res,
-            'center_crop': self.crop,
-            'flip_p': self.flip_percent,
-            'token_only': self.token_only,
-            'precision': self.precision,
-            'save_every_x_steps': self.save_every_x_steps,
-            'repeats': self.repeats,
-            'learning_rate': self.learning_rate,
-            'batch_size': self.batch_size,
-            'accumed_grads': self.accumed_grads,
-            'max_training_steps': self.max_training_steps,
-            'model_format': self.model_format,
-            'save_config_to_file': self.save_config_to_file,
-            'get_training_folder_name': self.get_training_folder_name,
-            'trained_models_directory': self.trained_models_directory,
-            'log_config_directory': self.log_config_directory,
-            'log_intermediate_checkpoints_directory': self.log_intermediate_checkpoints_directory,
-            'log_checkpoint_directory': self.log_checkpoint_directory,
-            'log_directory': self.log_directory,
-            'create_checkpoint_file_name': self.create_checkpoint_file_name
-        }
 
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
@@ -202,4 +234,3 @@ class JoePennaDreamboothConfigSchemaV1():
         os.makedirs(self.log_checkpoint_directory(), exist_ok=True)
         os.makedirs(self.log_config_directory(), exist_ok=True)
         os.makedirs(self.trained_models_directory(), exist_ok=True)
-
