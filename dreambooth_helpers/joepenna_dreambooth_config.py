@@ -5,7 +5,7 @@ from pytorch_lightning import seed_everything
 
 class JoePennaDreamboothConfigSchemaV1():
     def __init__(self, opts):
-        opt, ukopt = opts()
+        opt, ukopt = opts
         
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
@@ -62,7 +62,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self._create_log_folders()
     
     def __call__(self):
-        self.conf = {
+        return {
             'project_name': self.project_name,
             'token': self.token,
             'class_word': self.class_word,
@@ -90,7 +90,6 @@ class JoePennaDreamboothConfigSchemaV1():
             'log_directory': self.log_directory,
             'create_checkpoint_file_name': self.create_checkpoint_file_name
         }
-        return self.conf
 
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
