@@ -135,7 +135,7 @@ class DataModuleFromConfig(pl.LightningDataModule):
 
 if __name__ == "__main__":
     # Generate the config from the input arguments
-    dreambooth_config = JoePennaDreamboothConfigSchemaV1()
+    dreambooth_config: JoePennaDreamboothConfigSchemaV1 = parse_arguments()
 
     # add cwd for convenience and to make classes in this file available when
     # running as `python main.py`
