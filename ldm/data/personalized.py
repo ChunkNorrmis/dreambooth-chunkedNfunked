@@ -63,8 +63,8 @@ class PersonalizedBase(Dataset):
         example = {}
         image = Image.open(self.imgs[i % self.n_imgs])
         transform = v2.Compose([
-            v2.PILToTensor(),
             v2.RGB(),
+            v2.PILToTensor(),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(self._center_crop),
             v2.Resize((self.size, self.size), interpolation=3, antialias=True),
