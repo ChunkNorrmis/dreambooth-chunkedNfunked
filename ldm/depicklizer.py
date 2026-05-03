@@ -1,4 +1,4 @@
-import os, torch, diffusers
+import os, torch, diffusers, sys
 from safetensors.torch import save_file, save, load
 
 def depicklize(dict_pickle, nil_pickle=None):
@@ -12,7 +12,7 @@ def depicklize(dict_pickle, nil_pickle=None):
     elif os.path.isdir(nil_pickle):
         nil_pickle = os.path.join(nil_pickle, dict_pickle.replace('.ckpt', '.safetensors'))
     savetensors = save(hefty_pickle)
-    dict_pickless = load(savetensors, device=device)
+    dict_pickless = load(savetensors)
     for k in hefty_pickle.keys():
         pickless = dict_pickless[k]
         sus_pickle = hefty_pickle[k]
