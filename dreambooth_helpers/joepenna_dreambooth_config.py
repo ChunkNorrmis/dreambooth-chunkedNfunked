@@ -112,7 +112,7 @@ class JoePennaDreamboothConfigSchemaV1():
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
 
-        self.project_name = f"{self.token}-{self.class_word}_{tkn_cls['0']['token']}-{tkn_cls['0']['class']}"
+        self.project_name = project_name
         self.project_config_filename = f"{self.project_name}-config.json"
         
         if not os.path.exists(model_path):
