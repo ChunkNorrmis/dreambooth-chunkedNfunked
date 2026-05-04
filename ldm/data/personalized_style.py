@@ -1,4 +1,4 @@
-import os, torch, random, sys
+import os, torch, random, sys, cv2
 import numpy as np
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
@@ -59,7 +59,7 @@ class PersonalizedBase(Dataset):
         size=512,
         repeats=100,
         flip_p=0.5,
-        placeholder_token='sks',
+        placeholder_token='rock',
         per_image_tokens=False,
         center_crop=False
     ):
