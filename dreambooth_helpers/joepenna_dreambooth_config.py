@@ -102,7 +102,9 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.learning_rate = learning_rate
         self.precision = precision
-        if safetensors:
+        self.safetensors = safetensors
+        
+        if self.safetensors:
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
 
