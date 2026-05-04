@@ -63,6 +63,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.gpu = gpu
         self.token_only = token_only
         self.seed = random.randrange(0, 1e+04)
+        self.safetensors = safetensors
         
         seed_everything(self.seed)
 
@@ -102,7 +103,6 @@ class JoePennaDreamboothConfigSchemaV1():
 
         self.learning_rate = learning_rate
         self.precision = precision
-        self.safetensors = safetensors
         
         if self.safetensors:
             self.model_format = '.safetensors'
