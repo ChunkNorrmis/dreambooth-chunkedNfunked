@@ -7,10 +7,6 @@ def depicklize(dict_pickle, nil_pickle=None):
     hefty_pickle = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     metadata = {k: f"{v}" for k, v in suspicious_pickle.items() if k != 'state_dict'}
     metadata['format'] = 'pt'
-    if nil_pickle is None:
-        nil_pickle = os.path.splitext(dict_pickle)[0] + '.safetensors'
-    elif os.path.isdir(nil_pickle):
-        nil_pickle = os.path.join(nil_pickle, dict_pickle.replace('.ckpt', '.safetensors'))
     savedtensors = save(hefty_pickle)
     dict_pickless = load(savedtensors)
     for k in hefty_pickle.keys():
@@ -18,4 +14,8 @@ def depicklize(dict_pickle, nil_pickle=None):
         sus_pickle = hefty_pickle[k]
         if not torch.equal(pickless, sus_pickle):
             raise RuntimeError('keys do not match')
+    if nil_pickle is None:
+        nil_pickle = os.path.splitext(dict_pickle)[0] + '.safetensors'
+    elif os.path.isdir(nil_pickle):
+        nil_pickle = os.path.join(nil_pickle, dict_pickle.replace('.ckpt', '.safetensors'))
     save_file(hefty_pickle, nil_pickle, metadata=metadata)
