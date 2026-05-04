@@ -167,9 +167,9 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
     reg_block = {
         "target": "ldm.data.personalized.PersonalizedBase",
         "params": {
+            "data_root": config.regularization_images_folder_path,
             "set": "train",
             "reg": True,
-            "data_root": config.regularization_images_folder_path,
             "size": config.res,
             "repeats": 10,
             "flip_p": config.flip_percent,
@@ -191,9 +191,9 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "train": {
                 "target": "ldm.data.personalized.PersonalizedBase",
                 "params": {
+                    "data_root": config.training_images_folder_path,
                     "set": "train",
                     "reg": False,
-                    "data_root": config.training_images_folder_path,
                     "size": config.res,
                     "repeats": config.repeats,
                     "flip_p": config.flip_percent,
@@ -209,9 +209,9 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "validation": {
                 "target": "ldm.data.personalized.PersonalizedBase",
                 "params": {
+                    "data_root": config.training_images_folder_path,
                     "set": "val",
                     "reg": False,
-                    "data_root": config.training_images_folder_path,
                     "size": config.res,
                     "repeats": 10,
                     "flip_p": config.flip_percent,
