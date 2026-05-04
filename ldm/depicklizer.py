@@ -11,7 +11,8 @@ def depicklize(dict_pickle, nil_pickle=None):
         nil_pickle = os.path.splitext(dict_pickle)[0] + '.safetensors'
     elif os.path.isdir(nil_pickle):
         nil_pickle = os.path.join(nil_pickle, dict_pickle.replace('.ckpt', '.safetensors'))
-    dict_pickless = save(hefty_pickle)
+    savedtensors = save(hefty_pickle)
+    dict_pickless = load(savedtensors)
     for k in hefty_pickle.keys():
         pickless = dict_pickless[k]
         sus_pickle = hefty_pickle[k]
