@@ -27,6 +27,7 @@ class PersonalizedBase(Dataset):
         token_only=False,
         per_image_tokens=False
     ):
+        super().__init__()
         self.data_root = data_root
         self.imgs = find_images(self.data_root)
         self.n_imgs = len(self.imgs)
