@@ -65,6 +65,7 @@ class PersonalizedBase(Dataset):
         if random.random() < self.flip_p:
             image = cv2.flip(image, 1)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = np.array(image).astype(uint8)
         image = (np.array(image).astype(np.float32) / 255 - 0.5) / 0.5
         return image
 
