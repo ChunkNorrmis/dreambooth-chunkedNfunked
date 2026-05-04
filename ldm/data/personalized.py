@@ -15,9 +15,9 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(
         self,
+        data_root=None,
         set='train',
         reg=False,
-        data_root=None,
         placeholder_token='rock',
         coarse_class_text='lobster',
         size=512,
