@@ -54,28 +54,29 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def transform(self, x):
-        x = cv2.imread(x)
-        x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
-        h, w = x.shape[0], x.shape[1]
+    def transform(self, img_path):
+        image = cv2.imread(src=img_path, dst=image, flags=cv2.IMREAD_COLOR_RGB)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        h, w = image.shape[0], image.shape[1]
         crop = min(h, w)
         if self.center_crop and h != w:
-            x = x[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if crop > self.size:
-            x = cv2.resize(x, dsize=(self.size, self.size), interpolation=cv2.INTER_AREA)
+            image = cv2.resize(src=image, dst=image, dsize=(self.size, self.size), interpolation=cv2.INTER_AREA)
         if random.random() < self.flip_p:
-            x = cv2.flip(x, 1)
-        x = (x.astype(np.float32) / 255 - 0.5) / 0.5
+            image = cv2.flip(image, 1)
+        image = (np.array(image).astype(np.float32) / 255 - 0.5) / 0.5
         return x
 
     def __getitem__(self, i):
         example = {}
-        img = self.imgs[i % self.n_imgs]
+        img_path = self.imgs[i % self.n_imgs]
+        image = self.transform(img_path)
         
         if self.reg:
             example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
-        example['image'] = self.transform(img)
+        example['image'] = image
         return example
 
