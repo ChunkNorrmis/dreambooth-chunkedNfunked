@@ -66,7 +66,7 @@ class PersonalizedBase(Dataset):
         crop = min(h, w)
         if self.center_crop and x.shape[1] != x.shape[2]:
             x = fun.center_crop(x, crop)
-        if self.size < crop:
+        if self.size != crop:
             x = fun.resize(x, size=(self.size, self.size), interpolation=3, antialias=True)
         return x
 
