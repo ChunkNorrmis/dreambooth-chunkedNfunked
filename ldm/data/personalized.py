@@ -1,10 +1,9 @@
-import os, torch, random
+import os, torch, random, cv2
 import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from torchvision.transforms import v2
 from torchvision.transforms.v2 import functional as fun
-from PIL import Image
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
 
@@ -15,11 +14,11 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(
         self,
+        data_root,
         set='train',
         reg=False,
-        data_root=None,
-        placeholder_token='rock',
-        coarse_class_text='lobster',
+        placeholder_token='lobster',
+        coarse_class_text=None,
         size=512,
         repeats=100,
         center_crop=False,
@@ -43,42 +42,40 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
 
-        if self.reg:
-            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == 'train':
             self._length = self.n_imgs * self.repeats
 
+        if self.reg:
+            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
+
     def __len__(self):
         return self._length
 
-    def numpify(self, x): return x.clone().detach().permute(1, 2, 0).cpu().numpy()
-
-    def _center_crop(self, x): return fun.center_crop(x, min(x.size(1), x.size(2))) if self.center_crop and x.size(1) != x.size(2) else x
+    def transform(self, x):
+        x = cv2.imread(x)
+        x = cv2.cvtColor(x, cv.COLOR_BGR2RGB)
+        h, w = x.shape[0], x.shape[1]
+        crop = min(h, w)
+        if self.center_crop and h != w:
+            x = x[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+        if crop > self.size:
+            x = cv2.resize(x, dsize=(self.size, self.size), interpolation=cv.INTER_AREA)
+        if random.random() < self.flip_p:
+            x = cv2.flip(x, 1)
+        x = (x.astype(np.float32) / 255 - 0.5) / 0.5
+        return x
 
     def __getitem__(self, i):
         example = {}
-        image = Image.open(self.imgs[i % self.n_imgs])
-        transform = v2.Compose([
-            v2.RGB(),
-            v2.PILToTensor(),
-            v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(self._center_crop),
-            v2.Resize((self.size, self.size), interpolation=3, antialias=True),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=0.2),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5]),
-            v2.Lambda(self.numpify)
-        ])
-
+        img = self.imgs[i % self.n_imgs]
+        
         if self.reg:
             example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
-        example['image'] = transform(image)
-
+        example['image'] = self.transform(img)
         return example
+
