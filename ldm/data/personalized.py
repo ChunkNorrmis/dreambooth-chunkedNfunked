@@ -56,13 +56,13 @@ class PersonalizedBase(Dataset):
 
     def transform(self, x):
         x = cv2.imread(x)
-        x = cv2.cvtColor(x, cv.COLOR_BGR2RGB)
+        x = cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
         h, w = x.shape[0], x.shape[1]
         crop = min(h, w)
         if self.center_crop and h != w:
             x = x[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if crop > self.size:
-            x = cv2.resize(x, dsize=(self.size, self.size), interpolation=cv.INTER_AREA)
+            x = cv2.resize(x, dsize=(self.size, self.size), interpolation=cv2.INTER_AREA)
         if random.random() < self.flip_p:
             x = cv2.flip(x, 1)
         x = (x.astype(np.float32) / 255 - 0.5) / 0.5
