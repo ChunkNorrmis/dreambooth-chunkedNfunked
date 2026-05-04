@@ -57,9 +57,45 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
+    def __getitem__(self, i):
+        example = {}
+        img_path = self.imgs[i % self.n_imgs]
+        #transform = v2.Compose([
+        #    v2.RGB(),
+        #    v2.PILToTensor(),
+        #    v2.ToDtype(dtype=torch.uint8, scale=True),
+        #    v2.Lambda(self.crop_and_resize),
+        #    v2.RandomHorizontalFlip(p=self.flip_p),
+        #    v2.GaussianBlur(kernel_size=1, sigma=0.2),
+        #    v2.ToDtype(dtype=torch.float32, scale=True),
+        #    v2.Normalize(mean=self.nml, std=self.nml),
+        #    v2.Lambda(self.numpify)
+        #])
+        image = self.transformer(img_path)
+        if self.reg:
+            example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
+        else:
+            example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
+        
+        example['image'] = image
+        return example
+
+    def transformer(self, img_path):
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        h, w = image.shape[0], image.shape[1]
+        crop = min(h, w)
+        if self.center_crop and h != w:
+            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+        if self.size != crop:
+            interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
+            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
+        if random.random() < self.flip_p:
+            image = cv2.flip(image, 1)
+        image = (np.array(image).astype(np.float32) / 255 - 0.5) / 0.5
+        return image
 
     def numpify(self, x): return x.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True)
-
 
     def crop_and_resize(self, x):
         h, w = x.size(1), x.size(2)
@@ -69,30 +105,4 @@ class PersonalizedBase(Dataset):
         if self.size != crop:
             x = fun.resize(x, size=(self.size, self.size), interpolation=3, antialias=True)
         return x
-
-
-    def __getitem__(self, i):
-        example = {}
-        image = Image.open(self.imgs[i % self.n_imgs])
-        transform = v2.Compose([
-            v2.RGB(),
-            v2.PILToTensor(),
-            v2.ToDtype(dtype=torch.uint8, scale=True),
-            v2.Lambda(self.crop_and_resize),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            #v2.GaussianBlur(kernel_size=1, sigma=0.2),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=self.nml, std=self.nml),
-            v2.Lambda(self.numpify)
-        ])
-
-        if self.reg:
-            example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
-        else:
-            example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
-        
-        example['image'] = transform(image)
-        return example
-
-
 
