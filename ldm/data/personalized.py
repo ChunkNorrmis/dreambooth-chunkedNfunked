@@ -55,18 +55,18 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def transform(self, img_path):
-        image = cv2.imread(src=img_path, dst=image, flags=cv2.IMREAD_COLOR_RGB)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.imread(src=img_path, flags=cv2.IMREAD_COLOR_RGB)
+        image = cv2.cvtColor(src=image, cv2.COLOR_BGR2RGB)
         h, w = image.shape[0], image.shape[1]
         crop = min(h, w)
         if self.center_crop and h != w:
             image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if crop > self.size:
-            image = cv2.resize(src=image, dst=image, dsize=(self.size, self.size), interpolation=cv2.INTER_AREA)
+            image = cv2.resize(src=image, dsize=(self.size, self.size), interpolation=cv2.INTER_AREA)
         if random.random() < self.flip_p:
             image = cv2.flip(image, 1)
         image = (np.array(image).astype(np.float32) / 255 - 0.5) / 0.5
-        return x
+        return image
 
     def __getitem__(self, i):
         example = {}
@@ -77,6 +77,7 @@ class PersonalizedBase(Dataset):
             example['caption'] = generic_captions_from_path(self.imgs[i % self.n_imgs], self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(self.imgs[i % self.n_imgs], self.data_root, self.coarse_class_text, self.placeholder_token)
+        
         example['image'] = image
         return example
 
