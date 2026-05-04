@@ -54,7 +54,7 @@ per_img_token_list = [
 class PersonalizedBase(Dataset):
     def __init__(
         self,
-        data_root,
+        data_root=None,
         set='train',
         size=512,
         repeats=100,
@@ -63,7 +63,7 @@ class PersonalizedBase(Dataset):
         per_image_tokens=False,
         center_crop=False
     ):
-
+        super().__init__()
         self.data_root = data_root
         self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
