@@ -53,20 +53,22 @@ class PersonalizedBase(Dataset):
             self.flip_p = 0.0
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
-    
+
     def __len__(self):
         return self._length
 
-    
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transformer(img_path)
+        image = self.transform(img_path)
+        
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        
         example['image'] = image
+        
         return example
 
 
@@ -86,28 +88,30 @@ class PersonalizedBase(Dataset):
         return image
 
 
-    def transforms(self, img_path):
+    def transform(self, img_path):
         image = decode_image(img_path, mode='RGB')
-        image = image.to(torch.device('cuda:0'))
-        transform = v2.Compose([
-            v2.ToDtype(dtype=torch.uint8, scale=True),
+        transforms = v2.Compose([
+            v2.Lambda(lambda img: img.to(torch.device('cuda:0'))),
             v2.Lambda(self.crop_and_resize),
             v2.RandomHorizontalFlip(p=self.flip_p),
             #v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=self.tt_nml, std=self.tt_nml),
+            v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(self.numpify)
         ])
-        return transform(image)
-    
-    def numpify(self, x): return x.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
+         return transforms(image)
 
-    def crop_and_resize(self, x):
-        h, w = x.size(1), x.size(2)
+    def numpify(self, image): return image.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
+
+    def crop_and_resize(self, image):
+        h, w = image.size(1), image.size(2)
         crop = min(h, w)
-        if self.center_crop and x.shape[1] != x.shape[2]:
-            x = fun.center_crop(x, crop)
+        if self.center_crop and image.shape[1] != image.shape[2]:
+            image = fun.center_crop(image, crop)
         if self.size != crop:
-            x = fun.resize(x, size=(self.size, self.size), interpolation=3, antialias=True)
-        return x
+            image = fun.resize(image, size=(self.size, self.size), interpolation=3, antialias=True)
+        return image
+
+
+
 
