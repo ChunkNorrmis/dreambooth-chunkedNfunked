@@ -53,9 +53,11 @@ class PersonalizedBase(Dataset):
             self.flip_p = 0.0
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
+    
     def __len__(self):
         return self._length
 
+    
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
@@ -81,7 +83,7 @@ class PersonalizedBase(Dataset):
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
         if self.flip_p > random():
             image = cv2.flip(image, 1)
-        image = ((image / 255 - 0.5) / 0.5).astype(np.float32)
+        image = (image.astype(np.float32) / 255 - 0.5) / 0.5
         return image
 
 
