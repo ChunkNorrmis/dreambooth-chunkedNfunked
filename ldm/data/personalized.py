@@ -89,9 +89,10 @@ class PersonalizedBase(Dataset):
         return image
 
 
-    def transform(self, img_path):
-        image = decode_image(img_path, mode='RGB').to('cuda')
-        transforms = v2.Compose([
+    def transforms(self, img_path):
+        transform = v2.Compose([
+            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
+            v2.Lambda(lambda x: x.to(torch.device('cuda:0'))),
             v2.Lambda(self.crop_and_resize),
             v2.RandomHorizontalFlip(p=self.flip_p),
             #v2.GaussianBlur(kernel_size=1, sigma=0.2),
@@ -99,7 +100,7 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(self.numpify)
         ])
-        image = transforms(image)
+        image = transform(img_path)
         return image
 
     def numpify(self, image): return image.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
