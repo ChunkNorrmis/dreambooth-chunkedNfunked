@@ -90,7 +90,7 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transforms(img_path)
+        image = self.transformer(img_path)
         
         if self.per_image_tokens and random.random() < 0.25:
             example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
