@@ -85,25 +85,10 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-    def transform(self, img_path):
-        image = cv2.imread(img_path)
-        h, w = image.shape[0], image.shape[1]
-        crop = min(h, w)
-        if self.center_crop and h != w:
-            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
-        if crop > self.size:
-            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=cv2.INTER_AREA)
-        if random.random() < self.flip_p:
-            image = cv2.flip(image, 1)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image = np.array(image).astype(np.uint8)
-        image = (np.array(image).astype(np.float32) / 255 - 0.5) / 0.5
-        return image
-
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transform(img_path)
+        image = self.transforms(img_path)
         
         if self.per_image_tokens and random.random() < 0.25:
             example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
@@ -114,5 +99,46 @@ class PersonalizedBase(Dataset):
         return example
 
 
+    def transformer(self, img_path):
+        image = cv2.imread(img_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        h, w = image.shape[0], image.shape[1]
+        crop = min(h, w)
+        if self.center_crop and h != w:
+            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+        if self.size != crop:
+            interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
+            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
+        if self.flip_p > random():
+            image = cv2.flip(image, 1)
+        image = cv2.GaussianBlur(image, ksize=3, sigmaX=0.2, sigmaY=0.2)
+        image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
+        return image
+
+
+    def transforms(self, img_path):
+        img = decode_image(img_path, mode='RGB')
+        img = img.to(torch.device('cuda'))
+        transform = v2.Compose([
+            v2.Lambda(self.crop_and_resize),
+            v2.RandomHorizontalFlip(p=self.flip_p),
+            v2.GaussianBlur(kernel_size=1, sigma=0.3),
+            v2.ToDtype(dtype=torch.float32, scale=True),
+            v2.Normalize(mean=[0.5], std=[0.5]),
+            v2.Lambda(self.numpify)
+        ])
+        image = transform(img)
+        return image
+
+    def numpify(self, img): return img.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
+
+    def crop_and_resize(self, img):
+        h, w = img.size(1), img.size(2)
+        crop = min(h, w)
+        if self.center_crop and img.shape[1] != img.shape[2]:
+            img = fun.center_crop(img, crop)
+        if self.size != crop:
+            img = fun.resize(img, size=(self.size, self.size), interpolation=3, antialias=True)
+        return img
 
 
