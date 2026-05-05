@@ -205,7 +205,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(default_path):
             print(f"Downloading '{model_ckpt}'")
             hf_hub_download(repo_id, model_ckpt, local_dir=sys.path[0])
-        return default_path
+        return os.path.relpath(default_path)
         
     def get_training_folder_name(self) -> str:
         return f"{self.config_date_time}_{self.project_name}"
