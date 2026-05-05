@@ -62,7 +62,7 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transforms(img_path)
+        image = self.transformer(img_path)
         
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
