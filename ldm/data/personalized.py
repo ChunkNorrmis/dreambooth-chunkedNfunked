@@ -99,7 +99,7 @@ class PersonalizedBase(Dataset):
             v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(self.numpify)
         ])
-         return transforms(image)
+        return transforms(image)
 
     def numpify(self, image): return image.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
 
