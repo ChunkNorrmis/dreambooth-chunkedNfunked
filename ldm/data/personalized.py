@@ -42,8 +42,8 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.tt_nml = torch.tensor([0.5,0.5,0.5], dtype=torch.float32)
-        self.np_nml = np.array([0.5,0.5,0.5], dtype=np.float32)
-        self.scl = np.array([255,255,255], dtype=np.float32)
+        self.np_nml = np.array(0.5)
+        self.scl = np.array(255)
         self.flip_p = flip_p
             
         if per_image_tokens:
@@ -83,7 +83,10 @@ class PersonalizedBase(Dataset):
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
         if self.flip_p > random():
             image = cv2.flip(image, 1)
-        return (image.astype(np.float32) / self.scl - self.np_nml) / self.np_nml
+        image = image.astype(np.float32)
+        image = (image / 255 - 0.5) / 0.5
+        return image
+
 
     def transforms(self, img_path):
         image = decode_image(img_path, mode='RGB')
