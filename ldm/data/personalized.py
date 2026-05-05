@@ -45,10 +45,6 @@ class PersonalizedBase(Dataset):
         self.np_nml = np.array([0.5,0.5,0.5], dtype=np.float32)
         self.scl = np.array([255,255,255], dtype=np.float32)
         self.flip_p = flip_p
-        
-        if torch.cuda.is_available():
-            self._map_tensor_device = self._to_gpu
-        else: self._map_tensor_device = self.noop
             
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -89,14 +85,10 @@ class PersonalizedBase(Dataset):
             image = cv2.flip(image, 1)
         return (image.astype(np.float32) / self.scl - self.np_nml) / self.np_nml
 
-    def noop(self, x): pass
-
-    def _to_gpu(self, x): return x.to(torch.device('cuda:0'))
-    
-    def transform(self, img_path):
+    def transforms(self, img_path):
         image = decode_image(img_path, mode='RGB')
+        image = image.to(torch.device('cuda:0'))
         transform = v2.Compose([
-            v2.Lambda(self._map_tensor_device),
             v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(self.crop_and_resize),
             v2.RandomHorizontalFlip(p=self.flip_p),
