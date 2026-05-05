@@ -2,8 +2,9 @@ import os, torch, cv2
 from random import random
 import numpy as np
 from typing import OrderedDict
+from PIL import Image
 from torch.utils.data import Dataset
-from torchvision.io import decode_image, ImageReadMode
+from torchvision.io import decode_image
 from torchvision.transforms import v2
 from torchvision.transforms.v2 import functional as fun
 from captionizer import caption_from_path, generic_captions_from_path, find_images
@@ -61,7 +62,7 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transformer(img_path)
+        image = self.transforms(img_path)
         
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
@@ -85,22 +86,25 @@ class PersonalizedBase(Dataset):
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
         if self.flip_p > random():
             image = cv2.flip(image, 1)
+        image = cv2.GaussianBlur(image, ksize=3, sigmaX=0.2, sigmaY=0.2)
         image = (image.astype(np.float32) / 255 - 0.5) / 0.5
         return image
 
 
     def transforms(self, img_path):
+        img = Image.open(img_path)
         transform = v2.Compose([
-            v2.Lambda(lambda x: decode_image(x, mode=ImageReadMode.RGB)),
-            v2.Lambda(lambda x: x.to(torch.device('cuda:0'))),
+            v2.PILToTensor(), 
+            v2.Lambda(lambda x: x.to('cuda')),
+            v2.RGB(),
             v2.Lambda(self.crop_and_resize),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            #v2.GaussianBlur(kernel_size=1, sigma=0.2),
+            v2.GaussianBlur(kernel_size=1, sigma=0.3),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=[0.5], std=[0.5]),
             v2.Lambda(self.numpify)
         ])
-        image = transform(img_path)
+        image = transform(img)
         return image
 
     def numpify(self, image): return image.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
