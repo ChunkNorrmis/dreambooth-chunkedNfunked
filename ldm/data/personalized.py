@@ -3,7 +3,7 @@ from random import random
 import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
-from torchvision.io import decode_image
+from torchvision.io import decode_image, ImageReadMode
 from torchvision.transforms import v2
 from torchvision.transforms.v2 import functional as fun
 from captionizer import caption_from_path, generic_captions_from_path, find_images
@@ -91,7 +91,7 @@ class PersonalizedBase(Dataset):
 
     def transforms(self, img_path):
         transform = v2.Compose([
-            v2.Lambda(lambda x: decode_image(x, mode='RGB')),
+            v2.Lambda(lambda x: decode_image(x, mode=ImageReadMode.RGB)),
             v2.Lambda(lambda x: x.to(torch.device('cuda:0'))),
             v2.Lambda(self.crop_and_resize),
             v2.RandomHorizontalFlip(p=self.flip_p),
