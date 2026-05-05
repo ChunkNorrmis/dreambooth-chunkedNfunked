@@ -27,6 +27,7 @@ class PersonalizedBase(Dataset):
         token_only=False,
         per_image_tokens=False
     ):
+        self.set = set
         self.data_root = data_root
         self.imgs = find_images(self.data_root)
         self.n_imgs = len(self.imgs)
@@ -42,18 +43,17 @@ class PersonalizedBase(Dataset):
         self.tt_nml = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
         self.np_nml = np.array([0.5, 0.5, 0.5], dtype=np.float32)
         self.scl = np.array([255, 255, 255], dtype=np.float32)
+        self.flip_p = flip_p
 
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
-        if set == 'train':
+        if self.set == 'train':
             self._length = self.n_imgs * repeats
-            self.flip_p = flip_p
 
         if self.reg:
             self.flip_p = 0.0
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-
 
     def __len__(self):
         return self._length
