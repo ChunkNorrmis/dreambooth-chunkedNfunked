@@ -1,4 +1,5 @@
-import os, torch, random, cv2
+import os, torch, cv2
+from random import random
 import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
@@ -40,11 +41,15 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.tt_nml = torch.tensor([0.5, 0.5, 0.5], dtype=torch.float32)
-        self.np_nml = np.array([0.5, 0.5, 0.5], dtype=np.float32)
-        self.scl = np.array([255, 255, 255], dtype=np.float32)
+        self.tt_nml = torch.tensor([0.5,0.5,0.5], dtype=torch.float32)
+        self.np_nml = np.array([0.5,0.5,0.5], dtype=np.float32)
+        self.scl = np.array([255,255,255], dtype=np.float32)
         self.flip_p = flip_p
-
+        
+        if torch.cuda.is_available():
+            self._map_tensor_device = self._to_gpu
+        else: self._map_tensor_device = self.noop
+            
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
@@ -80,16 +85,22 @@ class PersonalizedBase(Dataset):
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if random.random() < self.flip_p:
+        if self.flip_p > random():
             image = cv2.flip(image, 1)
         return (image.astype(np.float32) / self.scl - self.np_nml) / self.np_nml
 
+    def noop(self, x): pass
+
+    def _to_gpu(self, x): return x.to(torch.device('cuda:0'))
+    
     def transform(self, img_path):
         image = decode_image(img_path, mode='RGB')
         transform = v2.Compose([
+            v2.Lambda(self._map_tensor_device),
+            v2.ToDtype(dtype=torch.uint8, scale=True),
             v2.Lambda(self.crop_and_resize),
             v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=0.2),
+            #v2.GaussianBlur(kernel_size=1, sigma=0.2),
             v2.ToDtype(dtype=torch.float32, scale=True),
             v2.Normalize(mean=self.tt_nml, std=self.tt_nml),
             v2.Lambda(self.numpify)
