@@ -41,9 +41,6 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.tt_nml = torch.tensor([0.5,0.5,0.5], dtype=torch.float32)
-        self.np_nml = np.array(0.5)
-        self.scl = np.array(255)
         self.flip_p = flip_p
             
         if per_image_tokens:
@@ -63,11 +60,12 @@ class PersonalizedBase(Dataset):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
         image = self.transformer(img_path)
-        example['image'] = image
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+            example['caption'] = c
+            aption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example['image'] = image
         return example
 
 
@@ -83,8 +81,7 @@ class PersonalizedBase(Dataset):
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
         if self.flip_p > random():
             image = cv2.flip(image, 1)
-        image = image.astype(np.float32)
-        image = (image / 255 - 0.5) / 0.5
+        image = ((image / 255 - 0.5) / 0.5).astype(np.float32)
         return image
 
 
