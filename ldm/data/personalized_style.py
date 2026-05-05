@@ -113,7 +113,7 @@ class PersonalizedBase(Dataset):
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
         if self.flip_p > random():
             image = cv2.flip(image, 1)
-        image = cv2.GaussianBlur(image, ksize=(3, 3), sigmaX=0.2, sigmaY=0.2)
+        image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
         return image
 
