@@ -1,7 +1,7 @@
 import os, json, math, glob, shutil, sys, torch, random
 from datetime import datetime, timezone
 from pytorch_lightning import seed_everything
-from ldm.download_model import get_model_from_hub
+from ldm.model_download import get_model_from_hub
 
 
 class JoePennaDreamboothConfigSchemaV1():
@@ -114,7 +114,7 @@ class JoePennaDreamboothConfigSchemaV1():
         
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
-                self.model_path = self.get_model_from_hub(repo_url=model_path)    
+                self.model_path = get_model_from_hub(model_path)    
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = os.path.relpath(model_path)
             
