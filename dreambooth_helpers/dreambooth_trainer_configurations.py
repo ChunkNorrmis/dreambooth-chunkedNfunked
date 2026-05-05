@@ -179,7 +179,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
             "placeholder_token": config.token,
             "coarse_class_text": config.class_word,
             "mixing_prob": 0.25
-        }
+        },
     }
 
     data_config = {
@@ -203,7 +203,7 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "mixing_prob": 0.25,
                     "placeholder_token": config.token,
                     "coarse_class_text": config.class_word
-                }
+                },
             },
             "reg": reg_block,
             "validation": {
@@ -221,9 +221,9 @@ def get_dreambooth_data_config(config: JoePennaDreamboothConfigSchemaV1) -> dict
                     "mixing_prob": 0.25,
                     "placeholder_token": config.token,
                     "coarse_class_text": config.class_word
-                }
-            }
-        }
+                },
+            },
+        },
     }
 
     return data_config
