@@ -65,8 +65,7 @@ class PersonalizedBase(Dataset):
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            example['caption'] = c
-            aption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         example['image'] = image
         return example
 
