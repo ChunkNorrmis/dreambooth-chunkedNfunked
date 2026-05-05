@@ -2,7 +2,6 @@ import os, torch, cv2
 from random import random
 import numpy as np
 from typing import OrderedDict
-from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.io import decode_image
 from torchvision.transforms import v2
