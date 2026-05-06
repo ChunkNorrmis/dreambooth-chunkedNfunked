@@ -1,11 +1,8 @@
-import os, torch, cv2
+import os, sys, torch, cv2
 from random import random
 import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
-from torchvision.io import decode_image
-from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
 from captionizer import caption_from_path, generic_captions_from_path, find_images
 
 
@@ -43,7 +40,7 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
-            
+
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
@@ -58,19 +55,22 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
+
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transformer(img_path)
+        image = self.transform(img_path)
+
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+
         example['image'] = image
         return example
 
 
-    def transformer(self, img_path):
+    def transform(self, img_path):
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         h, w = image.shape[0], image.shape[1]
@@ -85,9 +85,4 @@ class PersonalizedBase(Dataset):
         image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
         return image
-
-
-
-
-
 
