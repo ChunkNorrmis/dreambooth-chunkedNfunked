@@ -2,9 +2,6 @@ import os, torch, sys, cv2
 import numpy as np
 from random import random
 from torch.utils.data import Dataset
-from torchvision.io import decode_image
-from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
 import glob
 
 imagenet_templates_small = [
@@ -65,7 +62,6 @@ class PersonalizedBase(Dataset):
         per_image_tokens=False,
         center_crop=False
     ):
-        super().__init__()
         self.data_root = data_root
         self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
@@ -76,32 +72,33 @@ class PersonalizedBase(Dataset):
         self.size = size
         self.repeats = repeats
         self.placeholder_token = placeholder_token
-        
-                        
+
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == "train":
             self._length = self.n_imgs * self.repeats
-    
+
+
     def __len__(self):
         return self._length
+
 
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transformer(img_path)
-        
+        image = self.transform(img_path)
+
         if self.per_image_tokens and random.random() < 0.25:
             example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
             example['caption'] = random.choice(imagenet_templates_small).format(self.placeholder_token)
-        
+
         example['image'] = image
         return example
 
 
-    def transformer(self, img_path):
+    def transform(self, img_path):
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         h, w = image.shape[0], image.shape[1]
@@ -116,31 +113,4 @@ class PersonalizedBase(Dataset):
         image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
         return image
-
-
-    def transforms(self, img_path):
-        img = decode_image(img_path, mode='RGB')
-        img = img.to(torch.device('cuda'))
-        transform = v2.Compose([
-            v2.Lambda(self.crop_and_resize),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=0.3),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5]),
-            v2.Lambda(self.numpify)
-        ])
-        image = transform(img)
-        return image
-
-    def numpify(self, img): return img.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
-
-    def crop_and_resize(self, img):
-        h, w = img.size(1), img.size(2)
-        crop = min(h, w)
-        if self.center_crop and img.shape[1] != img.shape[2]:
-            img = fun.center_crop(img, crop)
-        if self.size != crop:
-            img = fun.resize(img, size=(self.size, self.size), interpolation=3, antialias=True)
-        return img
-
 
