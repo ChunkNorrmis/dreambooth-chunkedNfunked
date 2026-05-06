@@ -62,14 +62,11 @@ class PersonalizedBase(Dataset):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
         image = self.transformer(img_path)
-        
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        
         example['image'] = image
-        
         return example
 
 
@@ -90,30 +87,6 @@ class PersonalizedBase(Dataset):
         return image
 
 
-    def transforms(self, img_path):
-        img = decode_image(img_path, mode='RGB')
-        img = img.to(torch.device('cuda'))
-        transform = v2.Compose([
-            v2.Lambda(self.crop_and_resize),
-            v2.RandomHorizontalFlip(p=self.flip_p),
-            v2.GaussianBlur(kernel_size=1, sigma=0.3),
-            v2.ToDtype(dtype=torch.float32, scale=True),
-            v2.Normalize(mean=[0.5], std=[0.5]),
-            v2.Lambda(self.numpify)
-        ])
-        image = transform(img)
-        return image
-
-    def numpify(self, img): return img.permute(2,1,0).permute(1,0,2).cpu().numpy(force=True).astype(np.float32)
-
-    def crop_and_resize(self, img):
-        h, w = img.size(1), img.size(2)
-        crop = min(h, w)
-        if self.center_crop and img.shape[1] != img.shape[2]:
-            img = fun.center_crop(img, crop)
-        if self.size != crop:
-            img = fun.resize(img, size=(self.size, self.size), interpolation=3, antialias=True)
-        return img
 
 
 
