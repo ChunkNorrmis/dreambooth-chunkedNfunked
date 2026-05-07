@@ -60,7 +60,8 @@ class PersonalizedBase(Dataset):
         flip_p=0.5,
         placeholder_token='rock',
         per_image_tokens=False,
-        center_crop=False
+        center_crop=False,
+        mixing_prob=0.25
     ):
         self.data_root = data_root
         self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
@@ -71,6 +72,7 @@ class PersonalizedBase(Dataset):
         self.center_crop = center_crop
         self.size = size
         self.placeholder_token = placeholder_token
+        self.mixing_prob = mixing_prob
 
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -88,7 +90,7 @@ class PersonalizedBase(Dataset):
         img_path = self.imgs[i % self.n_imgs]
         image = self.transform(img_path)
 
-        if self.per_image_tokens and random.random() < 0.25:
+        if self.per_image_tokens and random.random() < self.mixing_prob:
             example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
             example['caption'] = random.choice(imagenet_templates_small).format(self.placeholder_token)
