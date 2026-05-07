@@ -2,7 +2,12 @@ import os, sys, torch
 import safetensors.torch as sftr
 
 def depicklize(dict_pickle, nil_pickle=None):
-    device = 'cpu'
+    print('Searching ...')
+    print('')
+    print('Suspicious pickle(s) detected')
+    print('Initializing depicklization sequence...')
+    print('')
+    print('Depicklizing...')
     suspicious_pickle = torch.load(dict_pickle, map_location=torch.device(device), weights_only=False)
     hefty_pickle = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     metadata = {k: f"{v}" for k, v in suspicious_pickle.items() if k != 'state_dict'}
