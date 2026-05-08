@@ -2,13 +2,8 @@ import os, sys, torch
 import safetensors.torch as sftr
 
 def depicklize(dict_pickle, nil_pickle=None):
-    print('Searching ...')
-    print('')
-    print('Suspicious pickle(s) detected')
-    print('Initializing depicklization sequence...')
-    print('')
-    print('Depicklizing...')
-    suspicious_pickle = torch.load(dict_pickle, map_location=torch.device(device), weights_only=False)
+    print('Depicklizing suspicious pickle(s)...')
+    suspicious_pickle = torch.load(dict_pickle, map_location=torch.device('cpu'), weights_only=False)
     hefty_pickle = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     metadata = {k: f"{v}" for k, v in suspicious_pickle.items() if k != 'state_dict'}
     metadata['format'] = 'pt'
@@ -20,7 +15,7 @@ def depicklize(dict_pickle, nil_pickle=None):
         if not torch.equal(pickless, sus_pickle):
             raise RuntimeError('keys do not match')
     if nil_pickle is None:
-        nil_pickle = os.path.splitext(dict_pickle)[0] + '.safetensors'
+        nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
     elif os.path.isdir(nil_pickle):
         nil_pickle = os.path.join(nil_pickle, dict_pickle.replace('.ckpt', '.safetensors'))
     sftr.save_file(hefty_pickle, nil_pickle, metadata=metadata)
