@@ -177,10 +177,8 @@ class JoePennaDreamboothConfigSchemaV1():
 
     def create_checkpoint_file_name(self, steps: str):
         date_string = datetime.now(timezone.utc).strftime('%m-%d-%Y')
-        model_prefix = f"{date_string}_{self.project_name}_{int(steps):05d}_steps".replace(' ', '_')
-        model_name = model_prefix + self.model_format
-        return model_name
-        
+        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps".replace(' ', '_') + f"{self.model_format}"
+                
     def save_config_to_file(
             self,
             save_path: str,
