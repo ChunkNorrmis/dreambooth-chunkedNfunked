@@ -20,7 +20,7 @@ class PersonalizedBase(Dataset):
         coarse_class_text=None,
         size=512,
         repeats=100,
-        center_crop=False,
+        center_crop=True,
         flip_p=0.5,
         mixing_prob=0.25,
         token_only=False,
@@ -59,18 +59,6 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transform(img_path)
-
-        if self.reg:
-            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
-        else:
-            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-
-        example['image'] = image
-        return example
-
-
-    def transform(self, img_path):
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         h, w = image.shape[0], image.shape[1]
@@ -80,10 +68,16 @@ class PersonalizedBase(Dataset):
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if self.flip_p > random():
+        if random.random() < self.flip_p:
             image = cv2.flip(image, 1)
         image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
-        return image
 
+        if self.reg:
+            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+        else:
+            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+
+        example['image'] = image
+        return example
 
