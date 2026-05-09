@@ -1,5 +1,4 @@
-import os, sys, torch, cv2
-from random import random
+import os, sys, torch, cv2, random
 import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
