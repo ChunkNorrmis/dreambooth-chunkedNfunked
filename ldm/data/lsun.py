@@ -18,6 +18,7 @@ class LSUNBase(Dataset):
         self._length = len(self.image_paths)
         self.size = size
         self.flip_p = flip_p
+        self.center_crop = False
         self.labels = {
             "relative_file_path_": [l for l in self.image_paths],
             "file_path_": [os.path.join(self.data_root, l) for l in self.image_paths]
