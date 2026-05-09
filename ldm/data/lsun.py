@@ -1,11 +1,16 @@
-import os, torch, sys, cv2
-from random import random
-import numpy as np
+import os, torch, sys, cv2, random, numpy as np
 from torch.utils.data import Dataset
 
 
 class LSUNBase(Dataset):
-    def __init__(self, txt_file, data_root, size=512, interpolation="bicubic", flip_p=0.5):
+    def __init__(
+        self,
+        txt_file,
+        data_root,
+        size=512,
+        interpolation="bicubic",
+        flip_p=0.5
+    ):
         self.data_paths = txt_file
         self.data_root = data_root
         with open(self.data_paths, "r") as f:
@@ -25,7 +30,8 @@ class LSUNBase(Dataset):
 
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
-        image = self.transform(example["file_path_"])
+        img_path = example["file_path_"]
+        image = self.transform(img_path)
         example['image'] = image
         return example
 
@@ -40,7 +46,7 @@ class LSUNBase(Dataset):
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if self.flip_p > random():
+        if random.random() < self.flip_p:
             image = cv2.flip(image, 1)
         image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
