@@ -1,6 +1,4 @@
-import os, torch, sys, cv2
-import numpy as np
-from random import random
+import os, torch, sys, cv2, random, numpy as np
 from torch.utils.data import Dataset
 import glob
 
@@ -60,7 +58,7 @@ class PersonalizedBase(Dataset):
         flip_p=0.5,
         placeholder_token='rock',
         per_image_tokens=False,
-        center_crop=False,
+        center_crop=True,
         mixing_prob=0.25
     ):
         self.data_root = data_root
@@ -94,7 +92,6 @@ class PersonalizedBase(Dataset):
             example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
             example['caption'] = random.choice(imagenet_templates_small).format(self.placeholder_token)
-
         example['image'] = image
         return example
 
@@ -109,9 +106,10 @@ class PersonalizedBase(Dataset):
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if self.flip_p > random():
+        if random.random() < self.flip_p:
             image = cv2.flip(image, 1)
         image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
         return image
+
 
