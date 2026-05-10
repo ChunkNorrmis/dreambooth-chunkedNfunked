@@ -72,9 +72,9 @@ class PersonalizedBase(Dataset):
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if random.random() < self.flip_p:
+        if self.flip_p > random.random():
             image = cv2.flip(image, 1)
-        image = cv2.GaussianBlur(image, ksize=(3, 3), sigmaX=0.2, sigmaY=0.2)
+        image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
         return image
 
