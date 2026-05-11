@@ -52,17 +52,6 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transform(img_path)
-
-        if self.reg:
-            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
-        else:
-            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-
-        example['image'] = image
-        return example
-
-    def transform(self, img_path):
         image = cv2.imread(img_path)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         h, w = image.shape[0], image.shape[1]
@@ -76,6 +65,12 @@ class PersonalizedBase(Dataset):
             image = cv2.flip(image, 1)
         image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
         image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
-        return image
 
+        if self.reg:
+            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+        else:
+            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+
+        example['image'] = image
+        return example
 
