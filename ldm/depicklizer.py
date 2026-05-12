@@ -18,3 +18,5 @@ def depicklize(dict_pickle, nil_pickle=None):
         dict_pickle = dict_pickle.replace('.ckpt', '.safetensors')
         nil_pickle = os.path.join(nil_pickle, dict_pickle)
     save_file(hefty_pickle, nil_pickle, metadata=metadata)
+
+
