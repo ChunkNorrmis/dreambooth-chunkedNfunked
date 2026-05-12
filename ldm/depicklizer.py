@@ -1,22 +1,34 @@
-import os, sys, torch
+import os, sys, torch, shutil
 from safetensors.torch import save, load, save_file
 
+
 def depicklize(dict_pickle, nil_pickle=None):
+    def equal_tensors(sus_dict, reloaded):
+        for key in sus_dict.keys():
+            if not torch.equal(sus_dict[key], reloaded[key]):
+                print('!! Key mismatch error !!')
+                print('Aborting safetensors conversion.')
+                print(' ')
+                return False
+        return True
+        
     print('Depicklizing suspicious pickle(s)...')
     suspicious_pickle = torch.load(dict_pickle, map_location=torch.device('cpu'), weights_only=False)
-    metadata = {k: f"{v}" for k, v in suspicious_pickle.items() if k != 'state_dict'}
+    sus_dict = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
+    del suspicious_pickle['state_dict']
+    metadata = {k: f"{v}" for k, v in suspicious_pickle.items()}
     metadata['format'] = 'pt'
-    hefty_pickle = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
-    savedtensors = save(hefty_pickle)
-    dict_pickless = load(savedtensors)
-    for key in suspicious_pickle['state_dict'].keys():
-        if not torch.equal(dict_pickless[key], suspicious_pickle['state_dict'][key]):
-            raise RuntimeError('keys do not match')
-    if nil_pickle is None:
-        nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
-    elif os.path.isdir(nil_pickle):
-        dict_pickle = dict_pickle.replace('.ckpt', '.safetensors')
-        nil_pickle = os.path.join(nil_pickle, dict_pickle)
-    save_file(hefty_pickle, nil_pickle, metadata=metadata)
-
+    saved = save(sus_dict)
+    reloaded = load(saved)
+    if not equal_tensors(sus_dict, reloaded):
+        nil_pickle = os.path.join(os.path.dirname(nil_pickle), os.path.basename(dict_pickle))
+        print(f"Moving checkpoint file to {os.path.abspath(nil_pickle)}.")
+        shutil.move(dict_pickle, nil_pickle)
+    else:
+        if nil_pickle is None:
+            nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
+        elif os.path.isdir(nil_pickle):
+            nil_pickle = os.path.join(nil_pickle, os.path.basename(dict_pickle).replace('.ckpt', '.safetensors'))
+        print(f"Saving converted checkpoint file to {os.path.abspath(nil_pickle)}.")
+        save_file(hefty_pickle, nil_pickle, metadata=metadata)
 
