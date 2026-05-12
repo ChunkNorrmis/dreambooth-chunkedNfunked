@@ -18,6 +18,10 @@ def depicklize(dict_pickle, nil_pickle=None):
     del suspicious_pickle['state_dict']
     metadata = {k: f"{v}" for k, v in suspicious_pickle.items()}
     metadata['format'] = 'pt'
+    if nil_pickle is None:
+        nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
+    elif os.path.isdir(nil_pickle):
+        nil_pickle = os.path.join(nil_pickle, os.path.basename(dict_pickle).replace('.ckpt', '.safetensors'))
     saved = save(sus_dict)
     reloaded = load(saved)
     if not equal_tensors(sus_dict, reloaded):
@@ -25,10 +29,6 @@ def depicklize(dict_pickle, nil_pickle=None):
         print(f"Moving checkpoint file to {os.path.abspath(nil_pickle)}.")
         shutil.move(dict_pickle, nil_pickle)
     else:
-        if nil_pickle is None:
-            nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
-        elif os.path.isdir(nil_pickle):
-            nil_pickle = os.path.join(nil_pickle, os.path.basename(dict_pickle).replace('.ckpt', '.safetensors'))
         print(f"Saving converted checkpoint file to {os.path.abspath(nil_pickle)}.")
-        save_file(hefty_pickle, nil_pickle, metadata=metadata)
+        save_file(sus_dict, nil_pickle, metadata=metadata)
 
