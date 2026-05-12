@@ -22,6 +22,7 @@ class PersonalizedBase(Dataset):
         token_only=False,
         per_image_tokens=False
     ):
+        self.data_root = data_root
         self.imgs = find_images(data_root)
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs * repeats
