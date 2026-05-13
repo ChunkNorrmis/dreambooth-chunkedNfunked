@@ -49,27 +49,24 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transformer(img_path)        
-
+        image = self.augment(img_path)
         if self.reg:
-            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-
-        example['image'] = image
+            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example = {'caption': caption, 'image': image}
         return example
 
-
-    def transformer(self, img_path):
+    def augment(self, img_path):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        return ((img / 255. - 0.5) / 0.5).astype(np.float32)
-    
+        img = ((img / 255. - 0.5) / 0.5).astype(np.float32)
+        return img
+
     def mirror(self, img):
         if self.flip_p > 0.0:
             if random.random() < self.flip_p:
@@ -77,9 +74,12 @@ class PersonalizedBase(Dataset):
         return img
 
     def blur(self, img):
-        k = random.choice([1, 3, 5])
-        sig = random.randrange(1, 6) / 10.
-        return cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
+        if self.flip_p > 0.0:
+            if random.random() < self.flip_p:
+                k = random.choice([1, 3, 1])
+                sig = random.uniform(0.1, 0.5)
+                img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
+        return img
 
     def crop_and_resize(self, img):
         h, w = img.shape[0], img.shape[1]
