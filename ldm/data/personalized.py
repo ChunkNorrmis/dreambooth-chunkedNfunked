@@ -45,8 +45,10 @@ class PersonalizedBase(Dataset):
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
+
     def __len__(self):
         return self._length
+
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
@@ -58,6 +60,7 @@ class PersonalizedBase(Dataset):
         example = {'caption': caption, 'image': image}
         return example
 
+
     def augment(self, img_path):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -67,11 +70,13 @@ class PersonalizedBase(Dataset):
         img = ((img / 255. - 0.5) / 0.5).astype(np.float32)
         return img
 
+
     def mirror(self, img):
         if self.flip_p > 0.0:
             if random.random() < self.flip_p:
                 img = cv2.flip(img, 1)
         return img
+
 
     def blur(self, img):
         if self.flip_p > 0.0:
@@ -80,6 +85,7 @@ class PersonalizedBase(Dataset):
                 sig = random.uniform(0.1, 0.5)
                 img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
         return img
+
 
     def crop_and_resize(self, img):
         h, w = img.shape[0], img.shape[1]
@@ -90,4 +96,5 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
+
 
