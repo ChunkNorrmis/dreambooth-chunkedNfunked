@@ -49,7 +49,6 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
         image = self.augment(img_path)
@@ -57,9 +56,11 @@ class PersonalizedBase(Dataset):
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': caption, 'image': image}
+        example = {
+            'caption': caption,
+            'image': image
+        }
         return example
-
 
     def augment(self, img_path):
         img = cv2.imread(img_path)
@@ -67,16 +68,14 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
-        return img
-
+        image = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
+        return image
 
     def mirror(self, img):
         if self.flip_p > 0.0:
             if random.random() < self.flip_p:
                 img = cv2.flip(img, 1)
         return img
-
 
     def blur(self, img):
         if self.flip_p > 0.0:
@@ -85,7 +84,6 @@ class PersonalizedBase(Dataset):
                 sig = random.uniform(0.1, 0.5)
                 img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
         return img
-
 
     def crop_and_resize(self, img):
         h, w = img.shape[0], img.shape[1]
