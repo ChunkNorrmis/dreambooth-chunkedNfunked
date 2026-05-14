@@ -41,10 +41,8 @@ class PersonalizedBase(Dataset):
             self._length = self.n_imgs * repeats
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-        self.conv_rgb = lambda x : cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
-        self.normal = lambda x : np.array((x / 255. - 0.5) / 0.5, dtype=np.float32)
-        self.ld_image = lambda x : cv2.imread(x)
 
+    
     def __len__(self):
         return self._length
 
@@ -62,13 +60,12 @@ class PersonalizedBase(Dataset):
         return example
 
     def augment(self, img_path):
-        img = self.ld_img(img_path)
-        img = self.conv_rgb(img)
+        img = cv2.imread(img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        #image = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
-        image = self.normal(img)
+        image = np.array(((img / 255. - 0.5) / 0.5), dtype=np.float32)
         return image
 
     def mirror(self, img):
