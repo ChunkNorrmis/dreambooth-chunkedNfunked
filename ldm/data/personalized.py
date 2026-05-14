@@ -68,8 +68,8 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = ((img / 255. - 0.5) / 0.5).astype(np.float32)
-        return img
+        image = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
+        return image
 
     def mirror(self, img):
         if self.flip_p > 0.0:
