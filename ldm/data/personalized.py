@@ -67,7 +67,7 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = ((img / 255. - 0.5) / 0.5).astype(np.float32)
+        img = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
         return img
 
 
@@ -81,7 +81,7 @@ class PersonalizedBase(Dataset):
     def blur(self, img):
         if self.flip_p > 0.0:
             if random.random() < self.flip_p:
-                k = random.choice([1, 3, 1])
+                k = random.choice([1, 3, 5])
                 sig = random.uniform(0.1, 0.5)
                 img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
         return img
