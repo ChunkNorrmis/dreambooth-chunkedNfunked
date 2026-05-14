@@ -35,16 +35,15 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
-        
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
-
         if set == 'train':
             self._length = self.n_imgs * repeats
-
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-
+        self.conv_rgb = lambda x : cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
+        self.normal = lambda x : np.array((x / 255. - 0.5) / 0.5, dtype=np.float32)
+        self.ld_image = lambda x : cv2.imread(x)
 
     def __len__(self):
         return self._length
@@ -63,12 +62,13 @@ class PersonalizedBase(Dataset):
         return example
 
     def augment(self, img_path):
-        img = cv2.imread(img_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = self.ld_img(img_path)
+        img = self.conv_rgb(img)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        image = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
+        #image = np.array((img / 255. - 0.5) / 0.5).astype(np.float32)
+        image = self.normal(img)
         return image
 
     def mirror(self, img):
