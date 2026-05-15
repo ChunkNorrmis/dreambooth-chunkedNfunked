@@ -269,7 +269,7 @@ def get_dreambooth_trainer_config(config: JoePennaDreamboothConfigSchemaV1, mode
             "target": "pytorch_lightning.loggers.CSVLogger",
             "params": {
                 "name": "CSVLogger",
-                "save_dir": config.log_directory(),
+                "save_dir": config.log_directory()
             }
         },
         "checkpoint_callback": cb.model_checkpoint()
@@ -280,38 +280,31 @@ def get_dreambooth_trainer_config(config: JoePennaDreamboothConfigSchemaV1, mode
     if hasattr(model, "monitor"):
         trainer_config["checkpoint_callback"]["params"]["monitor"] = model.monitor
         trainer_config["checkpoint_callback"]["params"]["save_top_k"] = 1
-
         if config.debug:
             print(f"Monitoring {model.monitor} as checkpoint metric.")
-
     return trainer_config
 
 
 def get_dreambooth_trainer_kwargs(config: JoePennaDreamboothConfigSchemaV1, trainer_config, callbacks_config) -> dict:
-    trainer_kwargs = dict()
-    trainer_kwargs["logger"] = instantiate_from_config(trainer_config["logger"])
-    trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_config[k]) for k in callbacks_config]
-    trainer_kwargs["max_steps"] = config.max_training_steps
-    trainer_kwargs["plugins"] = PruningCheckpointIO(dtype=config.precision)
-
+    trainer_kwargs = {
+        'logger': instantiate_from_config(trainer_config['logger']),
+        'callbacks': [instantiate_from_config(callbacks_config[k]) for k in callbacks_config],
+        'max_steps': config.max_training_steps,
+        'plugins': PruningCheckpointIO(dtype=config.precision)
+    }
     return trainer_kwargs
 
 
-def get_dreambooth_callbacks_config(config: JoePennaDreamboothConfigSchemaV1, model_data_config,
-                                    lightning_config) -> dict:
+def get_dreambooth_callbacks_config(config: JoePennaDreamboothConfigSchemaV1, model_data_config, lightning_config) -> dict:
     cb = callbacks(config)
     callbacks_config = {
-        "setup_callback": cb.setup_callback(
-            model_data_config=model_data_config,
-            lightning_config=lightning_config,
-        ),
+        "setup_callback": cb.setup_callback(model_data_config=model_data_config, lightning_config=lightning_config),
         "image_logger": cb.image_logger(),
         "learning_rate_logger": cb.learning_rate_logger(),
         "cuda_callback": cb.cuda_callback(),
         "checkpoint_callback": cb.model_checkpoint(),
     }
-
     if config.save_every_x_steps > 0:
         callbacks_config["metrics_over_trainsteps_checkpoint"] = cb.metrics_over_trainsteps_checkpoint()
-
     return callbacks_config
+
