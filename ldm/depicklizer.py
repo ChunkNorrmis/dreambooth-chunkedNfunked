@@ -22,7 +22,7 @@ def depicklize(dict_pickle, nil_pickle=None):
         nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
     elif os.path.isdir(nil_pickle):
         nil_pickle = os.path.join(nil_pickle, os.path.basename(dict_pickle).replace('.ckpt', '.safetensors'))
-    saved = sftrs.save(sus_dict)
+    saved = sftr.save(sus_dict)
     reloaded = sftr.load(saved)
     if not equal_tensors(sus_dict, reloaded):
         nil_pickle = os.path.join(os.path.dirname(nil_pickle), os.path.basename(dict_pickle))
