@@ -86,30 +86,44 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
-        image = self.transform(img_path)
+        image = self.augment(img_path)
 
         if self.per_image_tokens and random.random() < self.mixing_prob:
-            example['caption'] = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
+            caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
-            example['caption'] = random.choice(imagenet_templates_small).format(self.placeholder_token)
-        example['image'] = image
+            caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
+        example = {'caption': caption, 'image' = image}
         return example
 
 
-    def transform(self, img_path):
-        image = cv2.imread(img_path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        h, w = image.shape[0], image.shape[1]
-        crop = min(h, w)
-        if self.center_crop and h != w:
-            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
-        if self.size != crop:
-            interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if random.random() < self.flip_p:
-            image = cv2.flip(image, 1)
-        image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
-        image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
+    def augment(self, img_path):
+        img = cv2.imread(img_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = self.crop_and_resize(img)
+        img = self.mirror(img)
+        img = self.blur(img)
+        image = np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
         return image
 
+    def mirror(self, img):
+        if random.random() < self.flip_p:
+            img = cv2.flip(img, 1)
+        return img
+
+    def blur(self, img):
+        if random.random() < self.flip_p:
+            k = random.choice([1, 3])
+            sig = random.uniform(0.1, 0.5)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
+        return img
+
+    def crop_and_resize(self, img):
+        h, w = img.shape[0], img.shape[1]
+        crop = min(h, w)
+        if self.center_crop and h != w:
+            img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+        if self.size != crop:
+            interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
+            img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
+        return img
 
