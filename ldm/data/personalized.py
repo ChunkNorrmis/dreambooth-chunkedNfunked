@@ -67,26 +67,23 @@ class PersonalizedBase(Dataset):
         return image
 
     def random_mirror(self, img):
-        if self.flip_p > 0.0:
-            if random.random() < self.flip_p:
-                img = cv2.flip(img, 1)
+        if random.random() < self.flip_p:
+            img = cv2.flip(img, 1)
         return img
 
     def random_blur(self, img, p=0.5):
-        if p > 0.0:
-            if random.random() < p:
-                knl = random.randrange(1, 4) * 2 - 1
-                sig = random.uniform(0.1, 0.5)
-                img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
+        if random.random() < p:
+            knl = random.randrange(1, 4) * 2 - 1
+            sig = random.uniform(0.1, 0.5)
+            img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
         return img
 
     def random_sharpen(self, img, p=0.5):
-        if p > 0.0:
-            if random.random() < p:
-                alpha = random.choice([1.5, 2.0])
-                beta = 1.0 - alpha
-                mask = self.random_blur(img, p=1.0)
-                img = cv2.addWeighted(img, alpha, mask, beta, gamma=0)
+        if random.random() < p:
+            alpha = random.choice([1.5, 2.0])
+            beta = 1.0 - alpha
+            mask = self.random_blur(img, p=1.0)
+            img = cv2.addWeighted(img, alpha, mask, beta, gamma=0)
         return img
 
     def crop_and_resize(self, img):
