@@ -66,8 +66,9 @@ class PersonalizedBase(Dataset):
         return image
 
     def mirror(self, img):
-        if random.random() < self.flip_p:
-            img = cv2.flip(img, 1)
+        if self.flip_p > 0.0:
+            if random.random() < self.flip_p:
+                img = cv2.flip(img, 1)
         return img
 
     def blur(self, img):
