@@ -86,7 +86,7 @@ class PersonalizedBase(Dataset):
             alpha = random.choice([1.5, 2.0])
             beta = 1.0 - alpha
             mask = cv2.GaussianBlur(img, ksize=kern['size'], sigmaX=kern['sig'], sigmaY=kern['sig'])
-            img = cv2.AddWeighted(img, alpha, mask, beta, gamma=0)
+            img = cv2.addWeighted(img, alpha, mask, beta, gamma=0)
         return img
 
     def crop_and_resize(self, img):
