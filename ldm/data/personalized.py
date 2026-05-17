@@ -35,6 +35,7 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
+        
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
         if set == 'train':
@@ -42,7 +43,6 @@ class PersonalizedBase(Dataset):
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
-    
     def __len__(self):
         return self._length
 
@@ -72,21 +72,21 @@ class PersonalizedBase(Dataset):
                 img = cv2.flip(img, 1)
         return img
 
-    def random_blur(self, img):
-        if random.random() < 0.5:
-            knl = random.randrange(1, 4) * 2 - 1
-            sig = random.uniform(0.1, 0.5)
-            img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
+    def random_blur(self, img, p=0.5):
+        if p > 0.0:
+            if random.random() < p:
+                knl = random.randrange(1, 4) * 2 - 1
+                sig = random.uniform(0.1, 0.5)
+                img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
         return img
 
-    def random_sharpen(self, img):
-        if random.random() < 0.5:
-            knl = {'knl_1': {'size': (5,5), 'sig': 1.0}, 'knl_2': {'size': (9,9), 'sig': 0.5}}
-            kern = knl[random.choice(['knl_1', 'knl_2'])]
-            alpha = random.choice([1.5, 2.0])
-            beta = 1.0 - alpha
-            mask = cv2.GaussianBlur(img, ksize=kern['size'], sigmaX=kern['sig'], sigmaY=kern['sig'])
-            img = cv2.addWeighted(img, alpha, mask, beta, gamma=0)
+    def random_sharpen(self, img, p=0.5):
+        if p > 0.0:
+            if random.random() < p:
+                alpha = random.choice([1.5, 2.0])
+                beta = 1.0 - alpha
+                mask = self.random_blur(img, p=1.0)
+                img = cv2.addWeighted(img, alpha, mask, beta, gamma=0)
         return img
 
     def crop_and_resize(self, img):
