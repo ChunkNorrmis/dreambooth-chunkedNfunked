@@ -17,7 +17,7 @@ class PersonalizedBase(Dataset):
         size=512,
         repeats=100,
         center_crop=True,
-        flip_p=0.0,
+        flip_p=0.5,
         mixing_prob=0.25,
         token_only=False,
         per_image_tokens=False
@@ -53,10 +53,7 @@ class PersonalizedBase(Dataset):
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {
-            'caption': caption,
-            'image': image
-        }
+        example = {'caption': caption, 'image': image}
         return example
 
     def augment(self, img_path):
@@ -81,7 +78,7 @@ class PersonalizedBase(Dataset):
         return img
 
     def crop_and_resize(self, img):
-        h, w = img.shape[0], img.shape[1]
+        h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
             img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
