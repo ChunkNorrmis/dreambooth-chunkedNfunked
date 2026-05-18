@@ -55,8 +55,7 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.random_mirror(img)
         img = self.random_blur(img)
-        image = np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
-        return image
+        return np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
 
 
     def random_mirror(self, img):
