@@ -3,7 +3,7 @@ from huggingface_hub.file_download import hf_hub_download
 import hf_xet, hf_transfer
 
 
-def get_model_from_hub(repo_url):
+def get_model_from_hf(repo_url):
     repo_id = f"{repo_url.split('/')[3]}/{repo_url.split('/')[4]}"
     ckpt_file = os.path.basename(repo_url)
     model_path = os.path.join(sys.path[0], ckpt_file)
