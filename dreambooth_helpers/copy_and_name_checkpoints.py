@@ -25,12 +25,13 @@ def copy_and_name_checkpoints(
     checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
         first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
-        last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
-        if config.model_format == '.safetensors':
-            last = os.path.splitext(last)[0] + config.model_format
-            depicklize(first, nil_pickle=last)
-        else:
-            shutil.move(first, last)
+        if os.path.exists(first):
+            checkpoints_found = True
+            last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
+            if config.model_format == '.safetensors':
+                last = last.replace('.ckpt', config.model_format)
+                depicklize(first, nil_pickle=last)
+            else: shutil.move(first, last)
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
         file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
@@ -48,20 +49,19 @@ def copy_and_name_checkpoints(
             checkpoints_and_steps.append(
                 (original_file_path, checkpoint_steps)
             )
-        checkpoints_found = True
         for i, file_and_steps in enumerate(checkpoints_and_steps):
             original_file_name, steps = file_and_steps[0], file_and_steps[1]
-            new_file_name = config.create_checkpoint_file_name(steps)
-            output_file_name = os.path.join(output_folder, new_file_name)
             if os.path.exists(original_file_name):
-                print(f"Moving {original_file_name} to {output_file_name}")
+                checkpoints_found = True
+                new_file_name = config.create_checkpoint_file_name(steps)
+                output_file_name = os.path.join(output_folder, new_file_name)
                 if config.model_format == '.safetensors':
-                    output_file_name = os.path.splitext(output_file_name)[0] + config.model_format
+                    output_file_name = output_file_name.replace('.ckpt', config.model_format)
                     depicklize(original_file_name, nil_pickle=output_file_name)
-                else:
-                    shutil.move(original_file_name, output_file_name)
-
+                else: shutil.move(original_file_name, output_file_name)
+                print(f"Moving {original_file_name} to {output_file_name}")
+                
     if checkpoints_found:
-        print(f"✅ Download your trained model(s) from the '{output_folder}' folder and use in your favorite Stable Diffusion repo!")
+        print(f"✅ Model(s) moved to '{output_folder}'")
     else:
         print("No checkpoints found.")
