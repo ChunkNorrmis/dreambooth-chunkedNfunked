@@ -60,30 +60,21 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.crop_and_resize(img)
-        img = self.random_mirror(img)
-        img = self.random_sharpen(img)
-        img = self.random_blur(img)
+        img = self.mirror(img)
+        img = self.blur(img)
         image = np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
         return image
 
-    def random_mirror(self, img):
+    def mirror(self, img):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
 
-    def random_blur(self, img, p=0.5):
-        if random.random() < p:
-            knl = random.randrange(1, 4) * 2 - 1
+    def blur(self, img):
+        if random.random() < 0.5:
+            knl = random.choice([1, 3])
             sig = random.uniform(0.1, 0.5)
-            img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
-        return img
-
-    def random_sharpen(self, img, p=0.5):
-        if random.random() < p:
-            alpha = random.choice([1.5, 2.0])
-            beta = 1.0 - alpha
-            mask = self.random_blur(img, p=1.0)
-            img = cv2.addWeighted(img, alpha, mask, beta, gamma=0)
+            img = cv2.GaussianBlur(img, ksize=(knl, knl), sigmaX=sig, sigmaY=sig)
         return img
 
     def crop_and_resize(self, img):
@@ -95,5 +86,4 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
-
 
