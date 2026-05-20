@@ -26,6 +26,7 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
+        
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
         if set == 'train':
@@ -41,6 +42,7 @@ class PersonalizedBase(Dataset):
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
         image = self.augment(img_path)
+        
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -53,22 +55,23 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.crop_and_resize(img)
-        img = self.random_mirror(img)
-        img = self.random_blur(img)
-        return np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
+        img = self.mirror(img)
+        img = self.blur(img)
+        image = np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
+        return image
 
 
-    def random_mirror(self, img):
+    def mirror(self, img):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
 
 
-    def random_blur(self, img):
+    def blur(self, img):
         if random.random() < 0.5:
-            kl = random.randrange(1, 4) * 2 - 1
-            xy = random.uniform(0.1, 0.5)
-            img = cv2.GaussianBlur(img, ksize=(kl, kl), sigmaX=xy, sigmaY=xy)
+            knl = random.choice([1, 3, 1])
+            sig = random.uniform(0.2, 0.5)
+            img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
         return img
 
 
