@@ -4,8 +4,8 @@ import safetensors.torch as safetorch
 
 def depicklize(dict_pickle, nil_pickle=None):
     def equal_tensors(sus_dict, loaded):
-        for key in sus_dict.keys():
-            if not torch.equal(sus_dict[key], loaded[key]):
+        for k in sus_dict.keys():
+            if not torch.equal(sus_dict[k], loaded[k]):
                 print('!! Key mismatch error !!')
                 print('Aborting safetensors conversion.')
                 print(' ')
