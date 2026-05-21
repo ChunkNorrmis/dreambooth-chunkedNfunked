@@ -55,23 +55,24 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.crop_and_resize(img)
-        img = self.mirror(img)
-        img = self.blur(img)
-        image = np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
+        img = self.rdm_mirror(img)
+        img = self.rdm_blur(img)
+        image = np.array(img, dtype=np.float32)
+        image = (image / 255. - 0.5) * 2.
         return image
 
 
-    def mirror(self, img):
+    def rdm_mirror(self, img):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
 
 
-    def blur(self, img):
+    def rdm_blur(self, img):
         if random.random() < 0.5:
-            knl = random.randrange(1, 6) * 2 - 1 
+            krn = random.randrange(1, 6) * 2 - 1 
             sig = random.uniform(0.1, 0.5)
-            img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
+            img = cv2.GaussianBlur(img, ksize=(krn, krn), sigmaX=sig, sigmaY=sig)
         return img
 
 
