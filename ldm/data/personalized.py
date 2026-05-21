@@ -60,22 +60,22 @@ class PersonalizedBase(Dataset):
         image = image.astype(np.float32)
         return (image / 255 - 0.5) * 2
 
-    def rdm_mirror(self, img):
-        mirror = cv2.flip(img, 1)
-        return random.choice([mirror, img])
+    def rdm_mirror(self, image):
+        mirror = cv2.flip(image, 1)
+        return random.choice([mirror, image])
 
-    def rdm_blur(self, img):
+    def rdm_blur(self, image):
         k = random.randrange(1, 6) * 2 - 1
         x = random.randrange(0, 11) / 10
-        return cv2.GaussianBlur(img, ksize=(k, k), sigmaX=x, sigmaY=x)
+        return cv2.GaussianBlur(image, ksize=(k, k), sigmaX=x, sigmaY=x)
 
-    def crop_and_resize(self, img):
-        h, w = img.shape[:2]
+    def crop_and_resize(self, image):
+        h, w = image.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
-            img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
-        return img
+            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
+        return image
 
