@@ -66,7 +66,7 @@ class PersonalizedBase(Dataset):
 
     def rdm_blur(self, image):
         k = random.randrange(1, 6) * 2 - 1
-        x = random.randrange(0, 11) / 10
+        x = random.randrange(0, 10) / 10
         return cv2.GaussianBlur(image, ksize=(k, k), sigmaX=x, sigmaY=x)
 
     def crop_and_resize(self, image):
