@@ -70,7 +70,7 @@ class PersonalizedBase(Dataset):
 
     def rdm_blur(self, img):
         if random.random() < 0.5:
-            krn = random.randrange(1, 6) * 2 - 1)
+            krn = random.randrange(1, 6) * 2 - 1
             sig = random.uniform(0.5, 1.0)
             img = cv2.GaussianBlur(img, ksize=(krn, krn), sigmaX=sig, sigmaY=sig)
         return img
