@@ -86,7 +86,3 @@ class PersonalizedBase(Dataset):
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
 
-
-    def load_image(self, img_path):
-        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
