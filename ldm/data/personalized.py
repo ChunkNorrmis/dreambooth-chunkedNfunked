@@ -53,7 +53,7 @@ class PersonalizedBase(Dataset):
 
     def augment(self, img_path):
         img = cv2.imread(img_path, 256)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.cvtColor(img, 4)
         img = self.crop_and_resize(img)
         img = self.rdm_mirror(img)
         img = self.rdm_blur(img)
