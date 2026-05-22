@@ -4,6 +4,7 @@ import safetensors.torch as safetorch
 
 def depicklize(dict_pickle, nil_pickle=None):
     def equal_tensors(sus_dict, loaded):
+        print('Cross-referencing model keys for integrity...')
         for k in sus_dict.keys():
             if not torch.equal(sus_dict[k], loaded[k]):
                 print('!! Key mismatch error !!')
@@ -12,7 +13,7 @@ def depicklize(dict_pickle, nil_pickle=None):
                 return False
         return True
         
-    print('Depicklizing model...')
+    print(f"Depicklizing '{os.path.basename(dict_pickle)}'")
     suspicious_pickle = torch.load(dict_pickle, map_location=torch.device('cpu'), weights_only=False)
     sus_dict = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     del suspicious_pickle['state_dict']
@@ -25,10 +26,11 @@ def depicklize(dict_pickle, nil_pickle=None):
     saved = safetorch.save(sus_dict)
     loaded = safetorch.load(saved)
     if equal_tensors(sus_dict, loaded):
-        print(f"Saving converted checkpoint file to {os.path.relpath(nil_pickle)}.")
+        print('Model conversion successful')
+        print(f"Saving to './{os.path.relpath(nil_pickle)}'")
         safetorch.save_file(sus_dict, nil_pickle, metadata=metadata)
     else:
-        nil_pickle = os.path.join(os.path.dirname(nil_pickle), os.path.basename(dict_pickle))
-        print(f"Moving checkpoint file to {os.path.relpath(nil_pickle)}.")
+        nil_pickle = os.path.join('trained_models', os.path.basename(dict_pickle))
+        print(f"Moving model to './{os.path.relpath(nil_pickle)}'")
         shutil.move(dict_pickle, nil_pickle)
 
