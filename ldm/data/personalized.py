@@ -52,22 +52,26 @@ class PersonalizedBase(Dataset):
 
 
     def augment(self, img_path):
-        image = cv2.imread(img_path, 256)
-        image = cv2.cvtColor(image, 4)
+        image = cv2.imread(img_path)
         image = self.crop_and_resize(image)
         image = self.mirror(image)
         image = self.blur(image)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image.astype(np.float32)
-        return (image / 255 - 0.5) * 2
+        image = (image / 255. - 0.5) * 2.
+        return image
 
     def mirror(self, image):
-        mirror = cv2.flip(image, 1)
-        return random.choice([mirror, image])
+        if random.random() < self.flip_p:
+            image = cv2.flip(image, 1)
+        return image
 
     def blur(self, image):
-        k = random.randrange(1, 6) * 2 - 1
-        x = random.randrange(0, 10) / 10
-        return cv2.GaussianBlur(image, ksize=(k,k), sigmaX=x, sigmaY=x)
+        if random.random() < 0.5:
+            knl = random.randrange(2, 6) * 2 - 1
+            sig = random.uniform(0.5, 1.0)
+            image = cv2.GaussianBlur(image, ksize=(knl, knl), sigmaX=sig, sigmaY=sig)
+        return image
 
     def crop_and_resize(self, image):
         h, w = image.shape[:2]
