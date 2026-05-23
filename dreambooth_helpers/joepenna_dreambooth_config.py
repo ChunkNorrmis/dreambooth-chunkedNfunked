@@ -1,7 +1,7 @@
 import os, json, math, glob, shutil, sys, torch, random
 from datetime import datetime, timezone
 from pytorch_lightning import seed_everything
-from ldm.model_download import get_model_from_hf
+from ldm.model_downloader import DownloadModel
 
 
 class JoePennaDreamboothConfigSchemaV1():
@@ -113,8 +113,8 @@ class JoePennaDreamboothConfigSchemaV1():
         self.project_config_filename = f"{self.project_name}-config.json"
         
         if not os.path.exists(model_path):
-            if model_path.startswith('https://huggingface.co'):
-                self.model_path = get_model_from_hf(model_path)    
+            if model_path.startswith('https://'):
+                self.model_path = DownloadModel(model_path)
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = os.path.relpath(model_path)
             
