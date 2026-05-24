@@ -1,7 +1,7 @@
 import os, json, math, glob, shutil, sys, torch, random
 from datetime import datetime, timezone
 from pytorch_lightning import seed_everything
-from ldm.model_downloader import DownloadModel
+from ldm.model_downloader import from_huggingface_hub, from_google_drive
 
 
 class JoePennaDreamboothConfigSchemaV1():
