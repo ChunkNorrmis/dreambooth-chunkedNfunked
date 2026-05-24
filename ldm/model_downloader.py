@@ -4,7 +4,7 @@ import hf_xet, hf_transfer
 import gdown
 		
 class DownloadModel():
-	def __init__(self):
+	def __init__(self, url):
 		self.url = url
 		if self.url.startswith('https://huggingface.co'):
 			return self.from_huggingface_hub()
