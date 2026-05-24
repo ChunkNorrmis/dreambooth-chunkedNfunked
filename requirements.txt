@@ -1,16 +1,4 @@
 --extra-index-url https://download.pytorch.org/whl/cu130
-setuptools==76.0
-torch==2.12.0+cu130
-numpy==1.26.4
-torchmetrics==0.11.4
-pytorch-lightning==1.7.6
-torchvision
-opencv-python
-huggingface_hub
-hf-xet
-hf_transfer
-gdown
-pillow
 absl-py==2.4.0
 accelerate==1.13.0
 aiohappyeyeballs==2.6.1
@@ -18,7 +6,7 @@ aiohttp==3.13.5
 aiosignal==1.4.0
 albumentations==1.1.0
 annotated-doc==0.0.4
-antlr4-python3-runtime
+antlr4-python3-runtime==4.8
 anyio==4.13.0
 asttokens==3.0.1
 async-timeout==5.0.1
@@ -30,6 +18,9 @@ charset-normalizer==3.4.7
 click==8.3.1
 comm==0.2.3
 csv-logger==1.3.0
+cuda-bindings==13.2.0
+cuda-pathfinder==1.5.0
+cuda-toolkit==13.0.2
 datasets==2.14.4
 debugpy==1.8.20
 decorator==5.2.1
@@ -42,10 +33,14 @@ filelock==3.29.0
 frozenlist==1.8.0
 fsspec==2026.4.0
 ftfy==6.3.1
+gdown==6.0.0
 grpcio==1.80.0
 h11==0.16.0
+hf-xet==1.4.2
+hf_transfer==0.1.9
 httpcore==1.0.9
 httpx==0.28.1
+huggingface_hub==0.36.2
 idna==3.15
 ImageIO==2.37.3
 importlib_metadata==9.0.0
@@ -55,6 +50,9 @@ ipywidgets==8.1.8
 jedi==0.19.2
 Jinja2==3.1.6
 joblib==1.5.3
+jupyter_client==8.8.0
+jupyter_core==5.9.1
+jupyterlab_widgets==3.0.16
 kornia==0.6.7
 lazy-loader==0.5
 Markdown==3.10.2
@@ -68,11 +66,30 @@ multidict==6.7.1
 multiprocess==0.70.15
 nest-asyncio==1.6.0
 networkx==3.4.2
+numpy==1.26.4
+nvidia-cublas==13.1.0.3
+nvidia-cuda-cupti==13.0.85
+nvidia-cuda-nvrtc==13.0.88
+nvidia-cuda-runtime==13.0.96
+nvidia-cudnn-cu13==9.20.0.48
+nvidia-cufft==12.0.0.61
+nvidia-cufile==1.15.1.6
+nvidia-curand==10.4.0.35
+nvidia-cusolver==12.0.4.66
+nvidia-cusparse==12.6.3.3
+nvidia-cusparselt-cu13==0.8.1
+nvidia-nccl-cu13==2.29.7
+nvidia-nvjitlink==13.0.88
+nvidia-nvshmem-cu13==3.4.5
+nvidia-nvtx==13.0.85
 omegaconf==2.1.1
+opencv-python==4.11.0.86
+opencv-python-headless==4.11.0.86
 packaging==26.2
 pandas==2.3.3
 parso==0.8.6
 pexpect==4.9.0
+pillow==12.1.1
 platformdirs==4.9.4
 prompt_toolkit==3.0.52
 propcache==0.5.2
@@ -85,6 +102,7 @@ pyDeprecate==0.7.0
 Pygments==2.19.2
 PySocks==1.7.1
 python-dateutil==2.9.0.post0
+pytorch-lightning==1.7.6
 pytz==2026.2
 PyYAML==6.0.3
 pyzmq==27.1.0
@@ -92,22 +110,31 @@ qudida==0.0.4
 regex==2026.5.9
 requests==2.34.2
 rich==14.3.3
-safetensors
+safetensors==0.7.0
 scikit-image==0.24.0
 scikit-learn==1.7.2
 scipy==1.15.3
+setuptools==76.0.0
 shellingham==1.5.4
 six==1.17.0
 soupsieve==2.8.3
 stack-data==0.6.3
 sympy==1.14.0
+tensorboard==2.20.0
+tensorboard-data-server==0.7.2
 threadpoolctl==3.6.0
 tifffile==2025.5.10
 tokenizers==0.13.3
+torch==2.12.0+cu130
+torchaudio==2.11.0+cu130
+torchcodec==0.11.0+cu130
+torchmetrics==0.11.4+cu130
+torchvision==0.27.0+cu130
 tornado==6.5.5
 tqdm==4.67.3
 traitlets==5.14.3
 transformers==4.25.1
+triton==3.7.0
 typer==0.24.1
 typing_extensions==4.15.0
 tzdata==2026.2
@@ -118,6 +145,6 @@ widgetsnbextension==4.0.15
 xxhash==3.7.0
 yarl==1.23.0
 zipp==3.23.1
--e git+https://github.com/CompVis/taming-transformers.git@3ba01b241669f5ade541ce990f7650a3b8f65318#egg=taming_transformers
 -e git+https://github.com/openai/CLIP.git@d05afc436d78f1c48dc0dbf8e5980a9d471f35f6#egg=clip
+-e git+https://github.com/CompVis/taming-transformers.git@3ba01b241669f5ade541ce990f7650a3b8f65318#egg=taming_transformers
 -e .
