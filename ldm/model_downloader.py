@@ -4,17 +4,11 @@ import hf_xet, hf_transfer
 import gdown
 		
 class DownloadModel():
-	def __init__(self, url):
-		self.url = url
-		if self.url.startswith('https://huggingface.co'):
-			self.from_huggingface_hub()
-		elif self.url.startswith('https://drive.google.com'):
-			self.from_google_drive()
-
-
-	def from_huggingface_hub(self):
-		repo_id = f"{self.url.split('/')[3]}/{self.url.split('/')[4]}"
-		ckpt_file = os.path.basename(self.url)
+	def __init__(self):
+		
+	def from_huggingface_hub(self, url):
+		repo_id = f"{url.split('/')[3]}/{url.split('/')[4]}"
+		ckpt_file = os.path.basename(url)
 		model_path = os.path.join(sys.path[0], ckpt_file)
 		if not os.path.exists(model_path):
 			print(f"Downloading '{ckpt_file}'")
@@ -22,7 +16,7 @@ class DownloadModel():
 		return os.path.relpath(model_path)
 
 
-	def from_google_drive(self):
+	def from_google_drive(self, url):
 		def on_progress(bytes_so_far: int, bytes_total: int | None) -> None:
 		    if bytes_total is not None:
         		print(f"\r{bytes_so_far / bytes_total * 100:.1f}%", end="")
@@ -30,5 +24,5 @@ class DownloadModel():
 		model_path = os.path.join(sys.path[0], 'model.ckpt')
 		if not os.path.exists(model_path):
 			print(f"Downloading '{os.path.basename(model_path)}'")
-			gdown.download(url=self.url, output=model_path, quiet=True, progress=on_progress)
+			gdown.download(url=url, output=model_path, quiet=True, progress=on_progress)
 		return os.path.relpath(model_path)
