@@ -7,9 +7,9 @@ class DownloadModel():
 	def __init__(self, url):
 		self.url = url
 		if self.url.startswith('https://huggingface.co'):
-			return self.from_huggingface_hub()
+			self.from_huggingface_hub()
 		elif self.url.startswith('https://drive.google.com'):
-			return self.from_google_drive()
+			self.from_google_drive()
 
 
 	def from_huggingface_hub(self):
