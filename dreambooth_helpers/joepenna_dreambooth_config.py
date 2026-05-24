@@ -113,7 +113,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.project_config_filename = f"{self.project_name}-config.json"
         
         if not os.path.exists(model_path):
-		    if model_path.startswith('https://huggingface.co'):
+            if model_path.startswith('https://huggingface.co'):
                 self.model_path = DownloadModel.from_huggingface_hub(model_path)
             elif model_path.startswith('https://drive.google.com'):
                 self.model_path = DownloadModel.from_google_drive(model_path)
