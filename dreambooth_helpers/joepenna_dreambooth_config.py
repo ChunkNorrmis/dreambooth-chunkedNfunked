@@ -114,9 +114,9 @@ class JoePennaDreamboothConfigSchemaV1():
         
         if not os.path.exists(model_path):
             if model_path.startswith('https://huggingface.co'):
-                self.model_path = DownloadModel.from_huggingface_hub(model_path)
+                self.model_path = from_huggingface_hub(model_path)
             elif model_path.startswith('https://drive.google.com'):
-                self.model_path = DownloadModel.from_google_drive(model_path)
+                self.model_path = from_google_drive(model_path)
             else: raise Exception(f"Model Path Not Found: '{model_path}'.")
         else: self.model_path = os.path.relpath(model_path)
             
