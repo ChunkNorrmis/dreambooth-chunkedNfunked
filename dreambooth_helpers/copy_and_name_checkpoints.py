@@ -7,9 +7,16 @@ from ldm.depicklizer import depicklize
 import torch
 
 
-def copy_and_name_checkpoints(
-    config: JoePennaDreamboothConfigSchemaV1,
-):
+def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
+    def get_last_checkpoint(config):
+        first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
+        if os.path.exists(first):
+            last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
+            if config.model_format == '.safetensors':
+                last = last.replace('.ckpt', config.model_format)
+                depicklize(first, nil_pickle=last)
+            else: shutil.move(first, last)
+        
     checkpoints_found = False
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
@@ -24,14 +31,8 @@ def copy_and_name_checkpoints(
 
     checkpoints_and_steps = []
     if config.save_every_x_steps == 0:
-        first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
-        if os.path.exists(first):
-            checkpoints_found = True
-            last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
-            if config.model_format == '.safetensors':
-                last = last.replace('.ckpt', config.model_format)
-                depicklize(first, nil_pickle=last)
-            else: shutil.move(first, last)
+        checkpoints_found = True
+        get_last_checkpoint(config)
     else:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
         file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
@@ -52,14 +53,15 @@ def copy_and_name_checkpoints(
         for i, file_and_steps in enumerate(checkpoints_and_steps):
             original_file_name, steps = file_and_steps[0], file_and_steps[1]
             if os.path.exists(original_file_name):
-                checkpoints_found = True
                 new_file_name = config.create_checkpoint_file_name(steps)
                 output_file_name = os.path.join(output_folder, new_file_name)
                 if config.model_format == '.safetensors':
                     output_file_name = output_file_name.replace('.ckpt', config.model_format)
                     depicklize(original_file_name, nil_pickle=output_file_name)
-                else: shutil.move(original_file_name, output_file_name)
-                print(f"Moving {original_file_name} to {output_file_name}")
+                else:
+                    shutil.move(original_file_name, output_file_name)
+        get_last_checkpoint(config)
+        checkpoints_found = True
                 
     if checkpoints_found:
         print(f"✅ Model(s) moved to '{output_folder}'")
