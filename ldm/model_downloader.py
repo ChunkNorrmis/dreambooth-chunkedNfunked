@@ -11,7 +11,7 @@ class DownloadModel():
         ckpt_file = os.path.basename(url)
         model_path = os.path.join(sys.path[0], ckpt_file)
         if not os.path.exists(model_path):
-		    print(f"Downloading '{ckpt_file}'")
+            print(f"Downloading '{ckpt_file}'")
             hf_hub_download(repo_id, ckpt_file, local_dir=sys.path[0])
         return os.path.relpath(model_path)
 
