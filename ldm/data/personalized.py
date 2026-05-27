@@ -57,7 +57,7 @@ class PersonalizedBase(Dataset):
         image = self.mirror(image)
         image = self.blur(image)
         image = image.astype(np.float32)
-        image = (image / 255. - 0.5) * 2.
+        image = (image / 255. - 0.5) * 2
         return image
 
     def mirror(self, image):
