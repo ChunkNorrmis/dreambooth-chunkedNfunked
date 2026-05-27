@@ -70,7 +70,7 @@ class PersonalizedBase(Dataset):
             k = random.randrange(2, 6) * 2 - 1
             r = random.uniform(0.5, 1.0) 
             s = random.choice([r, 0])
-            image = cv2.GaussianBlur(image, ksize=(k, k), sigmaX=r, sigmaY=r)
+            image = cv2.GaussianBlur(image, ksize=(k, k), sigmaX=s, sigmaY=s)
         return image
 
     def crop_and_resize(self, image):
