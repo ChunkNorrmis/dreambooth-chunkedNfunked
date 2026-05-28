@@ -41,8 +41,12 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
-        image = self.augment(img_path)
-        
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
+        img = self.crop_and_resize(img)
+        img = self.mirror(img)
+        img = self.blur(img)
+        image = img.astype(np.float32)
+        image = (image / 255. - 0.5) * 2
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -51,32 +55,23 @@ class PersonalizedBase(Dataset):
         return example
 
 
-    def augment(self, img_path):
-        image = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
-        image = self.crop_and_resize(image)
-        image = self.mirror(image)
-        image = self.blur(image)
-        image = image.astype(np.float32)
-        image = (image / 255. - 0.5) * 2
-        return image
-
-    def mirror(self, image):
+    def mirror(self, img):
         if random.random() < self.flip_p:
-            image = cv2.flip(image, 1)
-        return image
+            img = cv2.flip(img, 1)
+        return img
 
-    def blur(self, image):
+    def blur(self, img):
         if random.random() < 0.5:
             r = random.uniform(0.5, 1.0)
-            image = cv2.GaussianBlur(image, ksize=(3, 3), sigmaX=r, sigmaY=r)
-        return image
+            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=r, sigmaY=r)
+        return img
 
-    def crop_and_resize(self, image):
-        h, w = image.shape[:2]
+    def crop_and_resize(self, img):
+        h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
-            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+            img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        return image
+            img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
+        return img
