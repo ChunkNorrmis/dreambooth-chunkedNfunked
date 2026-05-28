@@ -4,19 +4,11 @@ import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
 from ldm.depicklizer import depicklize
+from ldm.last_ckpt import get_last_ckpt
 import torch
 
 
 def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
-    def get_last_checkpoint(config):
-        first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
-        if os.path.exists(first):
-            last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
-            if config.model_format == '.safetensors':
-                last = last.replace('.ckpt', config.model_format)
-                depicklize(first, nil_pickle=last)
-            else: shutil.move(first, last)
-        
     checkpoints_found = False
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
@@ -30,10 +22,16 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         return
 
     checkpoints_and_steps = []
-    if config.save_every_x_steps == 0:
+    first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
+    if os.path.exists(first):
         checkpoints_found = True
-        get_last_checkpoint(config)
-    else:
+        last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
+        if config.model_format == '.safetensors':
+            last = last.replace('.ckpt', config.model_format)
+            depicklize(first, nil_pickle=last)
+        else: shutil.move(first, last)
+            
+    if config.save_every_x_steps > 0:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
         file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
 
@@ -60,7 +58,6 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
                     depicklize(original_file_name, nil_pickle=output_file_name)
                 else:
                     shutil.move(original_file_name, output_file_name)
-        get_last_checkpoint(config)
         checkpoints_found = True
                 
     if checkpoints_found:
