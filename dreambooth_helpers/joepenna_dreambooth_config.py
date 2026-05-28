@@ -15,7 +15,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.training_images_folder_path = None
         self.regularization_images_folder_path = None
         self.model_path = None
-        self.precision = 'float16'
+        self.precision = False
         self.safetensors = False
         self.repeats = 100
         self.learning_rate = 1.0e-06
