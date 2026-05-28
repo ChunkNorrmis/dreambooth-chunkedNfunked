@@ -120,10 +120,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
         )
         parser.add_argument(
             '--fp32',
-            type=str,
-            nargs='?',
-            const='float32',
-            default='float16',
+            action='store_true',
             help='saves model state dict as float32, rather than float16 (the default)'
         )
         parser.add_argument(
