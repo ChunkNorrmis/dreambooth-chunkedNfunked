@@ -290,7 +290,7 @@ def get_dreambooth_trainer_kwargs(config: JoePennaDreamboothConfigSchemaV1, trai
         'logger': instantiate_from_config(trainer_config['logger']),
         'callbacks': [instantiate_from_config(callbacks_config[k]) for k in callbacks_config],
         'max_steps': config.max_training_steps,
-        'plugins': PruningCheckpointIO(dtype=config.precision)
+        'plugins': PruningCheckpointIO(float32=config.precision)
     }
     return trainer_kwargs
 
