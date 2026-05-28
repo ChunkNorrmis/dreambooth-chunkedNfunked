@@ -46,7 +46,7 @@ class PersonalizedBase(Dataset):
         img = self.mirror(img)
         img = self.blur(img)
         image = img.astype(np.float32)
-        image = (image / 255. - 0.5) * 2
+        image = (image / 255. - 0.5) * 2.
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -62,8 +62,9 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
+            k = random.choice([3, 5])
             r = random.uniform(0.5, 1.0)
-            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=r, sigmaY=r)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=r, sigmaY=r)
         return img
 
     def crop_and_resize(self, img):
