@@ -4,7 +4,6 @@ import shutil
 import glob
 from dreambooth_helpers.joepenna_dreambooth_config import JoePennaDreamboothConfigSchemaV1
 from ldm.depicklizer import depicklize
-from ldm.last_ckpt import get_last_ckpt
 import torch
 
 
