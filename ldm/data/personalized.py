@@ -56,12 +56,12 @@ class PersonalizedBase(Dataset):
 
 
     def mirror(self, img):
-        if random.random() < self.flip_p:
+        if self.is_random()
             img = cv2.flip(img, 1)
         return img
 
     def blur(self, img):
-        if random.random() < 0.5:
+        if self.is_random()
             img = cv2.GaussianBlur(img, ksize=(3,3), sigmaX=0, sigmaY=0)
         return img
 
@@ -74,3 +74,9 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
+
+    def is_random(self):
+        if random.random() < 0.5:
+            return True
+
+
