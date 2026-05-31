@@ -62,7 +62,8 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if self.is_random()
-            img = cv2.GaussianBlur(img, ksize=(3,3), sigmaX=0, sigmaY=0)
+            r = random.choice([n / 10 for n in range(5, 11)] + [0])
+            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=r, sigmaY=r)
         return img
 
     def crop_and_resize(self, img):
