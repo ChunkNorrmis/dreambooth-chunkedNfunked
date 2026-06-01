@@ -12,7 +12,8 @@ def depicklize(dict_pickle, nil_pickle=None):
                 print(' ')
                 return False
         return True
-        
+
+    print(' ')
     print(f"Depicklizing '{os.path.basename(dict_pickle)}'")
     suspicious_pickle = torch.load(dict_pickle, map_location=torch.device('cpu'), weights_only=False)
     sus_dict = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
@@ -26,11 +27,13 @@ def depicklize(dict_pickle, nil_pickle=None):
     saved = safetorch.save(sus_dict)
     loaded = safetorch.load(saved)
     if equal_tensors(sus_dict, loaded):
-        print('Model conversion successful')
+        print('Key check pass...')
         print(f"Saving to './{os.path.relpath(nil_pickle)}'")
+        print(' ')
         safetorch.save_file(sus_dict, nil_pickle, metadata=metadata)
     else:
         nil_pickle = os.path.join('trained_models', os.path.basename(dict_pickle))
         print(f"Moving model to './{os.path.relpath(nil_pickle)}'")
+        print(' ')
         shutil.move(dict_pickle, nil_pickle)
 
