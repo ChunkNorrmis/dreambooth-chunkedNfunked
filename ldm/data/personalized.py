@@ -44,10 +44,7 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = random.choice([
-            self.blur(img),
-            self.sharpen(img)
-        ])
+        img = random.choice([self.blur(img), self.sharpen(img)])
         image = img.astype(np.float32)
         image = (image / 255. - 0.5) * 2.
 
