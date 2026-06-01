@@ -23,12 +23,13 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     checkpoints_and_steps = []
     first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
     if os.path.exists(first):
-        checkpoints_found = True
-        last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
-        if config.model_format == '.safetensors':
-            last = last.replace('.ckpt', config.model_format)
-            depicklize(first, nil_pickle=last)
-        else: shutil.move(first, last)
+        if int(torch.load(first, map_location='cpu', weights_only=False)['global_step']) == config.max_training_steps:
+            checkpoints_found = True
+            last = os.path.join(config.trained_models_directory(), config.create_checkpoint_file_name(config.max_training_steps))
+            if config.model_format == '.safetensors':
+                last = last.replace('.ckpt', config.model_format)
+                depicklize(first, nil_pickle=last)
+            else: shutil.move(first, last)
             
     if config.save_every_x_steps > 0:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
