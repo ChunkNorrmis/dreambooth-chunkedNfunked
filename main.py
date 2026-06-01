@@ -206,10 +206,10 @@ if __name__ == "__main__":
             # run all checkpoint hooks
             if trainer.global_rank == 0 and trainer.global_step > 0:
                 print(f"We encountered an error at step {trainer.global_step}. Saving checkpoint 'last.ckpt'...")
-                ckpt_path = os.path.join(dreambooth_config.log_checkpoint_directory(), f"last.ckpt")
+                ckpt_path = os.path.join(dreambooth_config.log_checkpoint_directory(), 'last.ckpt')
                 trainer.save_checkpoint(ckpt_path)
 
-                print(f"Copying trained model(s) to {dreambooth_config.trained_models_directory()}")
+                print(f"Copying trained model(s) to {os.path.relpath(dreambooth_config.trained_models_directory())}")
                 copy_and_name_checkpoints(config=dreambooth_config)
 
 
@@ -235,8 +235,8 @@ if __name__ == "__main__":
     finally:
         if trainer is not None and trainer.global_rank == 0:
             if trainer.global_step == dreambooth_config.max_training_steps:
-                print(f"Training complete. Successfully ran for {trainer.global_step} steps")
-                print(f"Copying trained model(s) to {dreambooth_config.trained_models_directory()}")
+                print(f"Training complete! Successfully ran for {trainer.global_step} steps")
+                #print(f"Moving model(s) to {dreambooth_config.trained_models_directory()}")
                 copy_and_name_checkpoints(config=dreambooth_config)
             else:
                 print(f"Error training at step {trainer.global_step}")
