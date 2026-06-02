@@ -75,7 +75,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             r = [n / 10. for n in range(5, 11)]
             sig = random.choice(r)
-            alpha = 1 / sig
+            alpha = 1 + (1 / sig)
             beta = 1 - alpha
             blur = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=sig, sigmaY=sig)
             img = cv2.addWeighted(img, alpha=alpha, src2=blur, beta=beta, gamma=0)
