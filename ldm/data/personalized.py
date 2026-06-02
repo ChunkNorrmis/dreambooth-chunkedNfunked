@@ -44,8 +44,7 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.sharpen(img)
-        img = self.blur(img)
+        img = random.choice([self.sharpen, self.blur])(img)
         image = img.astype(np.float32)
         image = (image / 255. - 0.5) * 2.
 
@@ -65,7 +64,7 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
-            r = [n / 10. for n in range(5, 11)] + [0]
+            r = [n / 10. for n in range(5, 11)] + [0.]
             sig = random.choice(r)
             img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=sig, sigmaY=sig)
         return img
@@ -75,10 +74,10 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             r = [n / 10. for n in range(5, 11)]
             sig = random.choice(r)
-            alpha = 1 + (1 / sig)
+            alpha = 1 / sig
             beta = 1 - alpha
-            blur = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=sig, sigmaY=sig)
-            img = cv2.addWeighted(img, alpha=alpha, src2=blur, beta=beta, gamma=0)
+            blur = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=sig, sigmaY=sig)
+            img = cv2.addWeighted(img, alpha=alpha, src2=blur, beta=beta, gamma=0.)
         return img
 
 
