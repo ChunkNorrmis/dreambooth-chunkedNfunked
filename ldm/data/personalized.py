@@ -40,14 +40,14 @@ class PersonalizedBase(Dataset):
 
 
     def __getitem__(self, i):
-        img_path = self.imgs[i % self.n_imgs]
-        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
-        img = self.crop_and_resize(img)
-        img = self.mirror(img)
-        img = self.sharpen(img)
-        img = self.blur(img)
-        image = img.astype(np.float32)
-        image = (image / 255. - 0.5) * 2.
+        image_path = self.imgs[i % self.n_imgs]
+        image = cv2.imread(image_path, cv2.IMREAD_COLOR_RGB)
+        image = self.crop_and_resize(image)
+        image = self.mirror(image)
+        image = self.sharpen(image)
+        image = self.blur(image)
+        image = image.astype(np.float32)
+        image = (image / 255 - 0.5) * 2
 
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
