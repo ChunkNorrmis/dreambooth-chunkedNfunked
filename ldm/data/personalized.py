@@ -50,9 +50,9 @@ class PersonalizedBase(Dataset):
         image = (image / 255 - 0.5) * 2
 
         if self.reg:
-            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            caption = generic_captions_from_path(image_path, self.data_root, self.reg_tokens)
         else:
-            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+            caption = caption_from_path(image_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         example = {'caption': caption, 'image': image}
         return example
 
@@ -65,14 +65,14 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
-            sig = random.uniform(0.5, 1.0)
+            sig = random.uniform(0.5, 1.)
             img = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=sig, sigmaY=sig)
         return img
 
 
     def sharpen(self, img):
         if random.random() < 0.5:
-            alpha = random.uniform(1.0, 1.5)
+            alpha = random.uniform(1., 1.5)
             beta = 1 - alpha
             blur = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0, sigmaY=0)
             img = cv2.addWeighted(img, alpha=alpha, src2=blur, beta=beta, gamma=0.)
