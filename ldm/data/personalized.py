@@ -52,7 +52,7 @@ class PersonalizedBase(Dataset):
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': caption, 'image': image}
+        example = {'caption': caption, 'image': img}
         return example
 
 
