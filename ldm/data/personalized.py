@@ -66,7 +66,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             r = [(n / 10) for n in range(5, 10)] + [1., 0]
             sig = random.choice(r)
-            k = random.choice(3, 5)
+            k = random.choice([3, 5])
             img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
         return img
 
