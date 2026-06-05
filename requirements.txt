@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/${CUDA_VER}
 absl-py==2.4.0
 accelerate==1.13.0
 aiohappyeyeballs==2.6.1
@@ -106,7 +107,7 @@ tensorboard-data-server==0.7.2
 threadpoolctl==3.6.0
 tifffile==2025.5.10
 tokenizers==0.13.3
-torch==2.12.0
+torch==2.11.0
 torchaudio
 torchcodec
 torchmetrics==0.11.4
@@ -115,7 +116,7 @@ tornado==6.5.5
 tqdm==4.67.3
 traitlets==5.14.3
 transformers==4.25.1
-triton==3.7.0
+triton
 typer==0.24.1
 typing_extensions==4.15.0
 tzdata==2026.2
