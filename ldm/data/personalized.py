@@ -41,13 +41,13 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
-        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
-        img = self.crop_and_resize(img)
-        img = self.mirror(img)
-        img = self.sharpen(img)
-        img = self.blur(img)
-        image = img.astype(np.float32)
-        image = (image / 255. - 0.5) * 2
+        image = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
+        image = self.crop_and_resize(image)
+        image = self.mirror(image)
+        image = self.sharpen(image)
+        image = self.blur(image)
+        image = image.astype(np.float32)
+        image = (image / 255 - 0.5) * 2
 
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
@@ -66,14 +66,14 @@ class PersonalizedBase(Dataset):
     def blur(self, img):
         if random.random() < 0.5:
             k = random.randrange(2, 6) * 2 - 1
-            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=1, sigmaY=1)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=1., sigmaY=1.)
         return img
 
 
     def sharpen(self, img):
         if random.random() < 0.5:
-            blur = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=1, sigmaY=1)
-            img = cv2.addWeighted(img, alpha=1, src2=blur, beta=0, gamma=0.)
+            blur = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=1., sigmaY=1.)
+            img = cv2.addWeighted(img, alpha=1, src2=blur, beta=-0, gamma=0)
         return img
 
 
