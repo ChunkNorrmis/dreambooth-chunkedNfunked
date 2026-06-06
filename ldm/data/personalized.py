@@ -64,19 +64,16 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
-            r = [(n / 10.) for n in range(5, 10)] + [0, 1]
-            sig = random.choice(r)
-            k = random.choice([3, 5])
-            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
+            k = random.randrange(2, 6) * 2 - 1
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=0, sigmaY=0)
         return img
 
 
     def sharpen(self, img):
         if random.random() < 0.5:
-            alpha = random.uniform(1., 1.5)
-            beta = 1 - alpha
-            blur = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=1.0, sigmaY=1.0)
-            img = cv2.addWeighted(img, alpha=alpha, src2=blur, beta=beta, gamma=0.)
+            blur = cv2.GaussianBlur(img, ksize=(9, 9), sigmaX=10.0, sigmaY=10.0)
+            img = cv2.addWeighted(img, alpha=1.5, src2=blur, beta=-0.5, gamma=0.)
+            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
         return img
 
 
