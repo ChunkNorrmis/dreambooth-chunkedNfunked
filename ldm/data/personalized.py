@@ -44,9 +44,9 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.blur(img)
-        img = img.astype(np.float32)
-        img = (img / 255. - 0.5) * 2
+        img = random.choice([self.blur, self.sharpen])(img)
+        image = img.astype(np.float32)
+        image = (image / 255. - 0.5) * 2
 
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
