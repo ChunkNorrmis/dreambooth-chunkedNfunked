@@ -73,7 +73,8 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             blur = cv2.GaussianBlur(img, ksize=(9, 9), sigmaX=10.0, sigmaY=10.0)
             img = cv2.addWeighted(img, alpha=1.5, src2=blur, beta=-0.5, gamma=0.)
-            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
+            if random.random() < 0.5:
+                img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
         return img
 
 
