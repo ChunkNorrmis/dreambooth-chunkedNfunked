@@ -10,7 +10,7 @@ per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י'
 
 class PersonalizedBase(Dataset):
     def __init__(
-        self, data_root=None, set='train', reg=False, placeholder_token='carbuncle', coarse_class_text='_', size=512,
+        self, data_root=None, set='train', reg=False, placeholder_token='lobster', coarse_class_text=None, size=512,
         repeats=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False
     ):
         self.data_root = data_root
@@ -41,11 +41,11 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
-        image = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
-        image = self.crop_and_resize(image)
-        image = self.mirror(image)
-        image = random.choice([self.blur, self.sharpen])(image)
-        image = image.astype(np.float32)
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
+        img = self.crop_and_resize(img)
+        img = self.mirror(img)
+        img = self.blur(img)
+        image = img.astype(np.float32)
         image = (image / 255 - 0.5) * 2
 
         if self.reg:
@@ -65,14 +65,15 @@ class PersonalizedBase(Dataset):
     def blur(self, img):
         if random.random() < 0.5:
             k = random.randrange(2, 6) * 2 - 1
-            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=1.0, sigmaY=1.0)
+            r = random.uniform(0.5, 1.0)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=r, sigmaY=r)
         return img
 
 
     def sharpen(self, img):
         if random.random() < 0.5:
-            blur = cv2.GaussianBlur(img, ksize=(9, 9), sigmaX=10.0, sigmaY=10.0)
-            img = cv2.addWeighted(img, alpha=1, src2=blur, beta=0, gamma=0.)
+            blur = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=0, sigmaY=0)
+            img = cv2.addWeighted(img, alpha=1.5, src2=blur, beta=-0.5, gamma=0.)
             img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
         return img
 
