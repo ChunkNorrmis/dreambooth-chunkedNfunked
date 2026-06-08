@@ -71,12 +71,12 @@ class JoePennaDreamboothConfigSchemaV1():
         if self.save_every_x_steps < 0:
             raise Exception("--save_every_x_steps: must be greater than or equal to 0")
 
-        self.training_images_folder_path = os.path.relpath(training_images_folder_path)
-
+        self.training_images_folder_path = training_images_folder_path
+        
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        self.training_images = [os.path.relpath(f, sys.path[0]) for f in
+        self.training_images = [os.path.relpath(f) for f in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpeg'), recursive=True) +
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
@@ -109,6 +109,9 @@ class JoePennaDreamboothConfigSchemaV1():
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
 
+        #self.trained_params = [[self.token, self.class_word], [self.token2, self.class2]]
+        
+        
         self.project_name = project_name
         self.project_config_filename = f"{self.project_name}-config.json"
         
