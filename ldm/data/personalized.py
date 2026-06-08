@@ -45,14 +45,14 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = img.astype(np.float32)
-        img = (img / 255. - 0.5) * 2
+        image = img.astype(np.float32)
+        image = (image / 255. - 0.5) * 2
 
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': caption, 'image': img}
+        example = {'caption': caption, 'image': image}
         return example
 
 
