@@ -49,8 +49,9 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = (img.astype(np.float32) / 255. - 0.5) * 2.
-        example = {'caption': cap, 'image': img}
+        image = np.array(img, dtype=np.float32)
+        image = (image / 255. - 0.5) * 2
+        example = {'caption': cap, 'image': image}
         return example
 
 
@@ -62,9 +63,7 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
-            kern = random.choice([3, 5])
-            sig = random.uniform(0.5, 1.0)
-            img = cv2.GaussianBlur(img, ksize=(kern, kern), sigmaX=sig, sigmaY=sig)
+            img = cv2.GaussianBlur(img, ksize=(3,3), sigmaX=0, sigmaY=0)
         return img
 
 
@@ -77,5 +76,3 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
-
-    
