@@ -64,7 +64,9 @@ class PersonalizedBase(Dataset):
     def blur(self, img):
         if random.random() < 0.5:
             k = random.randrange(2,6) * 2 - 1
-            img = cv2.GaussianBlur(img, ksize=(k,k), sigmaX=0, sigmaY=0)
+            r = [(n / 10) for n in range(5, 11)] + [0]
+            sig = random.choice(r)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
         return img
 
 
