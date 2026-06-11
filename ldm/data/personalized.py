@@ -49,9 +49,9 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = img.astype(np.float32)
-        img = (img / 255. - 0.5) * 2.
-        return {'caption': cap, 'image': img}
+        image = img.astype(np.float32)
+        image = (image / 255. - 0.5) * 2.
+        return {'caption': cap, 'image': image}
 
 
     def mirror(self, img):
@@ -78,3 +78,5 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
+
+
