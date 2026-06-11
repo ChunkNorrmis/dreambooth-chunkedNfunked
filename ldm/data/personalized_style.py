@@ -83,25 +83,18 @@ class PersonalizedBase(Dataset):
 
 
     def __getitem__(self, i):
-        img_path = self.imgs[i % self.n_imgs]
-        image = self.augment(img_path)
-        
+        img_path = self.imgs[i % self.n_imgs]        
         if self.per_image_tokens and random.random() < self.mixing_prob:
             caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
             caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
-        example = {'caption': caption, 'image': image}
-        return example
-
-
-    def augment(self, img_path):
-        img = cv2.imread(img_path)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        image = np.array(((img / 255. - 0.5) * 2.), dtype=np.float32)
-        return image
+        image = img.astype(np.float32)
+        image = (image / 255. - 0.5) * 2.
+        return {'caption': cap, 'image': image}
 
 
     def mirror(self, img):
@@ -112,9 +105,10 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
-            knl = random.choice([1, 3, 1])
-            sig = random.uniform(0.2, 0.5)
-            img = cv2.GaussianBlur(img, ksize=(knl,knl), sigmaX=sig, sigmaY=sig)
+            k = random.randrange(2, 5) * 2 - 1
+            r = [(n / 10) for n in range(5, 10)] + [0, 1.]
+            sig = random.choice(r)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=sig, sigmaY=sig)
         return img
 
 
