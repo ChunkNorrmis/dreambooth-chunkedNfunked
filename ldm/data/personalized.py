@@ -56,15 +56,16 @@ class PersonalizedBase(Dataset):
 
     def mirror(self, img):
         if random.random() < self.flip_p:
-            return cv2.flip(img, 1)
+            img = cv2.flip(img, 1)
+        return img
         
 
     def blur(self, img):
         if random.random() < 0.5:
             kern = random.choices([1, 3, 5], cum_weights=[1, 4, 5], k=1)
             sig = random.randrange(0, 11) / 10
-            return cv2.GaussianBlur(img, ksize=(kern, kern), sigmaX=sig, sigmaY=sig)
-        
+            img = cv2.GaussianBlur(img, ksize=(kern, kern), sigmaX=sig, sigmaY=sig)
+        return img
 
     def crop_and_resize(self, img):
         h, w = img.shape[:2]
