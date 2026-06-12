@@ -45,28 +45,26 @@ class PersonalizedBase(Dataset):
             cap = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             cap = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+
         img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        image = img.astype(np.float32)
-        image = (image / 255. - 0.5) * 2.
+        image = np.array((img / 255 - 0.5) * 2).astype(np.float32)
         return {'caption': cap, 'image': image}
 
 
     def mirror(self, img):
         if random.random() < self.flip_p:
-            img = cv2.flip(img, 1)
-        return img
-
+            return cv2.flip(img, 1)
+        
 
     def blur(self, img):
         if random.random() < 0.5:
-            k = random.randrange(1, 10, 2)
-            r = random.random()
-            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=r, sigmaY=r)
-        return img
-
+            kern = random.choices([1, 3, 5], cum_weights=[1, 4, 5], k=1)
+            sig = random.randrange(0, 11) / 10
+            return cv2.GaussianBlur(img, ksize=(kern, kern), sigmaX=sig, sigmaY=sig)
+        
 
     def crop_and_resize(self, img):
         h, w = img.shape[:2]
@@ -77,5 +75,4 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
         return img
-
 
