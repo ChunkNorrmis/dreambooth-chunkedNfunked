@@ -45,7 +45,6 @@ class PersonalizedBase(Dataset):
             cap = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             cap = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-
         img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
@@ -58,7 +57,7 @@ class PersonalizedBase(Dataset):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
-        
+
 
     def blur(self, img):
         if random.random() < 0.5:
