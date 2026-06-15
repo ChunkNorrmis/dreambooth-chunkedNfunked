@@ -77,6 +77,7 @@ class PersonalizedBase(Dataset):
             img = cv2.addWeighted(img, alpha=alpha, src2=mask, beta=beta, gamma=0.)
         return img
 
+
     def crop_and_resize(self, img):
         h, w = img.shape[:2]
         crop = min(h, w)
