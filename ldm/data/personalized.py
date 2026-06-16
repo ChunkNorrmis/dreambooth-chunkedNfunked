@@ -71,7 +71,7 @@ class PersonalizedBase(Dataset):
 
     def sharpen(self, img):
         if random.random() < 0.5:
-            mask = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=1.0, sigmaY=1.0)
+            mask = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=0)
             alpha = 1.5
             beta = 1 - alpha
             sharpened = cv2.addWeighted(img, alpha=alpha, src2=mask, beta=beta, gamma=0.0)
