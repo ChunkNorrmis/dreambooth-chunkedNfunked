@@ -32,26 +32,48 @@ class LSUNBase(Dataset):
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         img_path = example["file_path_"]
-        image = self.transform(img_path)
-        example['image'] = image
-        return example
+        image = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
+        image = self.crop_and_resize(image)
+        image = self.mirror(image)
+        image = random.choice([self.blur, self.sharpen])(image)
+        image = np.array(image).astype(np.float32)
+        image = (image  / 255. - 0.5) * 2
+        return {'image': image}
+        
+
+    def mirror(self, img):
+        if random.random() < self.flip_p:
+            img = cv2.flip(img, 1)
+        return img
 
 
-    def transform(self, img_path):
-        image = cv2.imread(img_path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        h, w = image.shape[0], image.shape[1]
+    def blur(self, img):
+        if random.random() < 0.5:
+            r = [n / 10 for n in range(6, 11)] + [0]
+            sig = random.choice(r)
+            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=sig, sigmaY=sig)
+        return img
+
+
+    def sharpen(self, img):
+        if random.random() < 0.5:
+            mask = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=0, sigmaY=0)
+            alpha = 1.3
+            beta = 1 - alpha
+            sharpened = cv2.addWeighted(img, alpha=alpha, src2=mask, beta=beta, gamma=0.0)
+            img = cv2.GaussianBlur(sharpened, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
+        return img
+
+
+    def crop_and_resize(self, img):
+        h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
-            image = image[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+            img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            image = cv2.resize(image, dsize=(self.size, self.size), interpolation=interp)
-        if random.random() < self.flip_p:
-            image = cv2.flip(image, 1)
-        image = cv2.GaussianBlur(image, ksize=(1, 1), sigmaX=0.2, sigmaY=0.2)
-        image = ((image / 255. - 0.5) / 0.5).astype(np.float32)
-        return image
+            img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
+        return img
 
 
 class LSUNChurchesTrain(LSUNBase):
