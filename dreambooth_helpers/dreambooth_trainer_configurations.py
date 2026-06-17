@@ -98,7 +98,7 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
             "image_size": 64,
             "channels": 4,
             "cond_stage_trainable": True,
-            "conditioning_key": "crossattn",
+            "conditioning_key": "adm",
             "monitor": "val/loss_simple_ema",
             "scale_factor": 0.18215,
             "use_ema": False,
