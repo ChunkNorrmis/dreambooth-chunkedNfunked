@@ -38,3 +38,9 @@ def depicklize(dict_pickle, nil_pickle=None):
         print(' ')
         shutil.move(dict_pickle, nil_pickle)
 
+
+if __name__ == '__main__':
+    dict_pickle = sys.argv[1]
+    nil_pickle = sys.argv[2]
+    depicklize(dict_pickle, nil_pickle=nil_pickle)
+
