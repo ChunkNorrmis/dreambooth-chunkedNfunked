@@ -22,6 +22,9 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         print(f"No checkpoints found in {logs_directory}")
         return
     
+    if config.model_format == '.safetensors':
+        print(f" Depickling model checkpoints")
+        print(' ')
     for file_path in tqdm(file_paths):
         checkpoints_found = True
         if file_path == first:
