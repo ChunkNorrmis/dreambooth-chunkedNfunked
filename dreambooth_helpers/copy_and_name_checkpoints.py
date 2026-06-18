@@ -34,7 +34,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         else:
             file_name = os.path.basename(file_path)
             steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name)
-            steps = os.path.splitext(checkpoint_steps)[0]
+            steps = os.path.splitext(steps)[0]
             output_file = os.path.join(output_folder, config.create_checkpoint_file_name(steps))
             if config.model_format == '.safetensors':
                 depicklize(file_path, nil_pickle=output_file)
