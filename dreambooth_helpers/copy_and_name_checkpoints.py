@@ -14,13 +14,20 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         os.mkdir(output_folder)
 
     config.save_config_to_file(save_path=output_folder)
-
+    intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
+    ckpt_dir = config.log_checkpoint_directory()
+    file_paths = [ckpt for ckpt in glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))]
+    first = os.path.join(ckpt_dir, 'last.ckpt')
+    if os.path.exists(first):
+        file_paths += [first]
+    
     logs_directory = config.log_directory()
     if not os.path.exists(logs_directory):
         print(f"No checkpoints found in {logs_directory}")
         return
-
-    first = os.path.join(config.log_checkpoint_directory(), 'last.ckpt')
+    
+    p_bar = tqdm(total=range(len(file_paths)), unit='conversion')
+    
     if os.path.exists(first):
         if int(torch.load(first, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
             checkpoints_found = True
@@ -29,12 +36,10 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
                 last = last.replace('.ckpt', '.safetensors')
                 depicklize(first, nil_pickle=last)
             else: shutil.move(first, last)
+            p_bar.update(1)
 
     if config.save_every_x_steps > 0:
         checkpoints_and_steps = []
-        intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-        file_paths = glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
-
         for i, original_file_path in enumerate(file_paths):
             # Grab the steps from the filename
             # "epoch=000000-step=000000250.ckpt" => "250.ckpt"
@@ -58,6 +63,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
                     depicklize(original_file_name, nil_pickle=output_file_name)
                 else:
                     shutil.move(original_file_name, output_file_name)
+                p_bar.update(1)
         checkpoints_found = True
 
     
