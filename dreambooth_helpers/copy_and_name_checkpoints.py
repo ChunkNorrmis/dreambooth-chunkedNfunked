@@ -25,18 +25,18 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
             if int(torch.load(file_path, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
                 last = os.path.join(output_folder, config.create_checkpoint_file_name(config.max_training_steps))
                 if config.model_format == '.safetensors':
-                    last = last.replace('.ckpt', '.safetensors')
                     depicklize(file_path, nil_pickle=last)
-                else: shutil.move(file_path, last)
+                else:
+                    shutil.move(file_path, last)
         else:
             file_name = os.path.basename(file_path)
             steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name)
             steps = os.path.splitext(checkpoint_steps)[0]
             output_file = os.path.join(output_folder, config.create_checkpoint_file_name(steps))
             if config.model_format == '.safetensors':
-                output_file = output_file.replace('.ckpt', config.model_format)
                 depicklize(file_path, nil_pickle=output_file)
-            else: shutil.move(file_path, output_file)
+            else:
+                shutil.move(file_path, output_file)
             
     if checkpoints_found:
         print(f"✅ Model(s) moved to './{output_folder}'")
