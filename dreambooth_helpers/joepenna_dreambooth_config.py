@@ -180,9 +180,9 @@ class JoePennaDreamboothConfigSchemaV1():
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
-    def create_checkpoint_file_name(self, steps: str):
+    def create_checkpoint_file_name(self, steps: str, proj_name=self.project_name):
         date_string = datetime.now(timezone.utc).strftime('%m-%d-%Y')
-        return f"{date_string}_{self.project_name}_{int(steps):05d}_steps.ckpt".replace(' ', '_')
+        return f"{date_string}_{proj_name}_{int(steps):05d}_steps.ckpt".replace(' ', '_')
                 
     def save_config_to_file(
             self,
