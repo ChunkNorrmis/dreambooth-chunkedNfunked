@@ -42,3 +42,9 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         print(f"✅ Model(s) moved to './{output_folder}'")
     else:
         print("No checkpoints found.")
+
+
+if __name__ == '__main__':
+    config = JoePennaDreamboothConfigSchemaV1()
+    copy_and_name_checkpoints(config)
+
