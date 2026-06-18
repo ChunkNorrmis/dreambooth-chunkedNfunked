@@ -34,7 +34,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
             file_name = os.path.basename(original_file_path)
             checkpoint_steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name)
             checkpoint_steps = os.path.splitext(checkpoint_steps)[0]
-            checkpoints_and_steps.append(original_file_path, checkpoint_steps)
+            checkpoints_and_steps.append((original_file_path, checkpoint_steps))
             for i, file_and_steps in enumerate(checkpoints_and_steps):
                 original_file_name, steps = file_and_steps[0], file_and_steps[1]
                 checkpoints_found = True
