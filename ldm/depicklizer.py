@@ -13,7 +13,6 @@ def depicklize(dict_pickle, nil_pickle=None):
                 return False
         return True
 
-    print(f" Depickling model checkpoints")
     suspicious_pickle = torch.load(dict_pickle, map_location=torch.device('cpu'), weights_only=False)
     sus_dict = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     del suspicious_pickle['state_dict']
