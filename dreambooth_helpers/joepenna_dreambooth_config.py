@@ -76,7 +76,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
 
-        self.training_images = [os.path.relpath(f) for f in
+        self.training_images = [os.path.relpath(t) for t in
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpg'), recursive=True) +
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.jpeg'), recursive=True) +
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
@@ -88,7 +88,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.max_training_steps = int(self.training_images_count * self.repeats / (self.batch_size * self.accumed_grads))
 
         if not self.token_only:
-            self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
+            self.regularization_images_folder_path = regularization_images_folder_path
             self.class_word = class_word
 
         if not os.path.exists(self.regularization_images_folder_path):
