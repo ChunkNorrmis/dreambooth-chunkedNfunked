@@ -45,38 +45,33 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        image = img.astype(np.float32)
-        image = (image / 255. - 0.5) * 2.
+        img = img.astype(np.float32) / 255
+        img = (img - 0.5) * 2
         if self.reg:
-            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            cap = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': caption, 'image': image}
+            cap = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example = {'caption': cap, 'image': img}
         return example
-
 
     def mirror(self, img):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
 
-
     def blur(self, img):
         if random.random() < 0.5:
-            k = random.choice([1, 3])
-            sig = random.uniform(0.5, 1.)
-            img = cv2.GaussianBlur(img, ksize=(k,k), sigmaX=sig, sigmaY=sig)
+            k = random.randrange(3, 10, 2)
+            img = cv2.GaussianBlur(img, ksize=(k, k), sigmaX=0, sigmaY=0)
         return img
-
 
     def sharpen(self, img):
         if random.random() < 0.5:
             mask = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
             alpha = 1.2
-            beta = 1. - alpha
+            beta = 1.0 - alpha
             img = cv2.addWeighted(img, alpha=alpha, src2=mask, beta=beta, gamma=0.)
         return img
-
 
     def crop_and_resize(self, img):
         h, w = img.shape[:2]
