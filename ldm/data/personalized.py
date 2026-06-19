@@ -45,7 +45,7 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = cv2.cvtColor(img, cv2.BGR2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = img.astype(np.float32) / 255
         img = (img - 0.5) * 2
         if self.reg:
