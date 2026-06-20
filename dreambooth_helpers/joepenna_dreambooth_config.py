@@ -71,7 +71,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if self.save_every_x_steps < 0:
             raise Exception("--save_every_x_steps: must be greater than or equal to 0")
 
-        self.training_images_folder_path = training_images_folder_path
+        self.training_images_folder_path = os.path.relpath(training_images_folder_path)
         
         if not os.path.exists(self.training_images_folder_path):
             raise Exception(f"Training Images Path Not Found: '{self.training_images_folder_path}'.")
@@ -88,7 +88,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.max_training_steps = int(self.training_images_count * self.repeats / (self.batch_size * self.accumed_grads))
 
         if not self.token_only:
-            self.regularization_images_folder_path = regularization_images_folder_path
+            self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
             self.class_word = class_word
 
         if not os.path.exists(self.regularization_images_folder_path):
