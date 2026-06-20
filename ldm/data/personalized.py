@@ -1,5 +1,4 @@
-import os, sys, torch, cv2, random, glob
-import numpy as np
+import os, sys, torch, cv2, random, glob, numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from captionizer import caption_from_path, generic_captions_from_path, find_images
