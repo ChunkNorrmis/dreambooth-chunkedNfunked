@@ -1,6 +1,5 @@
-import os, torch, sys, cv2, random, numpy as np
+import os, torch, sys, cv2, random, glob, numpy as np
 from torch.utils.data import Dataset
-import glob
 
 imagenet_templates_small = [
     'a painting in the style of {}',
@@ -56,13 +55,13 @@ class PersonalizedBase(Dataset):
         size=512,
         repeats=100,
         flip_p=0.5,
-        placeholder_token='rock',
+        placeholder_token='lobster',
         per_image_tokens=False,
         center_crop=True,
         mixing_prob=0.25
     ):
         self.data_root = data_root
-        self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
+        self.imgs = glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
         self.flip_p = flip_p
@@ -77,19 +76,17 @@ class PersonalizedBase(Dataset):
         if set == "train":
             self._length = self.n_imgs * repeats
 
-
     def __len__(self):
         return self._length
 
-
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
-        image = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
-        image = self.crop_and_resize(image)
-        image = self.mirror(image)
-        image = random.choice([self.blur, self.sharpen])(image)
-        image = np.array(image).astype(np.float32)
-        image = (image  / 255. - 0.5) * 2.
+        img = cv2.imread(img_path) #cv2.IMREAD_COLOR_RGB)
+        img = self.crop_and_resize(img)
+        img = self.mirror(img)
+        img = self.blur(img)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        image = ((img / 255 - 0.5) * 2).astype(np.float32)
         if self.per_image_tokens and random.random() < self.mixing_prob:
             caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
@@ -97,30 +94,24 @@ class PersonalizedBase(Dataset):
         example = {'caption': caption, 'image': image}
         return example
 
-
     def mirror(self, img):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
 
-
     def blur(self, img):
         if random.random() < 0.5:
-            r = [n / 10 for n in range(6, 11)] + [0]
-            sig = random.choice(r)
-            img = cv2.GaussianBlur(img, ksize=(3, 3), sigmaX=sig, sigmaY=sig)
+            k = random.randrange(3, 10, 2)
+            img = cv2.GaussianBlur(img, (k, k), 0)
         return img
-
 
     def sharpen(self, img):
         if random.random() < 0.5:
-            mask = cv2.GaussianBlur(img, ksize=(5, 5), sigmaX=0, sigmaY=0)
-            alpha = 1.3
-            beta = 1 - alpha
-            sharpened = cv2.addWeighted(img, alpha=alpha, src2=mask, beta=beta, gamma=0.0)
-            img = cv2.GaussianBlur(sharpened, ksize=(3, 3), sigmaX=0.5, sigmaY=0.5)
+            mask = cv2.GaussianBlur(img, (3, 3), 0.5)
+            alpha = 1.2
+            beta = 1.0 - alpha
+            img = cv2.addWeighted(img, alpha, mask, beta, 0.)
         return img
-
 
     def crop_and_resize(self, img):
         h, w = img.shape[:2]
@@ -129,7 +120,7 @@ class PersonalizedBase(Dataset):
             img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            img = cv2.resize(img, dsize=(self.size, self.size), interpolation=interp)
+            img = cv2.resize(img, (self.size, self.size), interp)
         return img
 
 
