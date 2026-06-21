@@ -43,12 +43,12 @@ class PersonalizedBase(Dataset):
         img = self.mirror(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = ((img / 255 - 0.5) * 2).astype(np.float32)
+        img = np.array((img / 255. - 0.5) * 2).astype(np.float32)
         if self.reg:
             cap = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             cap = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': cap, 'image': image}
+        example = {'caption': cap, 'image': img}
         return example
 
     def mirror(self, img):
@@ -58,16 +58,10 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < 0.5:
-            k = random.randrange(3, 10, 2)
-            img = cv2.GaussianBlur(img, (k, k), 0)
-        return img
-
-    def sharpen(self, img):
-        if random.random() < 0.5:
-            mask = cv2.GaussianBlur(img, (3, 3), 0.5)
-            alpha = 1.2
-            beta = 1.0 - alpha
-            img = cv2.addWeighted(img, alpha, mask, beta, 0.)
+            k = random.randrange(3, 8, 2)
+            gaussian = lambda x: cv2.GaussianBlur(x, (k, k), 0)
+            bilateral = lambda x: cv2.bilateralFilter(x, 7, 75, 75)
+            img = random.choice([gaussian, bilateral])(img)           
         return img
 
     def crop_and_resize(self, img):
