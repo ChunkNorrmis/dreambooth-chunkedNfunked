@@ -43,7 +43,8 @@ class PersonalizedBase(Dataset):
         img = self.mirror(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        img = img.astype(np.float32)
+        img = (img / 255 - 0.5) * 2
         if self.reg:
             cap = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -57,11 +58,11 @@ class PersonalizedBase(Dataset):
         return img
 
     def blur(self, img):
+        def _gaussian(x): return cv2.GaussianBlur(x, (5, 5), 0)
+        def _bilateral(x): return cv2.bilateralFilter(x, 5, 200, 200)
         if random.random() < 0.5:
-            k = random.randrange(3, 8, 2)
-            gaussian = lambda x: cv2.GaussianBlur(x, (k, k), 0)
-            bilateral = lambda x: cv2.bilateralFilter(x, 7, 75, 75)
-            img = random.choice([gaussian, bilateral])(img)           
+            blurred = random.choice([_gaussian, _bilateral])
+            img = blurred(img)
         return img
 
     def crop_and_resize(self, img):
