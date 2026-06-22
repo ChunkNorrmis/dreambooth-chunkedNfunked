@@ -43,13 +43,13 @@ class PersonalizedBase(Dataset):
         img = self.mirror(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = img.astype(np.float32)
-        img = (img / 255 - 0.5) * 2
+        image = img.astype(np.float32)
+        image = (image / 255 - 0.5) * 2
         if self.reg:
-            cap = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            cap = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': cap, 'image': img}
+            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example = {'caption': caption, 'image': image}
         return example
 
     def mirror(self, img):
