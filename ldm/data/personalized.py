@@ -49,8 +49,7 @@ class PersonalizedBase(Dataset):
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example = {'caption': caption, 'image': image}
-        return example
+        return {'caption': caption, 'image': image}
 
     def mirror(self, img):
         if random.random() < self.flip_p:
