@@ -102,11 +102,11 @@ tifffile==2025.5.10
 tokenizers==0.13.3
 torch==2.12.0
 torchcodec
-torchmetrics==0.11.4
+torchmetrics==0.11.3
 torchvision
 tornado==6.5.5
 traitlets==5.14.3
-transformers==4.33.3
+transformers==4.30
 triton
 typer==0.24.1
 typing_extensions==4.15.0
