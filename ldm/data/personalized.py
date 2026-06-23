@@ -8,10 +8,8 @@ from captionizer import caption_from_path, generic_captions_from_path, find_imag
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
 
 class PersonalizedBase(Dataset):
-    def __init__(
-        self, data_root=None, set='train', reg=False, placeholder_token='lobster', coarse_class_text=None, size=512,
-        repeats=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False
-    ):
+    def __init__(self, data_root='training_images', set='train', reg=False, placeholder_token='lobster', coarse_class_text='aesthetic',
+                 size=512, repeats=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
         self.data_root = data_root
         self.imgs = glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)
         self.n_imgs = len(self.imgs)
@@ -25,18 +23,17 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
-        
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
-        
         if set == 'train':
             self._length = self.n_imgs * repeats
-        
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
+
     def __len__(self):
         return self._length
+
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
@@ -52,10 +49,12 @@ class PersonalizedBase(Dataset):
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         return {'caption': caption, 'image': image}
 
+
     def mirror(self, img):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
+
 
     def blur(self, img):
         if random.random() < 0.5:
