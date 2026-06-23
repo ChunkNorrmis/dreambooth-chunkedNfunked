@@ -41,8 +41,7 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        image = img.astype(np.float32)
-        image = (image / 255 - 0.5) * 2
+        img = ((img / 255. - 0.5) * 2).astype(np.float32)
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
