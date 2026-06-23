@@ -40,11 +40,10 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
-        img = cv2.imread(img_path) #cv2.IMREAD_COLOR_RGB)
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = img.astype(np.float32)
         image = (image / 255 - 0.5) * 2
         if self.reg:
