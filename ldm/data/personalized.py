@@ -58,7 +58,7 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         def _gaussian(x): return cv2.GaussianBlur(x, (5, 5), 0)
-        def _bilateral(x): return cv2.bilateralFilter(x, 5, 200, 200)
+        def _bilateral(x): return cv2.bilateralFilter(x, 7, 100, 100)
         if random.random() < 0.5:
             blurred = random.choice([_gaussian, _bilateral])
             img = blurred(img)
