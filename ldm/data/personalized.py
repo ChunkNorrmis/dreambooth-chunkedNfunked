@@ -22,7 +22,7 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.flip_p = flip_p
+        self.odds = flip_p
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
         if set == 'train':
@@ -52,13 +52,13 @@ class PersonalizedBase(Dataset):
 
 
     def mirror(self, img):
-        if random.random() < self.flip_p:
+        if random.random() < self.odds:
             img = cv2.flip(img, 1)
         return img
 
 
     def blur(self, img):
-        if random.random() < 0.5:
+        if random.random() < self.odds:
             k = random.randrange(1, 8, 2)
             r = random.randrange(0, 6)
             s = 1.0 - r / 10
