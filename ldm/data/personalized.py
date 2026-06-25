@@ -53,8 +53,8 @@ class PersonalizedBase(Dataset):
 
     def convert(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = np.array((img / 255. - 0.5) * 2).astype(np.float32)
-        return img
+        image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        return image
 
 
     def mirror(self, img):
