@@ -36,19 +36,25 @@ class PersonalizedBase(Dataset):
 
 
     def __getitem__(self, i):
+        example = {}
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array(img, dtype=np.float32) / 255
-        image = (image - 0.5) * 2
+        img = self.convert(img)
         if self.reg:
-            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        return {'caption': caption, 'image': image}
+            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example['image'] = img
+        return example
+
+
+    def convert(self, img):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        return img
 
 
     def mirror(self, img):
@@ -60,9 +66,7 @@ class PersonalizedBase(Dataset):
     def blur(self, img):
         if random.random() < self.odds:
             k = random.randrange(1, 8, 2)
-            r = random.randrange(0, 6)
-            s = 1.0 - r / 10
-            img = cv2.GaussianBlur(img, (k, k), s)
+            img = cv2.GaussianBlur(img, (k, k), 0)
         return img
 
 
