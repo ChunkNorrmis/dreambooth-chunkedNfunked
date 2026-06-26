@@ -42,19 +42,19 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.blur(img)
-        img = self.convert(img)
+        image = self.convert(img)
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example['image'] = img
+        example['image'] = image
         return example
 
 
     def convert(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
-        return image
+        img = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        return img
 
 
     def mirror(self, img):
@@ -65,9 +65,8 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < self.odds:
-             r = random.randrange(5, 11)
-             s = r / 10       v 
-img = cv2.GaussianBlur(img, (5, 5), s)
+            r = random.randrange(5, 11) / 10
+            img = cv2.GaussianBlur(img, (3, 3), r)
         return img
 
 
