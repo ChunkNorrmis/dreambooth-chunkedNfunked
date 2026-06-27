@@ -88,8 +88,8 @@ def get_dreambooth_model_config(config: JoePennaDreamboothConfigSchemaV1) -> dic
         "target": "ldm.models.diffusion.ddpm.LatentDiffusion",
         "params": {
             "reg_weight": 1.0,
-            "linear_start": 0.00085,
-            "linear_end": 0.012,
+            "linear_start": 1e-05,
+            "linear_end": 5e-03,
             "num_timesteps_cond": 1,
             "log_every_t": 200,
             "timesteps": 1000,
