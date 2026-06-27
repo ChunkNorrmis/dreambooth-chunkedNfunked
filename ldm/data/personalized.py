@@ -51,12 +51,12 @@ class PersonalizedBase(Dataset):
         return example
 
 
-    def convert(self, img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array(img).astype(np.float32)
-        image = image / 255
-        image = (image - 0.5) * 2
-        return image
+    def convert(self, im):
+        im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        img = np.array(im).astype(np.float32)
+        img = img / 255
+        img = (img - 0.5) / 0.5
+        return img
 
 
     def mirror(self, img):
@@ -67,9 +67,8 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):
         if random.random() < self.odds:
-            r = random.randrange(5, 11)
-            r = r / 10.
-            img = cv2.GaussianBlur(img, (3, 3), r)
+            #sig = random.uniform(0.5, 0.7)
+            img = cv2.GaussianBlur(img, (3, 3), 0.5)
         return img
 
 
