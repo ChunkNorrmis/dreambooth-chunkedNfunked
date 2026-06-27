@@ -11,7 +11,7 @@ class PersonalizedBase(Dataset):
     def __init__(self, data_root='training_images', set='train', reg=False, placeholder_token='rock', coarse_class_text='lobster',
                  size=512, repeats=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
         self.data_root = data_root
-        self.imgs = glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)
+        self.imgs = (os.path.relpath(i) for i in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True))
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
         self.token_only = token_only
