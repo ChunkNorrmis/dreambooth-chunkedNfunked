@@ -42,19 +42,14 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = random.choice([self.blur, self.noise])(img)
-        image = self.convert(img)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        image = ((img / 255 - 0.5) * 2).astype(np.float32)
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         example['image'] = image
         return example
-
-
-    def convert(self, img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = ((img / 255 - 0.5) * 2).astype(np.float32)
-        return img
 
 
     def mirror(self, img):
