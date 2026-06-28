@@ -41,7 +41,7 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.blur(img)
+        img = random.choice([self.blur, self.noise])(img)
         image = self.convert(img)
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
@@ -62,6 +62,15 @@ class PersonalizedBase(Dataset):
     def mirror(self, img):
         if random.random() < self.odds:
             img = cv2.flip(img, 1)
+        return img
+
+
+    def noise(self, img):
+        if random.random() < self.odds:
+            sig = random.randrange(5,11)
+            _noise = np.random.normal(0, sig, img.shape).astype(np.float32)
+            img = img.astype(np.float32) + _noise
+            img = np.clip(img, 0, 255).astype(np.uint8)
         return img
 
 
