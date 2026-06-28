@@ -52,9 +52,7 @@ class PersonalizedBase(Dataset):
 
 
     def convert(self, img):
-        rgb = lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2RGB)
-        gray = lambda x: cv2.cvtColor(x, cv2.COLOR_BGR2GRAY)
-        img = random.choice([rgb, gray])(img)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = ((img / 255 - 0.5) * 2).astype(np.float32)
         return img
 
