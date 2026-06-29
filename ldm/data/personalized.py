@@ -43,7 +43,7 @@ class PersonalizedBase(Dataset):
         img = self.mirror(img)
         img = random.choice([self.blur, self.noise])(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = ((img / 255 - 0.5) * 2).astype(np.float32)
+        image = np.array((img / 255 - 0.5) * 2).astype(np.float32)
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
