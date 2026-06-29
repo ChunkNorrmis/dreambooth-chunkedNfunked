@@ -6,28 +6,26 @@ from ldm.depicklizer import depicklize
 
 def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     checkpoints_found = False
-    file_paths = []
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
     logs_directory = config.log_directory()
     ckpt_dir = config.log_checkpoint_directory()
-    first = os.path.join(ckpt_dir, 'last.ckpt')
+    file_paths = [os.path.join(ckpt_dir, 'last.ckpt')]
     if config.save_every_x_steps > 0:
         intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
         file_paths += glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt'))
-    file_paths += [first]
     config.save_config_to_file(save_path=output_folder)
     if not os.path.exists(logs_directory):
         print(f"No checkpoints found in {logs_directory}")
         return
     
     if config.model_format == '.safetensors':
-        print(f" Depickling model checkpoints")
+        print(f"Depickling model checkpoints")
         print(' ')
     for file_path in tqdm(file_paths):
         checkpoints_found = True
-        if file_path == first:
+        if os.path.basename(file_path) == 'last.ckpt':
             if int(torch.load(file_path, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
                 last = os.path.join(output_folder, config.create_checkpoint_file_name(config.max_training_steps))
                 if config.model_format == '.safetensors':
