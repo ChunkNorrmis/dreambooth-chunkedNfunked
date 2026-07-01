@@ -39,10 +39,11 @@ class PersonalizedBase(Dataset):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
-        img = self._crop_and_resize(img)
-        img = self._mirror(img)
-        img = random.choice([self._blur, self._noise])(img)
-        image = self._convert(img)
+        img = self.crop_and_resize(img)
+        img = self.mirror(img)
+        img = random.choice([self.blur, self.noise])(img)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)        
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -51,22 +52,22 @@ class PersonalizedBase(Dataset):
         return example
 
 
-    def _mirror(self, img):
+    def mirror(self, img):
         if random.random() < self.odds:
             img = cv2.flip(img, 1)
         return img
 
 
-    def _noise(self, img):
+    def noise(self, img):
         if random.random() < self.odds:
-            noise = np.random.normal(0, 5, img.shape).astype(np.float32)
-            noise = np.clip(noise, 0, 255).astype(np.uint8)
+            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            _noise = np.clip(_noise, 0, 255).astype(np.uint8)
             beta = random.uniform(1.0, 1.5)
-           img = cv2.addWeighted(img, 1, noise, beta, 0)
+            img = cv2.addWeighted(img, 1, _noise, beta, 0)
         return img
 
 
-    def _blur(self, img):                                                                                                                                                                                                
+    def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
             k = random.choice([3, 5])
             kern = (k, k)
@@ -75,18 +76,13 @@ class PersonalizedBase(Dataset):
         return img
 
 
-    def _convert(self, img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        return np.array((img / 255. - 0.5) * 2.).astype(np.float32)
-
-
-    def _crop_and_resize(self, img):
+    def crop_and_resize(self, img):
         h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
             img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            img = cv2.resize(img, (self.size, se000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000lf.size), interp)
+            img = cv2.resize(img, (self.size, self.size), interp)
         return img
 
