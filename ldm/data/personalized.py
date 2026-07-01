@@ -39,11 +39,10 @@ class PersonalizedBase(Dataset):
         example = {}
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
-        img = self.crop_and_resize(img)
-        img = self.mirror(img)
-        img = random.choice([self.blur, self.noise])(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255 - 0.5) * 2).astype(np.float32)
+        img = self._crop_and_resize(img)
+        img = self._mirror(img)
+        img = random.choice([self._blur, self._noise])(img)
+        image = self._convert(img)
         if self.reg:
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -52,36 +51,41 @@ class PersonalizedBase(Dataset):
         return example
 
 
-    def mirror(self, img):
+    def _mirror(self, img):
         if random.random() < self.odds:
             img = cv2.flip(img, 1)
         return img
 
 
-    def noise(self, img):
+    def _noise(self, img):
         if random.random() < self.odds:
-            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            noise = np.random.normal(0, 5, img.shape).astype(np.float32)
             img = img.astype(np.float32)
             beta = random.uniform(1.0, 1.5)
-            noisy = cv2.addWeighted(img, 1., _noise, beta, 0.)
+            noisy = cv2.addWeighted(img, 1., noise, beta, 0.)
             img = np.clip(noisy, 0., 255.).astype(np.uint8)
         return img
 
 
-    def blur(self, img):
+    def _blur(self, img):
         if random.random() < self.odds:
             sig = random.uniform(0.5, 1.0)
             img = cv2.GaussianBlur(img, (5, 5), sig)
         return img
 
 
-    def crop_and_resize(self, img):
+    def _convert(self, img):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        return np.array((img / 255. - 0.5) * 2.).astype(np.float32)
+
+
+    def _crop_and_resize(self, img):
         h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
             img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            img = cv2.resize(img, (self.size, self.size), interp)
+            img = cv2.resize(img, (self.size, se000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000lf.size), interp)
         return img
 
