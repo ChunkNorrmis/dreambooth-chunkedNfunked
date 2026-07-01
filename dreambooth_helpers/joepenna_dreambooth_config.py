@@ -15,10 +15,10 @@ class JoePennaDreamboothConfigSchemaV1():
         self.training_images_folder_path = None
         self.regularization_images_folder_path = None
         self.model_path = None
-        self.precision = False
+        self.precision = None
         self.safetensors = False
         self.repeats = 100
-        self.learning_rate = 1.0e-06
+        self.learning_rate = 1e-6
         self.batch_size = 1
         self.accumed_grads = 1
         self.res = 512
@@ -33,15 +33,15 @@ class JoePennaDreamboothConfigSchemaV1():
         self,
         project_name=None,
         token=None,
-        token_only=False,
+        token_only=None,
         class_word=None,
         training_images_folder_path=None,
         regularization_images_folder_path=None,
         model_path=None,
-        precision='float16',
-        safetensors=False,
-        repeats=100,
-        learning_rate=1.0e-06,
+        precision=None,
+        safetensors=None,
+        repeats=None,
+        learning_rate=None,
         batch_size=1,
         accumed_grads=1,
         res=512,
@@ -63,8 +63,20 @@ class JoePennaDreamboothConfigSchemaV1():
         self.debug = debug
         self.gpu = gpu
         self.token_only = token_only
-        self.seed = random.randrange(0, 1e+04)
+        self.seed = random.randrange(0, 1e+4)
         self.safetensors = safetensors
+        self.learning_rate = learning_rate
+        self.precision = precision
+        self.project_name = project_name
+        self.project_config_filename = f"{self.project_name}--config.json"
+
+        if not os.path.exists(model_path):
+            if model_path.startswith('https://huggingface.co'):
+                self.model_path = from_huggingface_hub(model_path)
+            elif model_path.startswith('https://drive.google.com'):
+                self.model_path = from_google_drive(model_path)
+            else: raise Exception(f"{os.path.basename(model_path)} not Found")
+        else: self.model_path = os.path.relpath(model_path)
         
         seed_everything(self.seed)
 
@@ -102,27 +114,10 @@ class JoePennaDreamboothConfigSchemaV1():
         if self.flip_percent < 0 or self.flip_percent > 1:
             raise Exception("--flip_p: must be between 0 and 1")
 
-        self.learning_rate = learning_rate
-        self.precision = precision
-        
         if self.safetensors:
             self.model_format = '.safetensors'
         else: self.model_format = '.ckpt'
-
-        #self.trained_params = [[self.token, self.class_word], [self.token2, self.class2]]
         
-        
-        self.project_name = project_name
-        self.project_config_filename = f"{self.project_name}-config.json"
-        
-        if not os.path.exists(model_path):
-            if model_path.startswith('https://huggingface.co'):
-                self.model_path = from_huggingface_hub(model_path)
-            elif model_path.startswith('https://drive.google.com'):
-                self.model_path = from_google_drive(model_path)
-            else: raise Exception(f"Model Path Not Found: '{model_path}'.")
-        else: self.model_path = os.path.relpath(model_path)
-            
         self.validate_gpu_vram()
         self._create_log_folders()
 
