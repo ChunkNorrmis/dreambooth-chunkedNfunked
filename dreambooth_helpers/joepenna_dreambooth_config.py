@@ -24,7 +24,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.res = 512
         self.crop = False
         self.flip_percent = 0.5
-        self.seed = 1337
+        self.seed = None
         self.save_every_x_steps = 0
         self.gpu = 0
         self.debug = False        
