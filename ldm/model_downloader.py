@@ -9,7 +9,7 @@ def from_huggingface_hub(url):
     ckpt_file = os.path.basename(url)
     model_path = os.path.join(sys.path[0], ckpt_file)
     if not os.path.exists(model_path):
-        print(f"Downloading '{ckpt_file}'")
+        print(f"Downloading '{ckpt_file}'...")
         hf_hub_download(repo_id, ckpt_file, local_dir=sys.path[0])
     return os.path.relpath(model_path)
 
@@ -21,6 +21,6 @@ def from_google_drive(url):
 
     model_path = os.path.join(sys.path[0], 'model.ckpt')
     if not os.path.exists(model_path):
-        print(f"Downloading '{os.path.basename(model_path)}'")
+        print('Downloading model.ckpt...')
         gdown.download(url=url, output=model_path, quiet=True, progress=on_progress)
     return os.path.relpath(model_path)
