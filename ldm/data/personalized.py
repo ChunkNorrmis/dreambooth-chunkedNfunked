@@ -60,9 +60,9 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < self.odds:
-            beta = random.uniform(0.5, 1.0)
             _noise = np.random.normal(0, 10, img.shape).astype(np.float32)
             img = img.astype(np.float32)
+            beta = random.uniform(0.5, 1.0)
             noisy = cv2.addWeighted(img, 1.0, _noise, beta, 0)
             img = np.clip(noisy, 0, 255).astype(np.uint8)            
         return img
