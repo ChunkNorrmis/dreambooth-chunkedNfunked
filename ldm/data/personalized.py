@@ -36,7 +36,6 @@ class PersonalizedBase(Dataset):
 
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
@@ -45,10 +44,10 @@ class PersonalizedBase(Dataset):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)        
         if self.reg:
-            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
-            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        example['image'] = image
+            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+        example = {'caption': caption, 'image': image}
         return example
 
 
