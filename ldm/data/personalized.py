@@ -62,7 +62,7 @@ class PersonalizedBase(Dataset):
             r = random.randrange(5, 11)
             _noise = np.random.normal(0, r, img.shape).astype(np.float32)
             img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise)
+            noisy = cv2.addWeighted(img, 1, _noise, 1, 0)
             img = np.clip(noisy, 0, 255).astype(np.uint8)            
         return img
 
