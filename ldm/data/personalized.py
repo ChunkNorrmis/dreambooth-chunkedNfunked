@@ -68,8 +68,7 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
-            kern = (3, 3)
-            img = cv2.GaussianBlur(img, kern, 0)
+            img = cv2.GaussianBlur(img, (3, 3), 0)
         return img
 
 
