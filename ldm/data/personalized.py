@@ -59,7 +59,7 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < self.odds:
-           _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
             img = img.astype(np.float32)
             noisy = cv2.add(img, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
