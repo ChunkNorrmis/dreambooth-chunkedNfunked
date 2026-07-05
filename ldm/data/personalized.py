@@ -34,7 +34,6 @@ class PersonalizedBase(Dataset):
     def __len__(self):
         return self._length
 
-
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
@@ -42,7 +41,7 @@ class PersonalizedBase(Dataset):
         img = self.mirror(img)
         img = random.choice([self.blur, self.noise])(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)        
+        image = np.array((img / 255 - 0.5) * 2).astype(np.float32)        
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -59,7 +58,7 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < self.odds:
-            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 10, img.shape).astype(np.float32)
             img = img.astype(np.float32)
             noisy = cv2.add(img, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
