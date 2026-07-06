@@ -42,7 +42,7 @@ class PersonalizedBase(Dataset):
         img = self.noise(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)        
+        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
