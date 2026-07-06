@@ -12,7 +12,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     logs_directory = config.log_directory()
     log_ckpt_dir = config.log_checkpoint_directory()
     intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-    model_paths = [os.path.relpath(cp) for cp in glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt')) + [os.path.join(log_ckpt_dir, 'last.ckpt')]]
+    model_paths = [cp for cp in glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt')) + [os.path.join(log_ckpt_dir, 'last.ckpt')]]
     config.save_config_to_file(save_path=output_folder)
     if not os.path.exists(logs_directory):
         print(f"No checkpoints found in {logs_directory}")
@@ -21,7 +21,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     if config.model_format == '.safetensors':
         print(f"Depickling model checkpoint(s)")
         print(' ')
-    p_bar = tqdm(total=len(file_paths))
+    p_bar = tqdm(total=len(model_paths))
     for model_path in model_paths:
         checkpoints_found = True
         if os.path.basename(model_path) == 'last.ckpt':
