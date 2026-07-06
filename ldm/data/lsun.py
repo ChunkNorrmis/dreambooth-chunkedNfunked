@@ -30,31 +30,31 @@ class LSUNBase(Dataset):
     def __getitem__(self, i):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         img_path = example["file_path_"]
-        img = cv2.imread(img_path) #cv2.IMREAD_COLOR_RGB)
+        img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
+        img = self.noise(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = ((img / 255 - 0.5) * 2).astype(np.float32)
+        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
         return {'image': image}
 
     def mirror(self, img):
-        if random.random() < self.flip_p:
+        if random.random() < self.odds:
             img = cv2.flip(img, 1)
         return img
 
-    def blur(self, img):
-        if random.random() < 0.5:
-            k = random.randrange(3, 10, 2)
-            img = cv2.GaussianBlur(img, (k, k), 0)
+    def noise(self, img):
+        if random.random() < self.odds:
+            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            img = img.astype(np.float32)
+            noisy = cv2.add(img, _noise).astype(np.float32)
+            img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
-    def sharpen(self, img):
-        if random.random() < 0.5:
-            mask = cv2.GaussianBlur(img, (3, 3), 0.5)
-            alpha = 1.2
-            beta = 1.0 - alpha
-            img = cv2.addWeighted(img, alpha, mask, beta, 0.)
+    def blur(self, img):                                                                                                                                                                                                
+        if random.random() < self.odds:
+            img = cv2.GaussianBlur(img, (5, 5), 0.5, 0.5)
         return img
 
     def crop_and_resize(self, img):
@@ -66,6 +66,7 @@ class LSUNBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, (self.size, self.size), interp)
         return img
+
 
 class LSUNChurchesTrain(LSUNBase):
     def __init__(self, **kwargs):
