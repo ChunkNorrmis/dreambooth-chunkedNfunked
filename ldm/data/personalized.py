@@ -42,7 +42,7 @@ class PersonalizedBase(Dataset):
         img = self.noise(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255 - 0.5) * 2.).astype(np.float32)        
+        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)        
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -60,14 +60,14 @@ class PersonalizedBase(Dataset):
         if random.random() < self.odds:
             _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
             img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise)
+            noisy = cv2.add(img, _noise).astype(np.float32)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
 
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
-            img = cv2.GaussianBlur(img, (3, 3), 0, 0)
+            img = cv2.GaussianBlur(img, (5, 5), 0.5, 0.5)
         return img
 
 
