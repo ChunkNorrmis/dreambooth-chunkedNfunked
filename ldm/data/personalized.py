@@ -36,7 +36,7 @@ class PersonalizedBase(Dataset):
 
 
     def __len__(self):
-        return len(self.imgs) * self.epochs
+        return self._length
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
