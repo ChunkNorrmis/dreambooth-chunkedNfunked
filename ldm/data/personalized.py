@@ -23,10 +23,13 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.odds = flip_p
+
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
+
         if set == 'train':
             self._length = self.n_imgs * repeats
+
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
@@ -47,8 +50,9 @@ class PersonalizedBase(Dataset):
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        return {'caption': caption, 'image': image}
-        
+        example = {'caption': caption, 'image': image}
+        return example
+
 
     def mirror(self, img):
         if random.random() < self.odds:
