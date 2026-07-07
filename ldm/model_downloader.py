@@ -5,9 +5,9 @@ import hf_xet, hf_transfer
 
 
 def get_model(url):
-    if url.startswith(('https://huggingface', 'https://www.huggingface')):
+    if url.startswith(('https://huggingface.co/', 'https://www.huggingface.co/')):
         return from_huggingface_hub(url)
-    elif url.startswith(('https://drive.google', 'https://www.drive.google')):
+    elif url.startswith(('https://drive.google.com/', 'https://www.drive.google.com/')):
         return from_google_drive(url)
 
 
