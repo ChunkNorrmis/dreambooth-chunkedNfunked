@@ -1,7 +1,6 @@
-import os, sys
+import os, sys, gdown
 from huggingface_hub.file_download import hf_hub_download
 import hf_xet, hf_transfer
-import gdown
 
 
 def get_model(url):
