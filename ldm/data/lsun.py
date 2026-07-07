@@ -8,7 +8,7 @@ class LSUNBase(Dataset):
         txt_file,
         data_root,
         size=512,
-        interpolation="bicubic",
+        interpolation=None,
         flip_p=0.5
     ):
         self.data_paths = txt_file
@@ -37,25 +37,29 @@ class LSUNBase(Dataset):
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
-        return {'image': image}
+        example = {'image': image}
+        return example
 
     def mirror(self, img):
         if random.random() < self.odds:
             img = cv2.flip(img, 1)
         return img
 
+
     def noise(self, img):
         if random.random() < self.odds:
-            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 10, img.shape).astype(np.float32)
             img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise).astype(np.float32)
+            noisy = cv2.add(img, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
+
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
-            img = cv2.GaussianBlur(img, (5, 5), 0.5, 0.5)
+            img = cv2.GaussianBlur(img, (5, 5), 0)
         return img
+
 
     def crop_and_resize(self, img):
         h, w = img.shape[:2]
