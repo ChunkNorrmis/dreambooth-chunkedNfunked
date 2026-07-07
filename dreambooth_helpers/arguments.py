@@ -91,7 +91,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             help="Specify a GPU other than 0 to use for training.  Multi-GPU support is not currently implemented."
         )
         parser.add_argument(
-            "--repeats",
+            "--epochs",
             type=int,
             default=100,
             required=False
@@ -150,7 +150,7 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             flip_percent=opt.flip_p,
             learning_rate=opt.learning_rate,
             model_path=opt.training_model,
-            repeats=opt.repeats,
+            epochs=opt.epochs,
             batch_size=opt.batch_size,
             accumed_grads=opt.accumed_grads,
             res=opt.resolution,
