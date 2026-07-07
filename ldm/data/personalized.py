@@ -64,8 +64,8 @@ class PersonalizedBase(Dataset):
         if random.random() < self.odds:
             n_str = random.randrange(5, 11)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
-            img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise)
+            image = img.astype(np.float32)
+            noisy = cv2.add(image, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
