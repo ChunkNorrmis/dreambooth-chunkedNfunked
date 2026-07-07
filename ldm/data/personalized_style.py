@@ -92,7 +92,8 @@ class PersonalizedBase(Dataset):
             caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
             caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
-        return {'caption': caption, 'image': image}
+        example = {'caption': caption, 'image': image}
+        return example
         
 
     def mirror(self, img):
