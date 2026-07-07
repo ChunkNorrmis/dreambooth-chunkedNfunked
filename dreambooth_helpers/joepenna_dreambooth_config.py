@@ -8,32 +8,11 @@ class JoePennaDreamboothConfigSchemaV1():
     def __init__(self):
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        #self.project_name = None
-        #self.token = None
-        #self.token_only = False
-        #self.class_word = None
-        #self.training_images_folder_path = None
-        #self.regularization_images_folder_path = None
-        #self.model_path = None
-        #self.precision = None
-        #self.safetensors = False
-        #self.epochs = None
-        #self.learning_rate = None
-        #self.batch_size = 1
-        #self.accumed_grads = 1
-        #self.res = 512
-        #self.crop = False
-        #self.flip_percent = 0.5
-        #self.seed = None
-        #self.save_every_x_steps = 0
-        #self.gpu = 0
-        #self.debug = False        
-
-    def saturate(
-        self, project_name=None, token=None, token_only=None, class_word=None, training_images_folder_path=None, regularization_images_folder_path=None,
+        
+    def saturate(self, project_name=None, token=None, token_only=None, class_word=None, training_images_folder_path=None, regularization_images_folder_path=None,
         model_path=None, precision=None, safetensors=None, epochs=None, learning_rate=None, batch_size=1, accumed_grads=1, res=512, crop=False, flip_percent=0.5,
-        save_every_x_steps=0, seed=None, gpu=0, debug=False
-    ):
+        save_every_x_steps=0, seed=None, gpu=0, debug=False):
+
         self.epochs = epochs
         self.batch_size = batch_size
         self.accumed_grads = accumed_grads
