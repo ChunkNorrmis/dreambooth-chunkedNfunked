@@ -14,7 +14,7 @@ class PersonalizedBase(Dataset):
         self.epochs = epochs
         self.imgs = [os.path.relpath(i) for i in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
-        self._length = self.n_imgs * self.epochs
+        self._length = self.n_imgs
         self.token_only = token_only
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
@@ -28,15 +28,15 @@ class PersonalizedBase(Dataset):
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
-        #if set == 'train':
-        #    self._length = self.n_imgs * self.epochs
+        if set == 'train':
+            self._length = self.n_imgs * self.epochs
 
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
 
     def __len__(self):
-        return self._length
+        return len(self.imgs) * self.epochs
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
