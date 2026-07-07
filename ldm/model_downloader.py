@@ -1,7 +1,14 @@
 import os, sys
 from huggingface_hub.file_download import hf_hub_download
 import hf_xet, hf_transfer
-import gdown
+from gdown import download as gdownload
+
+
+def get_model(url):
+    if url.startswith(('https://huggingface', 'https://www.huggingface')):
+        return from_huggingface_hub(url)
+    elif url.startswith(('https://drive.google', 'https://www.drive.google')):
+        return from_google_drive(url)
 
 
 def from_huggingface_hub(url):
@@ -19,8 +26,10 @@ def from_google_drive(url):
         if bytes_total is not None:
             print(f"\r{bytes_so_far / bytes_total * 100:.1f}%", end="")
 
-    model_path = os.path.join(sys.path[0], 'model.ckpt')
+    ckpt_file = gdownload.download(url=url, skip_download=True)
+    model_path = os.path.join(sys.path[0], ckpt_file)
     if not os.path.exists(model_path):
-        print('Downloading model.ckpt...')
-        gdown.download(url=url, output=model_path, quiet=True, progress=on_progress)
+        print(f"Downloading '{ckpt_file}'...")
+        gdownload.download(url=url, output=model_path, quiet=True, progress=on_progress)
     return os.path.relpath(model_path)
+
