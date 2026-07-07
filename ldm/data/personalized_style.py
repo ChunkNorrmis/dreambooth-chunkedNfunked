@@ -103,16 +103,16 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < self.odds:
-            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 10, img.shape).astype(np.float32)
             img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise).astype(np.float32)
+            noisy = cv2.add(img, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
 
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
-            img = cv2.GaussianBlur(img, (5, 5), 0.5, 0.5)
+            img = cv2.GaussianBlur(img, (5, 5), 0)
         return img
 
 
