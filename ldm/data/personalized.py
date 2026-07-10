@@ -41,7 +41,7 @@ class PersonalizedBase(Dataset):
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
-1        img = self.mirror(img)
+        img = self.mirror(img)
         img = self.noise(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
