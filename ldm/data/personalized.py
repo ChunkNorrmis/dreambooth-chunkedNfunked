@@ -11,7 +11,6 @@ class PersonalizedBase(Dataset):
     def __init__(self, data_root='training_images', set='train', reg=False, placeholder_token='rock', coarse_class_text='lobster',
                  size=512, epochs=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
         self.data_root = data_root
-        self.epochs = epochs
         self.imgs = [os.path.relpath(i) for i in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
@@ -29,7 +28,7 @@ class PersonalizedBase(Dataset):
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
 
         if set == 'train':
-            self._length = self.n_imgs * self.epochs
+            self._length = self.n_imgs * epochs
 
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
@@ -62,7 +61,7 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        if random.random() < 0.5:
+        if random.random() < self.odds:
             n_str = random.randrange(1, 5) 
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
             image = np.array(img).astype(np.float32)
@@ -72,7 +71,7 @@ class PersonalizedBase(Dataset):
 
 
     def blur(self, img):                                                                                                                                                                                                
-        if random.random() < 0.5:
+        if random.random() < self.odds:
             sig = random.uniform(0.4, 0.65)
             img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
