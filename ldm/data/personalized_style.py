@@ -53,7 +53,7 @@ class PersonalizedBase(Dataset):
         data_root=None,
         set='train',
         size=512,
-        repeats=100,
+        epochs=100,
         flip_p=0.5,
         placeholder_token='lobster',
         per_image_tokens=False,
@@ -64,7 +64,7 @@ class PersonalizedBase(Dataset):
         self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
-        self.flip_p = flip_p
+        self.odds = flip_p
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
@@ -74,7 +74,7 @@ class PersonalizedBase(Dataset):
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
         if set == "train":
-            self._length = self.n_imgs * repeats
+            self._length = self.n_imgs * epochs
 
     def __len__(self):
         return self._length
@@ -104,16 +104,18 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < self.odds:
-            _noise = np.random.normal(0, 10, img.shape).astype(np.float32)
-            img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise)
+            n_str = random.randrange(1, 5) 
+            _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
+            image = np.array(img).astype(np.float32)
+            noisy = cv2.add(image, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
 
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
-            img = cv2.GaussianBlur(img, (5, 5), 0)
+            sig = random.uniform(0.4, 0.65)
+            img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
 
