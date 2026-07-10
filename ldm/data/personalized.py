@@ -54,29 +54,29 @@ class PersonalizedBase(Dataset):
         return example
 
 
-    @self.chance(augment)
     def mirror(self, img):
-        return cv2.flip(img, 1)
+        if random.random() < self.odds:
+            img = cv2.flip(img, 1)
+            return img
+        else: pass
         
 
-    @self.chance(augment)
     def noise(self, img):
-        n_str = random.randrange(3, 6) 
-        _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
-        img = img.astype(np.float32)
-        noisy = cv2.add(img, _noise)
-        return np.clip(noisy, 0, 255).astype(np.uint8)
-
-
-    @self.chance(augment)
-    def blur(self, img):                                                                                                                                                                                                
-        sig = random.uniform(0.45, 0.7)
-        return cv2.GaussianBlur(img, (5, 5), sig, sig)
-
-
-    def chance(self, augment):
         if random.random() < self.odds:
-            return augment
+            n_str = random.randrange(3, 6)
+            _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
+            img = img.astype(np.float32)
+            noisy = cv2.add(img, _noise)
+            img = np.clip(noisy, 0, 255).astype(np.uint8)
+            return img
+        else: pass
+
+
+    def blur(self, img):                                                                                                                                                                                                
+        if random.random() < self.odds:
+            sig = random.uniform(0.45, 0.7)
+            cv2.GaussianBlur(img, (5, 5), sig, sig)
+            return img
         else: pass
 
 
