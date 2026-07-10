@@ -41,7 +41,7 @@ class PersonalizedBase(Dataset):
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
-        img = self.mirror(img)
+1        img = self.mirror(img)
         img = self.noise(img)
         img = self.blur(img)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -61,19 +61,19 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        if random.random() < self.odds:
-            n_str = random.randrange(1, 5) 
+        if random.random() < 0.25:
+            n_str = random.randrange(3, 6) 
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
-            image = np.array(img).astype(np.float32)
-            noisy = cv2.add(image, _noise)
+            img = img.astype(np.float32)
+            noisy = cv2.add(img, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
 
     def blur(self, img):                                                                                                                                                                                                
-        if random.random() < self.odds:
-            sig = random.uniform(0.4, 0.65)
-            img = cv2.GaussianBlur(img, (3, 3), sig)
+        if random.random() < 0.25:
+            sig = random.uniform(0.45, 0.7)
+            img = cv2.GaussianBlur(img, (5, 5), sig, sig)
         return img
 
 
