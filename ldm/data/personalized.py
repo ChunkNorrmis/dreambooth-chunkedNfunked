@@ -57,9 +57,8 @@ class PersonalizedBase(Dataset):
     def mirror(self, img):
         if random.random() < self.odds:
             img = cv2.flip(img, 1)
-            return img
-        else: pass
-        
+        return img
+
 
     def noise(self, img):
         if random.random() < self.odds:
@@ -68,16 +67,14 @@ class PersonalizedBase(Dataset):
             img = img.astype(np.float32)
             noisy = cv2.add(img, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
-            return img
-        else: pass
+        return img
 
 
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < self.odds:
             sig = random.uniform(0.45, 0.7)
             img = cv2.GaussianBlur(img, (5, 5), sig, sig)
-            return img
-        else: pass
+        return img
 
 
     def crop_and_resize(self, img):
