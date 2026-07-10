@@ -4,12 +4,8 @@ import safetensors.torch as safetorch
 
 def depicklize(dict_pickle, nil_pickle=None):
     def equal_tensors(sus_dict, loaded):
-        print('Comparing model keys...')
         for k in sus_dict.keys():
             if not torch.equal(sus_dict[k], loaded[k]):
-                print('Fail -- key mismatch')
-                print('Aborting safetensors conversion...')
-                print(' ')
                 return False
         return True
 
@@ -29,6 +25,9 @@ def depicklize(dict_pickle, nil_pickle=None):
     if equal_tensors(sus_dict, loaded):
         safetorch.save_file(sus_dict, nil_pickle, metadata=metadata)
     else:
+        print('!! Failed -- key mismatch')
+        print('!! Aborting safetensors conversion...')
+        print(' ')
         nil_pickle = os.path.join('trained_models', os.path.basename(dict_pickle))
         shutil.move(dict_pickle, nil_pickle)
 
