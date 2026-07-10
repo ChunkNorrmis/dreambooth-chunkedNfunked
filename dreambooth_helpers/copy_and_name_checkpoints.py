@@ -24,7 +24,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         if config.model_format == '.safetensors':
             print(f"Depickling model checkpoint(s)")
             print(' ')
-        p_bar = tqdm(total=n_models), leave=False)
+        p_bar = tqdm(total=n_models, leave=False)
         for model_path in model_paths:
             if os.path.basename(model_path) == 'last.ckpt':
                 if int(torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
