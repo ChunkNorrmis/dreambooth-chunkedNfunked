@@ -21,7 +21,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     if config.model_format == '.safetensors':
         print(f"Depickling model checkpoint(s)")
         print(' ')
-    p_bar = tqdm(total=len(model_paths))
+    p_bar = tqdm(total=len(model_paths), leave=False)
     for model_path in model_paths:
         checkpoints_found = True
         if os.path.basename(model_path) == 'last.ckpt':
