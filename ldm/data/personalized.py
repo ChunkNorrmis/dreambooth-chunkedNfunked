@@ -8,7 +8,7 @@ from captionizer import caption_from_path, generic_captions_from_path, find_imag
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
 
 class PersonalizedBase(Dataset):
-    def __init__(self, data_root='training_images', set='train', reg=False, placeholder_token='rock', coarse_class_text='lobster',
+    def __init__(self, data_root='train_imgs', set='train', reg=False, placeholder_token='lobster', coarse_class_text=None,
                  size=512, epochs=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
 
         self.data_root = data_root
@@ -63,7 +63,7 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        if random.random() < self.odds:
+        if random.random() < 0.25:
             n_str = random.randrange(1, 6)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
             image = img.astype(np.float32)
@@ -73,8 +73,8 @@ class PersonalizedBase(Dataset):
 
 
     def blur(self, img):                                                                                                                                                                                                
-        if random.random() < self.odds:
-            sig = random.uniform(0.45, 0.6)
+        if random.random() < 0.25:
+            sig = random.uniform(0.45, 0.65)
             img = cv2.GaussianBlur(img, (3, 3), sig, sig)
         return img
 
