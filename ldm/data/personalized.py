@@ -60,7 +60,7 @@ class PersonalizedBase(Dataset):
 
     def convert(self, img):
         if isinstance(img, torch.Tensor):
-            img = img.clone().detach().permute(1,2,0)
+            img = img.clone().detach().permute(1, 2, 0)
         if isinstance(img, np.ndarray):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
@@ -77,7 +77,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            n_str = random.randrange(1, 4)
+            n_str = random.randrange(1, 5)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
             image = img.astype(np.float32)
             noisy = cv2.add(image, _noise).astype(np.float32)
@@ -92,10 +92,10 @@ class PersonalizedBase(Dataset):
         return img
 
 
-    def equalize(self, img):
+    def equal(self, img):
         if random.random() < 0.25:
             img = self.to_tensor(img)
-            img = fun.equalize(img)
+            img = fun.equalize(imgd)
         return img
 
 
@@ -109,12 +109,12 @@ class PersonalizedBase(Dataset):
     def to_tensor(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = torch.tensor(img, dtype=torch.uint8)
-        img = img.permute(2,0,1)
+        img = img.permute(2, 0, 1)
         return img
 
-
+2
     def from_tensor(self, img):
-        img = img.clone().detach().permute(1,2,0)
+        img = img.clone().detach().permute(1, 2, 0)
         img = np.array(img, dtype=np.uint8)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
@@ -124,8 +124,8 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            sig = random.uniform(0.4, 0.65)
-            img = cv2.GaussianBlur(img, (3,3), sig)
+            sig = random.uniform(0.45, 0.7)
+            img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
 
