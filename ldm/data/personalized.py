@@ -86,7 +86,7 @@ class PersonalizedBase(Dataset):
 
 
     def exposure(self, img):
-        if random.random() < 0.25:
+        if random.random() < 0.5:
             img = self.to_tensor(img)
             img = random.choice([fun.autocontrast, fun.equalize])(img)
         return img
