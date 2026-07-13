@@ -45,8 +45,7 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.contrast(img)
-        img = self.equalize(img)
+        img = self.exposure(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
@@ -86,18 +85,23 @@ class PersonalizedBase(Dataset):
         return img
 
 
+    def exposure(self, img):
+        if random.random() < 0.25:
+            img = self.to_tensor(img)
+            img = random.choice([fun.autocontrast, fun.equalize])(img)
+        return img
+
+
     def equalize(self, img):
         if random.random() < 0.25:
-            if isinstance(img, np.ndarray):
-                img = self.to_tensor(img)
+            img = self.to_tensor(img)
             img = fun.equalize(img)
         return img
 
 
     def contrast(self, img):
         if random.random() < 0.25:
-            if isinstance(img, np.ndarray):
-                img = self.to_tensor(img)
+            img = self.to_tensor(img)
             img = fun.autocontrast(img)
         return img
 
