@@ -2,6 +2,8 @@ import os, sys, torch, cv2, random, glob, numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from captionizer import caption_from_path, generic_captions_from_path, find_images
+from torchvision.transforms import v2
+from torchvision.transforms.v2 import functional as fun
 
 
 
@@ -43,17 +45,27 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
+        img = self.contrast(img)
+        img = self.equalize(img)
         img = self.noise(img)
         img = self.blur(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
-        
+        image = self.convert(img)
+                
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
-        return {'caption': caption, 'image': image}
+        example = {'caption': caption, 'image': image}
+        return example
         
+
+    def convert(self, img):
+        if isinstance(img, torch.tensor):
+            img = img.clone().detach().permute(2,0,1)
+        if isinstance(img, np.ndarray):
+            img = cv2.cvtColor(img, cv2.BGR2RGB)
+        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
+        return image
 
 
     def mirror(self, img):
@@ -64,6 +76,8 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < 0.25:
+            if isinstance(img, torch.tensor):
+                img = self.from_tensor(img)
             n_str = random.randrange(1, 4)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
             image = img.astype(np.float32)
@@ -72,10 +86,42 @@ class PersonalizedBase(Dataset):
         return img
 
 
+    def equalize(self, img):
+        if random.random() < 0.25:
+            if isinstance(img, np.ndarray):
+                img = self.to_tensor(img)
+            img = fun.equalize(img, p=0.25)
+        return img
+
+
+    def contrast(self, img):
+        if random.random() < 0.25:
+            if isinstance(img, np.ndarray):
+                img = self.to_tensor(img)
+            img = fun.autocontrast(img, p=0.25)
+        return img
+
+
+    def to_tensor(self, img):
+        img = cv2.cvtColor(img, cv2.BGR2RGB)
+        img = torch.tensor(img, dtype=torch.uint8)
+        img = img.permute(1,2,0)
+        return img
+
+
+    def from_tensor(self, img):
+        img = img.clone().detach().permute(2,0,1)
+        img = np.array(img, dtype=np.uint8)
+        img = cv2.cvtColor(img, cv2.RGB2BGR)
+        return img
+
+
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < 0.25:
-            sig = random.uniform(0.45, 0.65)
-            img = cv2.GaussianBlur(img, (5, 5), sig, sig)
+            if isinstance(img, torch.tensor):
+                img = self.from_tensor(img)
+            sig = random.uniform(0.4, 0.65)
+            img = cv2.GaussianBlur(img, (3,3), sig)
         return img
 
 
