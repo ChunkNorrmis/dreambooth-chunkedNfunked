@@ -60,7 +60,7 @@ class PersonalizedBase(Dataset):
         
 
     def convert(self, img):
-        if isinstance(img, torch.tensor):
+        if isinstance(img, torch.Tensor):
             img = img.clone().detach().permute(2,0,1)
         if isinstance(img, np.ndarray):
             img = cv2.cvtColor(img, cv2.BGR2RGB)
@@ -76,7 +76,7 @@ class PersonalizedBase(Dataset):
 
     def noise(self, img):
         if random.random() < 0.25:
-            if isinstance(img, torch.tensor):
+            if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
             n_str = random.randrange(1, 4)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
@@ -118,7 +118,7 @@ class PersonalizedBase(Dataset):
 
     def blur(self, img):                                                                                                                                                                                                
         if random.random() < 0.25:
-            if isinstance(img, torch.tensor):
+            if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
             sig = random.uniform(0.4, 0.65)
             img = cv2.GaussianBlur(img, (3,3), sig)
