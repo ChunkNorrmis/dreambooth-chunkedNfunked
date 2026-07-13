@@ -63,7 +63,7 @@ class PersonalizedBase(Dataset):
         if isinstance(img, torch.Tensor):
             img = img.clone().detach().permute(2,0,1)
         if isinstance(img, np.ndarray):
-            img = cv2.cvtColor(img, cv2.BGR2RGB)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
         return image
 
@@ -103,7 +103,7 @@ class PersonalizedBase(Dataset):
 
 
     def to_tensor(self, img):
-        img = cv2.cvtColor(img, cv2.BGR2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = torch.tensor(img, dtype=torch.uint8)
         img = img.permute(1,2,0)
         return img
@@ -112,7 +112,7 @@ class PersonalizedBase(Dataset):
     def from_tensor(self, img):
         img = img.clone().detach().permute(2,0,1)
         img = np.array(img, dtype=np.uint8)
-        img = cv2.cvtColor(img, cv2.RGB2BGR)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
 
 
