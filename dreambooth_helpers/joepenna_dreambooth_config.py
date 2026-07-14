@@ -12,7 +12,7 @@ class JoePennaDreamboothConfigSchemaV1():
                                          
     def saturate(self, project_name=None, token=None, token_only=None, class_word=None, training_images_folder_path=None, regularization_images_folder_path=None,
         model_path=None, precision=None, safetensors=None, epochs=None, learning_rate=None, batch_size=1, accumed_grads=1, res=512, crop=False, flip_percent=0.5,
-        save_every_x_steps=0, seed=None, gpu=0, debug=False):
+        save_every_x_steps=0, gpu=0, debug=False):
 
         self.epochs = epochs
         self.batch_size = batch_size
@@ -34,8 +34,6 @@ class JoePennaDreamboothConfigSchemaV1():
             else: raise Exception(f"{os.path.basename(model_path)} not Found")
         else: self.model_path = os.path.relpath(model_path)
 
-        if seed is not None:
-            self.seed = seed
         seed_everything(self.seed)
 
         if self.save_every_x_steps < 0:
