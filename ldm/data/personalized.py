@@ -83,7 +83,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            n_str = random.randrange(1, 5)
+            n_str = random.randrange(1, 4)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
             image = img.astype(np.float32)
             noisy = cv2.add(image, _noise).astype(np.float32)
@@ -92,7 +92,7 @@ class PersonalizedBase(Dataset):
 
 
     def exposure(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             img = self.to_tensor(img)
             img = random.choice([fun.autocontrast, fun.equalize])(img)
         return img
@@ -132,7 +132,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            sig = random.uniform(0.45, 0.7)
+            sig = random.uniform(0.45, 0.6)
             img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
