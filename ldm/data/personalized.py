@@ -96,7 +96,7 @@ class PersonalizedBase(Dataset):
     def equal(self, img):
         if random.random() < 0.25:
             img = self.to_tensor(img)
-            img = fun.equalize(imgd)
+            img = fun.equalize(img)
         return img
 
 
