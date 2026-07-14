@@ -19,7 +19,7 @@ def from_generic(url):
     response = requests.head(url, allow_redirects=True)
     header = response.headers.get('content-disposition')
     results = re.search(r'filename="?([^";]+)"?', header)
-    ckpt_file = match.group(1)
+    ckpt_file = results.group(1)
     model_path = os.path.join(sys.path[0], ckpt_file)
     if not os.path.exists(model_path):
         print(f"Downloading '{ckpt_file}'...")
