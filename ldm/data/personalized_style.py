@@ -1,5 +1,7 @@
 import os, torch, sys, cv2, random, glob, numpy as np
 from torch.utils.data import Dataset
+from torchvision.transforms import v2
+from torchvision.transforms.v2 import functional as fun
 
 imagenet_templates_small = [
     'a painting in the style of {}',
@@ -84,17 +86,30 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
+        img = self.exposure(img)
+        #img = self.equal(img)
+        #img = self.contrast(img)
         img = self.noise(img)
         img = self.blur(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)        
+        image = self.convert(img)
+
+        placeholder_token = img_path.split('/')[-2]
         if self.per_image_tokens and random.random() < self.mixing_prob:
-            caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
+            caption = random.choice(imagenet_dual_templates_small).format(placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
-            caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
+            caption = random.choice(imagenet_templates_small).format(placeholder_token)
         example = {'caption': caption, 'image': image}
         return example
-        
+
+
+    def convert(self, img):
+        if isinstance(img, torch.Tensor):
+            img = img.detach().permute(1, 2, 0)
+        if isinstance(img, np.ndarray):
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
+        return image
+
 
     def mirror(self, img):
         if random.random() < self.odds:
@@ -103,18 +118,59 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        if random.random() < self.odds:
-            n_str = random.randrange(1, 5) 
+        if random.random() < 0.25:
+            if isinstance(img, torch.Tensor):
+                img = self.from_tensor(img)
+            n_str = random.randrange(1, 5)
             _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
-            image = np.array(img).astype(np.float32)
-            noisy = cv2.add(image, _noise)
+            image = img.astype(np.float32)
+            noisy = cv2.add(image, _noise).astype(np.float32)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
 
+    def exposure(self, img):
+        if random.random() < 0.5:
+            img = self.to_tensor(img)
+            img = random.choice([fun.autocontrast, fun.equalize])(img)
+        return img
+
+
+    def equal(self, img):
+        if random.random() < 0.25:
+            if isinstance(img, np.ndarray):
+                img = self.to_tensor(img)
+            img = fun.equalize(img)
+        return img
+
+
+    def contrast(self, img):
+        if random.random() < 0.25:
+            if isinstance(img, np.ndarray):
+                img = self.to_tensor(img)
+            img = fun.autocontrast(img)
+        return img
+
+
+    def to_tensor(self, img):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = torch.tensor(img, dtype=torch.uint8)
+        img = img.permute(2, 0, 1)
+        return img
+
+
+    def from_tensor(self, img):
+        img = img.detach().permute(1, 2, 0)
+        img = np.array(img, dtype=np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        return img
+
+
     def blur(self, img):                                                                                                                                                                                                
-        if random.random() < self.odds:
-            sig = random.uniform(0.4, 0.65)
+        if random.random() < 0.25:
+            if isinstance(img, torch.Tensor):
+                img = self.from_tensor(img)
+            sig = random.uniform(0.45, 0.7)
             img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
@@ -128,4 +184,6 @@ class PersonalizedBase(Dataset):
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, (self.size, self.size), interp)
         return img
+
+
 
