@@ -38,8 +38,8 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             "--training_model",
             type=str,
             required=False,
-            default='https://huggingface.co/sd-legacy/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt',
-            help="Path to a local model or the url of a huggingface model repo to use for training (e.g 'v1-5-pruned.ckpt' -- 'https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt')"
+            default='https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned.ckpt',
+            help="Path to a local model or the url of a hosted model (e.g './v1-5-pruned.ckpt', 'https://huggingface.co/...', 'https://drive.google.com/...', etc.)"
         )
         parser.add_argument(
             "--training_images",
@@ -64,17 +64,14 @@ def parse_arguments() -> JoePennaDreamboothConfigSchemaV1:
             type=float,
             required=False,
             default=0.5,
-            help="Flip Percentage "
-                 "Example: if set to 0.5, will flip (mirror) your training images 50% of the time."
-                 "This helps expand your dataset without needing to include more training images."
-                 "This can lead to worse results for face training since most people's faces are not perfectly symmetrical."
+            help='Percent chance training data will be mirrored.' 
         )
         parser.add_argument(
             "--learning_rate",
             type=float,
             required=False,
-            default=1.0e-06,
-            help="Set the learning rate. Defaults to 1.0e-06 (0.000001).  Accepts scientific notation."
+            default=2e-06,
+            help='Set the learning rate. Defaults to 2e-06 (0.000002).'
         )
         parser.add_argument(
             "--save_every_x_steps",
