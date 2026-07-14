@@ -8,7 +8,8 @@ class JoePennaDreamboothConfigSchemaV1():
     def __init__(self):
         self.schema = 1
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
-        
+        self.seed = random.randrange(1, int(1e+05 - 1))
+                                         
     def saturate(self, project_name=None, token=None, token_only=None, class_word=None, training_images_folder_path=None, regularization_images_folder_path=None,
         model_path=None, precision=None, safetensors=None, epochs=None, learning_rate=None, batch_size=1, accumed_grads=1, res=512, crop=False, flip_percent=0.5,
         save_every_x_steps=0, seed=None, gpu=0, debug=False):
@@ -18,12 +19,10 @@ class JoePennaDreamboothConfigSchemaV1():
         self.accumed_grads = accumed_grads
         self.res = res
         self.crop = crop
-        self.seed = seed
         self.save_every_x_steps = save_every_x_steps
         self.debug = debug
         self.gpu = gpu
         self.token_only = token_only
-        self.seed = random.randrange(1, 1e+4) if seed is None else seed
         self.learning_rate = learning_rate
         self.precision = precision
         self.project_name = project_name
@@ -34,7 +33,9 @@ class JoePennaDreamboothConfigSchemaV1():
                 self.model_path = get_model(model_path)
             else: raise Exception(f"{os.path.basename(model_path)} not Found")
         else: self.model_path = os.path.relpath(model_path)
-        
+
+        if seed is not None:
+            self.seed = seed
         seed_everything(self.seed)
 
         if self.save_every_x_steps < 0:
@@ -55,15 +56,14 @@ class JoePennaDreamboothConfigSchemaV1():
         self.max_training_steps = int(num_training_images * self.epochs / (self.batch_size * self.accumed_grads))
 
         if not self.token_only:
+            if not os.path.exists(regularization_images_folder_path):
+                raise Exception(f"Regularization Images Path Not Found: '{regularization_images_folder_path}'.")
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
             self.class_word = class_word
 
-        if not os.path.exists(self.regularization_images_folder_path):
-            raise Exception(f"Regularization Images Path Not Found: '{self.regularization_images_folder_path}'.")
-
-        self.token = token
-        if self.token is None or self.token == '':
+        if token is None or token == '':
             raise Exception(f"Token not provided.")
+        self.token = token
 
         self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
