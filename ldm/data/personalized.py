@@ -10,7 +10,7 @@ from torchvision.transforms.v2 import functional as fun
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
 
 class PersonalizedBase(Dataset):
-    def __init__(self, data_root='train_imgs', set='train', reg=False, placeholder_token='lobster', coarse_class_text=None,
+    def __init__(self, data_root='./training_imgs', set='train', reg=False, placeholder_token='lobster', coarse_class_text=None,
                  size=512, epochs=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
 
         self.data_root = data_root
@@ -49,7 +49,6 @@ class PersonalizedBase(Dataset):
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
-                
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -112,7 +111,7 @@ class PersonalizedBase(Dataset):
         img = img.permute(2, 0, 1)
         return img
 
-2
+
     def from_tensor(self, img):
         img = img.clone().detach().permute(1, 2, 0)
         img = np.array(img, dtype=np.uint8)
