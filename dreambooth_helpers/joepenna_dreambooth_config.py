@@ -30,7 +30,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.project_config_filename = f"{self.project_name}--config.json"
 
         if not os.path.exists(model_path):
-            if model_path.startswith('https://'):
+            if model_path.startswith(('https://', 'http://')):
                 self.model_path = get_model(model_path)
             else: raise Exception(f"{os.path.basename(model_path)} not Found")
         else: self.model_path = os.path.relpath(model_path)
