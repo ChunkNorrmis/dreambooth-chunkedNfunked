@@ -33,8 +33,8 @@ class PersonalizedBase(Dataset):
         if set == 'train':
             self._length = self.n_imgs * epochs
 
-        if self.reg:
-            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
+        #if self.reg:
+        #    self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
 
 
     def __len__(self):
@@ -45,16 +45,21 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        #img = self.exposure(img)
-        img = self.equal(img)
-        img = self.contrast(img)
+        img = self.exposure(img)
+        #img = self.equal(img)
+        #img = self.contrast(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
+
+        path_split = img_path.split('/')
+        coarse_class_text = path_split[-2]
         if self.reg:
-            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            reg_token = {'C': coarse_class_text}
+            caption = generic_captions_from_path(img_path, self.data_root, reg_token)
         else:
-            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+            placeholder_token = path_split[-3]
+            caption = caption_from_path(img_path, self.data_root, coarse_class_text, placeholder_token)
         example = {'caption': caption, 'image': image}
         return example
         
