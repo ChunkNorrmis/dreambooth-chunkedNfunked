@@ -3,12 +3,6 @@ import safetensors.torch as safetorch
 
 
 def depicklize(dict_pickle, nil_pickle=None):
-    def equal_tensors(sus_dict, loaded):
-        for k in sus_dict.keys():
-            if not torch.equal(sus_dict[k], loaded[k]):
-                return False
-        return True
-
     suspicious_pickle = torch.load(dict_pickle, map_location=torch.device('cpu'), weights_only=False)
     sus_dict = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     del suspicious_pickle['state_dict']
@@ -30,6 +24,12 @@ def depicklize(dict_pickle, nil_pickle=None):
         print(' ')
         nil_pickle = os.path.join('trained_models', os.path.basename(dict_pickle))
         shutil.move(dict_pickle, nil_pickle)
+
+def equal_tensors(sus_dict, loaded):
+    for k in sus_dict.keys():
+        if not torch.equal(sus_dict[k], loaded[k]):
+            return False
+    return True
 
 
 if __name__ == '__main__':
