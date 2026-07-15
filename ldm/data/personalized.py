@@ -45,9 +45,9 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        #img = self.exposure(img)
-        img = self.equal(img)
-        img = self.contrast(img)
+        img = self.exposure(img)
+        #img = self.equal(img)
+        #img = self.contrast(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
@@ -128,7 +128,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            sig = random.uniform(0.45, 0.7)
+            sig = random.uniform(0.45, 0.6)
             img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
