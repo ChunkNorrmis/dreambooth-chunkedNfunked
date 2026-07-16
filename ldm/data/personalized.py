@@ -83,17 +83,13 @@ class PersonalizedBase(Dataset):
 
     def augment(self, img):
         if random.random() < 0.5:
-            pick = random.randrange(0,6)
-            if pick <= 3:
+            if random.randrange(0,6) < 4:
                 img = self.to_tensor(img)
                 f = random.uniform(0.7, 1.3)
                 b = random.randrange(2,9,2)
-            img = {0: fun.equalize(img),
-                   1: fun.posterize(img, bits=b),
-                   2: fun.adjust_saturation(img, saturation_factor=f),
-                   3: fun.adjust_contrast(img, contrast_factor=f),
-                   4: self.noise(img),
-                   5: self.blur(img)}[pick]
+                img = random.choice([fun.equalize(img), fun.posterize(img, bits=b), fun.adjust_saturation(img, saturation_factor=f), fun.adjust_contrast(img, contrast_factor=f)])
+            else:
+                img = random.choice([self.noise, self.blur])(img)
         return img
 
 
