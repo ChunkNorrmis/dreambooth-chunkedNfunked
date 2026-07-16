@@ -6,7 +6,6 @@ from torchvision.transforms import v2
 from torchvision.transforms.v2 import functional as fun
 
 
-
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
 
 class PersonalizedBase(Dataset):
@@ -14,7 +13,7 @@ class PersonalizedBase(Dataset):
                  size=512, epochs=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
 
         self.data_root = data_root
-        self.imgs = [os.path.relpath(i) for i in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
+        self.imgs = [im for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
         self.token_only = token_only
@@ -45,11 +44,10 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.photometric(img)
+        img = self.photometrics(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
-        
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
@@ -85,14 +83,14 @@ class PersonalizedBase(Dataset):
         return img
 
 
-    def photometric(self, img):
+    def photometrics(self, img):
         if random.random() < 0.25:
             img = self.to_tensor(img)
             f = random.uniform(0.7, 1.3)
             b = random.randrange(2,9,2)
             augment = random.choice([
                 fun.equalize,
-                fun.posterize(bits=b),
+                fun.posterize(bits=b), 
                 fun.adjust_saturation(saturation_factor=f),
                 fun.adjust_contrast(contrast_factor=f)
             ])
@@ -118,7 +116,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            sig = random.uniform(0.45, 0.65)
+            sig = random.uniform(0.45, 0.6)
             img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
