@@ -44,9 +44,7 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.photometrics(img)
-        img = self.noise(img)
-        img = self.blur(img)
+        img = self.augment(img)
         image = self.convert(img)
         if self.reg:
             caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
@@ -72,29 +70,32 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        if random.random() < 0.25:
-            if isinstance(img, torch.Tensor):
-                img = self.from_tensor(img)
-            n_str = random.randrange(1, 5)
-            _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
-            image = img.astype(np.float32)
-            noisy = cv2.add(image, _noise).astype(np.float32)
-            img = np.clip(noisy, 0, 255).astype(np.uint8)
+        #if random.random() < 0.25:
+        if isinstance(img, torch.Tensor):
+            img = self.from_tensor(img)
+        n_str = random.randrange(1, 4)
+        _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
+        image = img.astype(np.float32)
+        noisy = cv2.add(image, _noise).astype(np.float32)
+        img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
 
-    def photometrics(self, img):
-        if random.random() < 0.25:
-            img = self.to_tensor(img)
-            f = random.uniform(0.7, 1.3)
-            b = random.randrange(2,9,2)
-            img = random.choice([
-                fun.equalize(img),
-                fun.posterize(img, bits=b), 
-                fun.adjust_saturation(img, saturation_factor=f),
-                fun.adjust_contrast(img, contrast_factor=f)
-            ])
-        return img
+    def augment(self, img):
+        if random.random() < 0.5:
+            pick = random.randrange(0,6)
+            if pick <= 3:
+                img = self.to_tensor(img)
+                f = random.uniform(0.7, 1.3)
+                b = random.randrange(2,9,2)
+            aug = {0: fun.equalize(img),
+                   1: fun.posterize(img, bits=b),
+                   2: fun.adjust_saturation(img, saturation_factor=f),
+                   3: fun.adjust_contrast(img, contrast_factor=f),
+                   4: self.noise(img),
+                   5: self.blur(img)}
+            img = aug[pick]
+            return img
 
 
     def to_tensor(self, img):
@@ -112,11 +113,11 @@ class PersonalizedBase(Dataset):
 
 
     def blur(self, img):                                                                                                                                                                                                
-        if random.random() < 0.25:
-            if isinstance(img, torch.Tensor):
-                img = self.from_tensor(img)
-            sig = random.uniform(0.45, 0.6)
-            img = cv2.GaussianBlur(img, (3, 3), sig)
+        #if random.random() < 0.25:
+        if isinstance(img, torch.Tensor):
+            img = self.from_tensor(img)
+        sig = random.uniform(0.45, 0.6)
+        img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
 
