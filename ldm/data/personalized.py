@@ -45,7 +45,9 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.exposure(img)
+        img = self.saturate(img)
+        img = self.contrast(img)
+        #img = self.exposure(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
@@ -88,7 +90,7 @@ class PersonalizedBase(Dataset):
     def exposure(self, img):
         if random.random() < 0.25:
             img = self.to_tensor(img)
-            img = random.choice([fun.autocontrast, fun.equalize, self.posterize, self.saturate])(img)
+            img = random.choice([fun.equalize, self.posterize])(img)
         return img
 
 
@@ -96,8 +98,17 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            r = random.uniform(0.75, 1.25)
-            img = fun.adjust_saturation(img, saturation_factor=r)
+            f = random.uniform(0.75, 1.25)
+            img = fun.adjust_saturation(img, saturation_factor=f)
+        return img
+
+
+    def contrast(self, img):
+        if random.random() < 0.25:
+            if isinstance(img, np.ndarray):
+                img = self.to_tensor(img)
+            f = random.uniform(0.75, 1.25)
+            img = fun.adjust_contrast(img, contrast_factor=f)
         return img
 
 
@@ -127,8 +138,8 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            sig = random.uniform(0.45, 0.7)
-            img = cv2.GaussianBlur(img, (5, 5), sig)
+            sig = random.uniform(0.45, 0.6)
+            img = cv2.GaussianBlur(img, (3, 3), sig)
         return img
 
 
