@@ -95,7 +95,7 @@ class PersonalizedBase(Dataset):
                    4: self.noise(img),
                    5: self.blur(img)}
             img = aug[pick]
-            return img
+        return img
 
 
     def to_tensor(self, img):
