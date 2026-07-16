@@ -70,7 +70,6 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        #if random.random() < 0.25:
         if isinstance(img, torch.Tensor):
             img = self.from_tensor(img)
         n_str = random.randrange(1, 4)
@@ -80,16 +79,35 @@ class PersonalizedBase(Dataset):
         img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
+    def posterize(self, img):
+        img = self.to_tensor(img)
+        r = random.randrange(2,9,2)
+        img = fun.posterize(img, bits=r)
+        return img
 
+    def saturate(self, img):
+        img = self.to_tensor(img)
+        f = random.uniform(0.7, 1.3)
+        img = fun.adjust_saturation(img, saturation_factor=f)
+        return img
+
+    def contrast(self, img):
+        img = self.to_tensor(img)
+        f = random.uniform(0.7, 1.3)
+        img = fun.adjust_contrast(img, contrast_factor=f)
+        return img
+    
     def augment(self, img):
         if random.random() < 0.5:
-            if random.randrange(0,6) < 4:
-                img = self.to_tensor(img)
-                f = random.uniform(0.7, 1.3)
-                b = random.randrange(2,9,2)
-                img = random.choice([fun.equalize(img), fun.posterize(img, bits=b), fun.adjust_saturation(img, saturation_factor=f), fun.adjust_contrast(img, contrast_factor=f)])
-            else:
-                img = random.choice([self.noise, self.blur])(img)
+            aug = random.choice([
+                fun.equalize,
+                self.posterize,
+                self.saturate,
+                self.contrast,
+                self.noise,
+                self.blur
+            ])
+            img = aug(img)
         return img
 
 
@@ -108,7 +126,6 @@ class PersonalizedBase(Dataset):
 
 
     def blur(self, img):                                                                                                                                                                                                
-        #if random.random() < 0.25:
         if isinstance(img, torch.Tensor):
             img = self.from_tensor(img)
         sig = random.uniform(0.45, 0.6)
