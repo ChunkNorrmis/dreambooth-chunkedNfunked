@@ -56,10 +56,10 @@ class PersonalizedBase(Dataset):
 
     def convert(self, img):
         if isinstance(img, torch.Tensor):
-            img = img.detach().permute(1, 2, 0)
+            img = img.detach().clone().permute(1, 2, 0)
         if isinstance(img, np.ndarray):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
+        image = np.array((img / 255 - 0.5) * 2, dtype=np.float32)
         return image
 
 
@@ -72,7 +72,7 @@ class PersonalizedBase(Dataset):
     def noise(self, img):
         if isinstance(img, torch.Tensor):
             img = self.from_tensor(img)
-        n_str = random.randrange(1, 4)
+        n_str = random.randrange(1, 6)
         _noise = np.random.normal(0, n_str, img.shape).astype(np.float32)
         image = img.astype(np.float32)
         noisy = cv2.add(image, _noise).astype(np.float32)
@@ -87,13 +87,13 @@ class PersonalizedBase(Dataset):
 
     def saturate(self, img):
         img = self.to_tensor(img)
-        f = random.uniform(0.7, 1.3)
+        f = random.uniform(0.9, 1.25)
         img = fun.adjust_saturation(img, saturation_factor=f)
         return img
 
     def brighten(self, img):
         img = self.to_tensor(img)
-        f = random.uniform(0.7, 1.3)
+        f = random.uniform(0.8, 1.4)
         img = fun.adjust_brightness(img, brightness_factor=f)
         return img
 
@@ -105,29 +105,28 @@ class PersonalizedBase(Dataset):
     
     def augment(self, img):
         if random.random() < 0.5:
-            aug = random.choice([
-                fun.equalize,
-                self.posterize,
+            img = random.choice([
+                #fun.equalize,
+                #self.posterize,
                 self.saturate,
-                self.contrast,
+                #self.contrast,
                 self.noise,
                 self.blur,
                 self.brighten
-            ])
-            img = aug(img)
+            ])(img)
         return img
 
 
     def to_tensor(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = torch.tensor(img).to(torch.uint8)
-        img = img.permute(2, 0, 1)
-        return img
+        im = torch.tensor(img, dtype=torch.uint8)
+        im = im.permute(2, 0, 1)
+        return im
 
 
     def from_tensor(self, img):
-        img = img.detach().permute(1, 2, 0)
-        img = np.array(img).astype(np.uint8)
+        im = img.detach().clone().permute(1, 2, 0)
+        img = np.array(im, dtype=np.uint8)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
 
@@ -135,8 +134,8 @@ class PersonalizedBase(Dataset):
     def blur(self, img):                                                                                                                                                                                                
         if isinstance(img, torch.Tensor):
             img = self.from_tensor(img)
-        sig = random.uniform(0.45, 0.6)
-        img = cv2.GaussianBlur(img, (3, 3), sig)
+        sig = random.uniform(0.6, 1.0)
+        img = cv2.GaussianBlur(img, (5, 5), sig)
         return img
 
 
