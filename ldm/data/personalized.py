@@ -88,13 +88,12 @@ class PersonalizedBase(Dataset):
                 img = self.to_tensor(img)
                 f = random.uniform(0.7, 1.3)
                 b = random.randrange(2,9,2)
-            aug = {0: fun.equalize(img),
+            img = {0: fun.equalize(img),
                    1: fun.posterize(img, bits=b),
                    2: fun.adjust_saturation(img, saturation_factor=f),
                    3: fun.adjust_contrast(img, contrast_factor=f),
                    4: self.noise(img),
-                   5: self.blur(img)}
-            img = aug[pick]
+                   5: self.blur(img)}[pick]
         return img
 
 
