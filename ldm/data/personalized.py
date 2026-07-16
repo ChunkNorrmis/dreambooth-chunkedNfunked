@@ -46,8 +46,6 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.exposure(img)
-        img = self.saturate(img)
-        img = self.posterize(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
@@ -90,7 +88,7 @@ class PersonalizedBase(Dataset):
     def exposure(self, img):
         if random.random() < 0.25:
             img = self.to_tensor(img)
-            img = random.choice([fun.autocontrast, fun.equalize])(img)
+            img = random.choice([fun.autocontrast, fun.equalize, self.posterize, self.saturate])(img)
         return img
 
 
