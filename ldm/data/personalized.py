@@ -91,6 +91,12 @@ class PersonalizedBase(Dataset):
         img = fun.adjust_saturation(img, saturation_factor=f)
         return img
 
+    def brighten(self, img):
+        img = self.to_tensor(img)
+        f = random.uniform(0.7, 1.3)
+        img = fun.adjust_brightness(img, brightness_factor=f)
+        return img
+
     def contrast(self, img):
         img = self.to_tensor(img)
         f = random.uniform(0.7, 1.3)
@@ -105,7 +111,8 @@ class PersonalizedBase(Dataset):
                 self.saturate,
                 self.contrast,
                 self.noise,
-                self.blur
+                self.blur,
+                self.brighten
             ])
             img = aug(img)
         return img
