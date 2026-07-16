@@ -89,11 +89,11 @@ class PersonalizedBase(Dataset):
             f = random.uniform(0.7, 1.3)
             b = random.randrange(2,9,2)
             img = random.choice([
-                fun.equalize,
-                fun.posterize(bits=b), 
-                fun.adjust_saturation(saturation_factor=f),
-                fun.adjust_contrast(contrast_factor=f)
-            ])(img)
+                fun.equalize(img),
+                fun.posterize(img, bits=b), 
+                fun.adjust_saturation(img, saturation_factor=f),
+                fun.adjust_contrast(img, contrast_factor=f)
+            ])
         return img
 
 
