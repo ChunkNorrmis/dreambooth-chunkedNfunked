@@ -42,8 +42,10 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = random.choice([self.saturation, self.brightness])(img)
-        img = random.choice([self.blur, self.noise])(img)
+        img = self.saturation(img)
+        img = self.brightness(img)
+        img = self.noise(img)
+        img = self.blur(img)
         image = self.convert(img)
         
         if self.reg:
@@ -56,10 +58,10 @@ class PersonalizedBase(Dataset):
 
     def convert(self, img):
         if isinstance(img, torch.Tensor):
-            img = img.detach().clone().permute(1, 2, 0)
+            img = img.permute(1, 2, 0)
         if isinstance(img, np.ndarray):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255 - 0.5) * 2, dtype=np.float32)
+        image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
         return image
 
 
@@ -73,8 +75,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            strength = random.randrange(1, 4)
-            _noise = np.random.normal(0, strength, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 3, img.shape).astype(np.float32)
             image = img.astype(np.float32)
             noisy = cv2.add(image, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
@@ -82,41 +83,35 @@ class PersonalizedBase(Dataset):
 
     def posterize(self, img):
         img = self.to_tensor(img)
-        r = random.randrange(2,7,2)
-        img = fun.posterize(img, bits=r)
+        img = fun.posterize(img, bits=2)
         return img
 
     def saturation(self, img):
         if random.random() < 0.5:
             img = self.to_tensor(img)
-            amount = random.uniform(0.8, 1.3)
-            img = fun.adjust_saturation(img, saturation_factor=amount)
+            img = fun.adjust_saturation(img, saturation_factor=1.25)
         return img
 
     def brightness(self, img):
         if random.random() < 0.5:
             img = self.to_tensor(img)
-            amount = random.uniform(0.8, 1.5)
-            img = fun.adjust_brightness(img, brightness_factor=amount)
+            img = fun.adjust_brightness(img, brightness_factor=1.25)
         return img
 
     def contrast(self, img):
         img = self.to_tensor(img)
-        f = random.uniform(0.7, 1.3)
-        img = fun.adjust_contrast(img, contrast_factor=f)
+        img = fun.adjust_contrast(img, contrast_factor=1.25)
         return img
 
 
     def to_tensor(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        im = torch.tensor(img, dtype=torch.uint8)
-        im = im.permute(2, 0, 1)
-        return im
+        img = torch.tensor(img, dtype=torch.uint8).permute(2, 0, 1)
+        return img
 
 
     def from_tensor(self, img):
-        im = img.detach().clone().permute(1, 2, 0)
-        img = np.array(im, dtype=np.uint8)
+        img = np.array(img, dtype=np.uint8).transpose(1, 2, 0)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
 
@@ -125,8 +120,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            sig = random.uniform(0.45, 0.7)
-            img = cv2.GaussianBlur(img, (3, 3), sig)
+            img = cv2.GaussianBlur(img, (3, 3), 0)
         return img
 
 
