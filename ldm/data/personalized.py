@@ -91,7 +91,7 @@ class PersonalizedBase(Dataset):
 
 
     def saturation(self, img):
-        if random.random() < 0.25:
+        if random.random() < 0.5:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
             img = fun.adjust_saturation(img, saturation_factor=1.15)
@@ -99,7 +99,7 @@ class PersonalizedBase(Dataset):
 
 
     def brightness(self, img):
-        if random.random() < 0.25:
+        if random.random() < 0.5:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
             img = fun.adjust_brightness(img, brightness_factor=1.15)
@@ -107,7 +107,7 @@ class PersonalizedBase(Dataset):
 
 
     def contrast(self, img):
-        if random.random() < 0.25:
+        if random.random() < 0.5:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
             img = fun.adjust_contrast(img, contrast_factor=1.15)
