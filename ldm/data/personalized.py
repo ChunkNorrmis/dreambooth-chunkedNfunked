@@ -43,7 +43,7 @@ class PersonalizedBase(Dataset):
         img = self.crop_and_resize(img)
         img = self.mirror(img)
         img = self.saturation(img)
-        img = self.brightness(img)
+        img = random.choice([self.brightness, self.contrast])(img)
         img = self.noise(img)
         img = self.blur(img)
         image = self.convert(img)
@@ -81,10 +81,14 @@ class PersonalizedBase(Dataset):
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
+
     def posterize(self, img):
-        img = self.to_tensor(img)
-        img = fun.posterize(img, bits=2)
+        if random.random() < 0.5:
+            if isinstance(img, np.ndarray):
+                img = self.to_tensor(img)
+            img = fun.posterize(img, bits=2)
         return img
+
 
     def saturation(self, img):
         if random.random() < 0.5:
@@ -93,12 +97,14 @@ class PersonalizedBase(Dataset):
             img = fun.adjust_saturation(img, saturation_factor=1.25)
         return img
 
+
     def brightness(self, img):
         if random.random() < 0.5:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
             img = fun.adjust_brightness(img, brightness_factor=1.25)
         return img
+
 
     def contrast(self, img):
         if random.random() < 0.5:
