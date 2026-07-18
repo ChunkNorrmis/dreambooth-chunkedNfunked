@@ -75,7 +75,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.5:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            _noise = np.random.normal(0, 3, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
             image = img.astype(np.float32)
             noisy = cv2.add(image, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
@@ -91,26 +91,26 @@ class PersonalizedBase(Dataset):
 
 
     def saturation(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            img = fun.adjust_saturation(img, saturation_factor=1.25)
+            img = fun.adjust_saturation(img, saturation_factor=1.15)
         return img
 
 
     def brightness(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            img = fun.adjust_brightness(img, brightness_factor=1.25)
+            img = fun.adjust_brightness(img, brightness_factor=1.15)
         return img
 
 
     def contrast(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-        img = fun.adjust_contrast(img, contrast_factor=1.25)
+        img = fun.adjust_contrast(img, contrast_factor=1.15)
         return img
 
 
