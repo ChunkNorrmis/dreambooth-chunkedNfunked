@@ -58,9 +58,9 @@ multidict==6.7.1
 multiprocess==0.70.15
 nest-asyncio==1.6.0
 networkx==3.4.2
-numpy==1.26.3
+numpy==1.26.4
 omegaconf==2.1.1
-opencv-python-headless==4.11.0.86
+opencv-contrib-python-headless==4.11.0.86
 packaging==26.2
 pandas==2.3.3
 parso==0.8.6
