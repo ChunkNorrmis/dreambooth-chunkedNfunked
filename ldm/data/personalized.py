@@ -13,7 +13,7 @@ class PersonalizedBase(Dataset):
                  size=512, epochs=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
 
         self.data_root = data_root
-        self.imgs = [im for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
+        self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
         self.token_only = token_only
@@ -24,7 +24,7 @@ class PersonalizedBase(Dataset):
         self.reg = reg
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
-        self.odds = flip_p
+        self.flip_p = flip_p
 
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -61,12 +61,13 @@ class PersonalizedBase(Dataset):
             img = img.permute(1, 2, 0)
         if isinstance(img, np.ndarray):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        image = np.array(img).astype(np.float32)
+        image = (image / 255. - 0.5) * 2
         return image
 
 
     def mirror(self, img):
-        if random.random() < self.odds:
+        if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         return img
 
@@ -77,8 +78,8 @@ class PersonalizedBase(Dataset):
                 img = self.from_tensor(img)
             strength = random.randrange(2, 6)
             _noise = np.random.normal(0, strength, img.shape).astype(np.float32)
-            image = img.astype(np.float32)
-            noisy = cv2.add(image, _noise)
+            im = img.astype(np.float32)
+            noisy = cv2.add(im, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
         return img
 
@@ -120,12 +121,12 @@ class PersonalizedBase(Dataset):
 
     def to_tensor(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
+        img = torch.tensor(img, dtype=torch.uint8).permute(2, 0, 1)
         return img
 
 
     def from_tensor(self, img):
-        img = np.array(img).astype(np.uint8).transpose(1, 2, 0)
+        img = np.array(img, dtype=np.uint8).transpose(1, 2, 0)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
 
