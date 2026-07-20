@@ -72,10 +72,11 @@ class PersonalizedBase(Dataset):
 
 
     def noise(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            _noise = np.random.normal(0, 5, img.shape).astype(np.float32)
+            strength = random.randrange(2, 6)
+            _noise = np.random.normal(0, strength, img.shape).astype(np.float32)
             image = img.astype(np.float32)
             noisy = cv2.add(image, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
@@ -91,43 +92,46 @@ class PersonalizedBase(Dataset):
 
 
     def saturation(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            img = fun.adjust_saturation(img, saturation_factor=1.15)
+            factor = random.uniform(1.0, 1.5)
+            img = fun.adjust_saturation(img, saturation_factor=factor)
         return img
 
 
     def brightness(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            img = fun.adjust_brightness(img, brightness_factor=1.15)
+            factor = random.uniform(1.0, 1.5)
+            img = fun.adjust_brightness(img, brightness_factor=factor)
         return img
 
 
     def contrast(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            img = fun.adjust_contrast(img, contrast_factor=1.15)
+            factor = random.uniform(1.0, 1.5)
+            img = fun.adjust_contrast(img, contrast_factor=factor)
         return img
 
 
     def to_tensor(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = torch.tensor(img, dtype=torch.uint8).permute(2, 0, 1)
+        img = torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
         return img
 
 
     def from_tensor(self, img):
-        img = np.array(img, dtype=np.uint8).transpose(1, 2, 0)
+        img = np.array(img).astype(np.uint8).transpose(1, 2, 0)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
 
 
     def blur(self, img):
-        if random.random() < 0.5:
+        if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
             img = cv2.GaussianBlur(img, (3, 3), 0)
