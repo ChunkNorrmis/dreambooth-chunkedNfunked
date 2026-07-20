@@ -5,11 +5,9 @@ from ldm.depicklizer import depicklize
 
 
 def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
-    checkpoints_found = False
     output_folder = config.trained_models_directory()
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-    
     logs_directory = config.log_directory()
     log_ckpt_dir = config.log_checkpoint_directory()
     intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
