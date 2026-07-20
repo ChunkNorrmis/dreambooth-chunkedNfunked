@@ -61,7 +61,7 @@ class PersonalizedBase(Dataset):
             img = img.permute(1, 2, 0)
         if isinstance(img, np.ndarray):
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array(img).astype(np.float32)
+        image = np.array(img, dtype=np.float32)
         image = (image / 255. - 0.5) * 2
         return image
 
@@ -76,8 +76,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            strength = random.randrange(2, 6)
-            _noise = np.random.normal(0, strength, img.shape).astype(np.float32)
+            _noise = np.random.normal(0, 2, img.shape).astype(np.float32)
             im = img.astype(np.float32)
             noisy = cv2.add(im, _noise)
             img = np.clip(noisy, 0, 255).astype(np.uint8)
@@ -96,8 +95,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            factor = random.uniform(1.0, 1.5)
-            img = fun.adjust_saturation(img, saturation_factor=factor)
+            img = fun.adjust_saturation(img, saturation_factor=1.15)
         return img
 
 
@@ -105,8 +103,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            factor = random.uniform(1.0, 1.5)
-            img = fun.adjust_brightness(img, brightness_factor=factor)
+            img = fun.adjust_brightness(img, brightness_factor=1.15)
         return img
 
 
@@ -114,8 +111,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            factor = random.uniform(1.0, 1.5)
-            img = fun.adjust_contrast(img, contrast_factor=factor)
+            img = fun.adjust_contrast(img, contrast_factor=1.15)
         return img
 
 
@@ -135,7 +131,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            img = cv2.GaussianBlur(img, (3, 3), 0)
+            img = cv2.GaussianBlur(img, (3, 3), 0.65)
         return img
 
 
