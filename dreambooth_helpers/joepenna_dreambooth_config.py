@@ -49,8 +49,8 @@ class JoePennaDreamboothConfigSchemaV1():
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
         ])
 
-        tokens = [tk for tk in os.listdir(self.training_images_folder_path)]
-        classes = [os.listdir(os.path.join(self.training_images_folder_path, cl)) for cl in tokens]
+        tokens = os.listdir(self.training_images_folder_path)
+        classes = [os.listdir(os.path.join(self.training_images_folder_path, cl))[0] for cl in tokens]
         self.token_classes = [f"{tokens[0]}_{classes[0]}", f"{tokens[1]}_{classes[1]}"]
 
         if num_training_images <= 0:
