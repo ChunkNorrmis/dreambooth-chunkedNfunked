@@ -25,9 +25,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.token_only = token_only
         self.learning_rate = learning_rate
         self.precision = precision
-        self.project_name = project_name
-        self.project_config_filename = f"{self.project_name}--config.json"
-
+        
         if not os.path.exists(model_path):
             if model_path.startswith(('https://', 'http://')):
                 self.model_path = get_model(model_path)
@@ -57,16 +55,24 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"No Training Images (*.png, *.jpg, *.jpeg) found in '{self.training_images_folder_path}'.")
         self.max_training_steps = int(num_training_images * self.epochs / (self.batch_size * self.accumed_grads))
 
-        if tokens[0] is None or tokens[0] == '':
-            raise Exception(f"Token not provided.")
-        self.token = tokens[0]
+        if token is not None:
+            self.token = token
+        else: self.token = tokens[0]
             
         if not self.token_only:
             if not os.path.exists(regularization_images_folder_path):
                 raise Exception(f"Regularization Images Path Not Found: '{regularization_images_folder_path}'.")
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            self.class_word = classes[0]
+            if class_word is not None:
+                self.class_word = class_word
+            else: self.class_word = classes[0]
 
+        if project_name is not None:
+            self.project_name = project_name
+        else:
+            self.project_name = f"{self.token_classes[0]}-{self.token_classes[1]}"
+        self.project_config_filename = f"{self.project_name}--config.json"
+            
         if flip_percent < 0 or flip_percent > 1:
             raise Exception("--flip_p: must be between 0 and 1")
         self.flip_percent = flip_percent
