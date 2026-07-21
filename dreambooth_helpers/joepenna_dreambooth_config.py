@@ -49,6 +49,10 @@ class JoePennaDreamboothConfigSchemaV1():
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
         ])
 
+        tokens = [tk for tk in os.listdir(self.training_images_folder_path)]
+        classes = [os.listdir(os.path.join(self.training_images_folder_path, cl)) for cl in tokens]
+        self.token_classes = [f"{tokens[0]}_{classes[0]}", f"{tokens[1]}_{classes[1]}"]
+
         if num_training_images <= 0:
             raise Exception(f"No Training Images (*.png, *.jpg, *.jpeg) found in '{self.training_images_folder_path}'.")
         self.max_training_steps = int(num_training_images * self.epochs / (self.batch_size * self.accumed_grads))
