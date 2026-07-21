@@ -11,7 +11,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     logs_directory = config.log_directory()
     log_ckpt_dir = config.log_checkpoint_directory()
     intermediate_checkpoints_directory = config.log_intermediate_checkpoints_directory()
-    model_paths = [mp for mp in glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt')) + [os.path.join(log_ckpt_dir, 'last.ckpt')]]
+    model_paths = [os.path.relpath(mp) for mp in glob.glob(os.path.join(intermediate_checkpoints_directory, '*.ckpt')) + [os.path.join(log_ckpt_dir, 'last.ckpt')]]
     config.save_config_to_file(save_path=output_folder)
     if not os.path.exists(logs_directory):
         print(f"No checkpoints found in {logs_directory}")
