@@ -10,8 +10,8 @@ class JoePennaDreamboothConfigSchemaV1():
         self.config_date_time = datetime.now(timezone.utc).strftime("%m-%d-%Y")
         self.seed = random.randrange(1, int(1e+04))
                                          
-    def saturate(self, project_name=None, token=None, token_only=None, class_word=None, training_images_folder_path=None, regularization_images_folder_path=None,
-        model_path=None, precision=None, safetensors=None, epochs=None, learning_rate=None, batch_size=1, accumed_grads=1, res=512, crop=False, flip_percent=0.5,
+    def saturate(self, project_name=None, token=None, token_only=False, class_word=None, training_images_folder_path=None, regularization_images_folder_path=None,
+        model_path=None, precision=None, safetensors=False, epochs=None, learning_rate=None, batch_size=1, accumed_grads=1, res=512, crop=False, flip_percent=0.5,
         save_every_x_steps=0, gpu=0, debug=False):
 
         self.epochs = epochs
