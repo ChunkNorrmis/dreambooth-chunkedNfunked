@@ -25,7 +25,8 @@ class JoePennaDreamboothConfigSchemaV1():
         self.token_only = token_only
         self.learning_rate = learning_rate
         self.precision = precision
-        
+        self.safetensors = safetensors
+
         if not os.path.exists(model_path):
             if model_path.startswith(('https://', 'http://')):
                 self.model_path = get_model(model_path)
@@ -33,7 +34,6 @@ class JoePennaDreamboothConfigSchemaV1():
         else: self.model_path = os.path.relpath(model_path)
 
         seed_everything(self.seed)
-
         if self.save_every_x_steps < 0:
             raise Exception("--save_every_x_steps: must be greater than or equal to 0")
 
@@ -58,7 +58,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if token is not None:
             self.token = token
         else: self.token = tokens[0]
-            
+
         if not self.token_only:
             if not os.path.exists(regularization_images_folder_path):
                 raise Exception(f"Regularization Images Path Not Found: '{regularization_images_folder_path}'.")
@@ -72,15 +72,12 @@ class JoePennaDreamboothConfigSchemaV1():
         else:
             self.project_name = f"{self.token_classes[0]}-{self.token_classes[1]}"
         self.project_config_filename = f"{self.project_name}--config.json"
-            
+
         if flip_percent < 0 or flip_percent > 1:
             raise Exception("--flip_p: must be between 0 and 1")
         self.flip_percent = flip_percent
 
-        if safetensors:
-            self.model_format = '.safetensors'
-        else: self.model_format = '.ckpt'
-        
+
         self.validate_gpu_vram()
         self._create_log_folders()
 
