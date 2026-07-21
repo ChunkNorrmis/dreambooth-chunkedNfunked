@@ -73,7 +73,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            _noise = np.array(img, dtype=np.uint8)
+            _noise = img.copy()
             cv2.randn(_noise, 0, 25)
             img = cv2.add(img, _noise)
         return img
