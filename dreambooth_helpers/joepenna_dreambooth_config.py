@@ -67,7 +67,7 @@ class JoePennaDreamboothConfigSchemaV1():
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
             self.class_word = classes[0]
 
-        if self.flip_percent < 0 or self.flip_percent > 1:
+        if flip_percent < 0 or flip_percent > 1:
             raise Exception("--flip_p: must be between 0 and 1")
         self.flip_percent = flip_percent
 
