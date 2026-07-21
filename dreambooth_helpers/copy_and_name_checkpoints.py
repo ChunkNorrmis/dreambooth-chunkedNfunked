@@ -18,7 +18,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         return
     
     if len(model_paths) > 0:
-        if config.model_format == '.safetensors':
+        if config.safetensors:
             print(f"Depickling model checkpoint(s)")
             print(' ')
         #p_bar = tqdm(total=n_models, leave=False)
@@ -26,7 +26,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
             if os.path.basename(model_path) == 'last.ckpt':
                 if int(torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
                     last = os.path.join(output_folder, config.create_checkpoint_file_name(config.max_training_steps))
-                    if config.model_format == '.safetensors':
+                    if config.safetensors:
                         depicklize(model_path, nil_pickle=last)
                     else:
                         shutil.move(model_path, last)
@@ -36,7 +36,7 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
                 steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name)
                 steps = os.path.splitext(steps)[0]
                 output_file = os.path.join(output_folder, config.create_checkpoint_file_name(steps))
-                if config.model_format == '.safetensors':
+                if config.safetensors:
                     depicklize(model_path, nil_pickle=output_file)
                 else:
                     shutil.move(model_path, output_file)
