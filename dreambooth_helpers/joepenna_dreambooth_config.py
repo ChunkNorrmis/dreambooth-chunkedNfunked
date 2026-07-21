@@ -57,19 +57,19 @@ class JoePennaDreamboothConfigSchemaV1():
             raise Exception(f"No Training Images (*.png, *.jpg, *.jpeg) found in '{self.training_images_folder_path}'.")
         self.max_training_steps = int(num_training_images * self.epochs / (self.batch_size * self.accumed_grads))
 
+        if tokens[0] is None or tokens[0] == '':
+            raise Exception(f"Token not provided.")
+        self.token = tokens[0]
+            
         if not self.token_only:
             if not os.path.exists(regularization_images_folder_path):
                 raise Exception(f"Regularization Images Path Not Found: '{regularization_images_folder_path}'.")
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
-            self.class_word = class_word
+            self.class_word = classes[0]
 
-        if token is None or token == '':
-            raise Exception(f"Token not provided.")
-        self.token = token
-
-        self.flip_percent = flip_percent
         if self.flip_percent < 0 or self.flip_percent > 1:
             raise Exception("--flip_p: must be between 0 and 1")
+        self.flip_percent = flip_percent
 
         if safetensors:
             self.model_format = '.safetensors'
@@ -77,6 +77,7 @@ class JoePennaDreamboothConfigSchemaV1():
         
         self.validate_gpu_vram()
         self._create_log_folders()
+
 
     def validate_gpu_vram(self):
         def convert_size(size_bytes):
