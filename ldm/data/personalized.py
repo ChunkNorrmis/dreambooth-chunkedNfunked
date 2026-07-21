@@ -42,7 +42,7 @@ class PersonalizedBase(Dataset):
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
-        if self.set == 'train':
+        if self.set == 'train' and not self.reg:
             img = self.mirror(img)
             img = self.noise(img)
             img = self.blur(img)
