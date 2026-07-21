@@ -68,7 +68,7 @@ class JoePennaDreamboothConfigSchemaV1():
         if project_name is not None:
             self.project_name = project_name
         else:
-            self.project_name = f"{self.token_classes[0][0]}_{self.token_classes[0][1]}-{self.token_classes[1][0]}_{self.token_classes[1][1]}"
+            self.project_name = f"{self.token_classes[0][0]}-{self.token_classes[0][1]}_{self.token_classes[1][0]}-{self.token_classes[1][1]}"
         self.project_config_filename = f"{self.project_name}--config.json"
 
         if flip_percent < 0 or flip_percent > 1:
