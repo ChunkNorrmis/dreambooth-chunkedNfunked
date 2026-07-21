@@ -47,9 +47,7 @@ class JoePennaDreamboothConfigSchemaV1():
             glob.glob(os.path.join(self.training_images_folder_path, '**', '*.png'), recursive=True)
         ])
 
-        tokens = os.listdir(self.training_images_folder_path)
-        classes = [os.listdir(os.path.join(self.training_images_folder_path, cl))[0] for cl in tokens]
-        self.token_classes = [f"{tokens[0]}_{classes[0]}", f"{tokens[1]}_{classes[1]}"]
+        self.token_classes = [[cl, os.listdir(os.path.join(self.training_images_folder_path, cl))[0]] for cl in os.listdir(self.training_images_folder_path)]
 
         if num_training_images <= 0:
             raise Exception(f"No Training Images (*.png, *.jpg, *.jpeg) found in '{self.training_images_folder_path}'.")
@@ -57,7 +55,7 @@ class JoePennaDreamboothConfigSchemaV1():
 
         if token is not None:
             self.token = token
-        else: self.token = tokens[0]
+        else: self.token = self.token_classes[0][0]
 
         if not self.token_only:
             if not os.path.exists(regularization_images_folder_path):
@@ -65,12 +63,12 @@ class JoePennaDreamboothConfigSchemaV1():
             self.regularization_images_folder_path = os.path.relpath(regularization_images_folder_path)
             if class_word is not None:
                 self.class_word = class_word
-            else: self.class_word = classes[0]
+            else: self.class_word = self.token_classes[0][1]
 
         if project_name is not None:
             self.project_name = project_name
         else:
-            self.project_name = f"{self.token_classes[0]}-{self.token_classes[1]}"
+            self.project_name = f"{self.token_classes[0][0]}_{self.token_classes[0][1]}-{self.token_classes[1][0]}_{self.token_classes[1][1]}"
         self.project_config_filename = f"{self.project_name}--config.json"
 
         if flip_percent < 0 or flip_percent > 1:
