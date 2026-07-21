@@ -73,10 +73,9 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            _noise = np.random.normal(0, 3, img.shape).astype(np.float32)
-            im = img.astype(np.float32)
-            noisy = cv2.add(im, _noise)
-            img = np.clip(noisy, 0, 255).astype(np.uint8)
+            _noise = np.array(img, dtype=np.uint8)
+            cv2.randn(_noise, 0, 25)
+            img = cv2.add(img, _noise)
         return img
 
 
