@@ -108,7 +108,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, np.ndarray):
                 img = self.to_tensor(img)
-            img = fun.adjust_contrast(img, contrast_factor=1.15)
+            img = fun.autocontrast(img)
         return img
 
 
