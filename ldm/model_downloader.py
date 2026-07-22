@@ -20,21 +20,27 @@ def from_generic(url):
     header = response.headers.get('content-disposition')
     results = re.search(r'filename="?([^";]+)"?', header)
     ckpt_file = results.group(1)
-    model_path = os.path.join(sys.path[0], ckpt_file)
-    if not os.path.exists(model_path):
-        print(f"Downloading model '{ckpt_file}' ...")
-        urllib.response.urlretrieve(url, model_path)
-    return os.path.relpath(model_path)
+    if ckpt_file.endswith('.ckpt'):
+        model_path = os.path.join(sys.path[0], ckpt_file)
+        if not os.path.exists(model_path):
+            print(f"Downloading model '{ckpt_file}' ...")
+            urllib.response.urlretrieve(url, model_path)
+        return os.path.relpath(model_path)
+    else:
+        raise Exception('model not a checkpoint file') 
 
 
 def from_huggingface_hub(url):
     repo_id = f"{url.split('/')[3]}/{url.split('/')[4]}"
     ckpt_file = os.path.basename(url)
-    model_path = os.path.join(sys.path[0], ckpt_file)
-    if not os.path.exists(model_path):
-        print(f"Downloading model '{ckpt_file}' ...")
-        hf_hub_download(repo_id, ckpt_file, local_dir=sys.path[0])
-    return os.path.relpath(model_path)
+    if ckpt_file.endswith('.ckpt'):
+        model_path = os.path.join(sys.path[0], ckpt_file)
+        if not os.path.exists(model_path):
+            print(f"Downloading model '{ckpt_file}' ...")
+            hf_hub_download(repo_id, ckpt_file, local_dir=sys.path[0])
+        return os.path.relpath(model_path)
+    else:
+        raise Exception('model not a checkpoint file') 
 
 
 def from_google_drive(url):
@@ -43,10 +49,13 @@ def from_google_drive(url):
             print(f"\r{bytes_so_far / bytes_total * 100:.1f}%", end="")
 
     ckpt_file = gdown.download(url=url, skip_download=True)[-1]
-    model_path = os.path.join(sys.path[0], ckpt_file)
-    if not os.path.exists(model_path):
-        print(f"Downloading model '{ckpt_file}' ...")
-        gdown.download(url=url, output=model_path, quiet=True, progress=on_progress)
-    return os.path.relpath(model_path)
+    if ckpt_file.endswith('.ckpt'):
+        model_path = os.path.join(sys.path[0], ckpt_file)
+        if not os.path.exists(model_path):
+            print(f"Downloading model '{ckpt_file}' ...")
+            gdown.download(url=url, output=model_path, quiet=True, progress=on_progress)
+        return os.path.relpath(model_path)
+    else:
+        raise Exception('model not a checkpoint file') 
 
 
