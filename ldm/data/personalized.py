@@ -76,7 +76,7 @@ class PersonalizedBase(Dataset):
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
             _noise = img.copy()
-            cv2.randn(_noise, 0, 25)
+            cv2.randn(_noise, 0, 15)
             img = cv2.add(img, _noise)
         return img
 
@@ -129,7 +129,7 @@ class PersonalizedBase(Dataset):
         if random.random() < 0.25:
             if isinstance(img, torch.Tensor):
                 img = self.from_tensor(img)
-            img = cv2.GaussianBlur(img, (3, 3), 0.65)
+            img = cv2.GaussianBlur(img, (3, 3), 0.55)
         return img
 
 
