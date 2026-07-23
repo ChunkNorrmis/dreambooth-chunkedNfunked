@@ -23,20 +23,16 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
         for model_path in tqdm(model_paths):
             if os.path.basename(model_path) == 'last.ckpt':
                 if int(torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
-                    last = os.path.join(output_folder, config.create_checkpoint_file_name(config.max_training_steps))
-                    if config.safetensors:
-                        depicklize(model_path, nil_pickle=last)
-                    else:
-                        shutil.move(model_path, last)
+                    output_file = os.path.join(output_folder, config.create_checkpoint_file_name(config.max_training_steps))
             else:
                 file_name = os.path.basename(model_path)
-                steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name)
-                steps = os.path.splitext(steps)[0]
+                steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name).replace('.ckpt', '')
+                #steps = os.path.splitext(steps)[0]
                 output_file = os.path.join(output_folder, config.create_checkpoint_file_name(steps))
-                if config.safetensors:
-                    depicklize(model_path, nil_pickle=output_file)
-                else:
-                    shutil.move(model_path, output_file)
+            if config.safetensors:
+                depicklize(model_path, nil_pickle=output_file)
+            else:
+                shutil.move(model_path, output_file)
         print(f"✅ Model(s) moved to '{output_folder}'")
     else:
         print("No checkpoints found.")
