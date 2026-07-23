@@ -43,8 +43,8 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path)
         img = self.crop_and_resize(img)
         img = self.mirror(img)
-        img = self.noise(img)
-        img = self.blur(img)
+        #img = self.noise(img)
+        #img = self.blur(img)
         image = self.convert(img)
         
         if self.reg:
