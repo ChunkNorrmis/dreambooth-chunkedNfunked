@@ -20,8 +20,6 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
     if len(model_paths) > 0:
         if config.safetensors:
             print(f"Depickling model checkpoint(s)")
-            print(' ')
-        #p_bar = tqdm(total=n_models, leave=False)
         for model_path in tqdm(model_paths):
             if os.path.basename(model_path) == 'last.ckpt':
                 if int(torch.load(model_path, map_location=torch.device('cpu'), weights_only=False)['global_step']) == config.max_training_steps:
@@ -30,7 +28,6 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
                         depicklize(model_path, nil_pickle=last)
                     else:
                         shutil.move(model_path, last)
-                    #p_bar.update()
             else:
                 file_name = os.path.basename(model_path)
                 steps = re.sub(r"epoch=\d{6}-step=0*", "", file_name)
@@ -40,7 +37,6 @@ def copy_and_name_checkpoints(config: JoePennaDreamboothConfigSchemaV1):
                     depicklize(model_path, nil_pickle=output_file)
                 else:
                     shutil.move(model_path, output_file)
-                #p_bar.update()
         print(f"✅ Model(s) moved to '{output_folder}'")
     else:
         print("No checkpoints found.")
