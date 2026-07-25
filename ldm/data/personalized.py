@@ -1,9 +1,7 @@
 import os, sys, torch, cv2, random, glob, numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
-from captionizer import caption_from_path, generic_captions_from_path, find_images
-from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
+from captionizer import caption_from_path, generic_captions_from_path
 
 
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
