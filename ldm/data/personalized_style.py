@@ -1,7 +1,6 @@
 import os, torch, sys, cv2, random, glob, numpy as np
 from torch.utils.data import Dataset
-from torchvision.transforms import v2
-from torchvision.transforms.v2 import functional as fun
+
 
 imagenet_templates_small = [
     'a painting in the style of {}',
