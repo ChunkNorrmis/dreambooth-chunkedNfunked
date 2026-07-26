@@ -31,37 +31,6 @@ class LSUNBase(Dataset):
         example = dict((k, self.labels[k][i]) for k in self.labels)
         img_path = example["file_path_"]
         img = cv2.imread(img_path)
-        img = self.crop_and_resize(img)
-        img = self.mirror(img)
-        img = self.noise(img)
-        img = self.blur(img)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        image = np.array((img / 255. - 0.5) * 2.).astype(np.float32)
-        example = {'image': image}
-        return example
-
-    def mirror(self, img):
-        if random.random() < self.odds:
-            img = cv2.flip(img, 1)
-        return img
-
-
-    def noise(self, img):
-        if random.random() < self.odds:
-            _noise = np.random.normal(0, 10, img.shape).astype(np.float32)
-            img = img.astype(np.float32)
-            noisy = cv2.add(img, _noise)
-            img = np.clip(noisy, 0, 255).astype(np.uint8)
-        return img
-
-
-    def blur(self, img):                                                                                                                                                                                                
-        if random.random() < self.odds:
-            img = cv2.GaussianBlur(img, (5, 5), 0)
-        return img
-
-
-    def crop_and_resize(self, img):
         h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
@@ -69,7 +38,11 @@ class LSUNBase(Dataset):
         if self.size != crop:
             interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             img = cv2.resize(img, (self.size, self.size), interp)
-        return img
+        if random.random() < self.flip_p:
+            img = cv2.flip(img, 1)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        example['image'] = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        return example
 
 
 class LSUNChurchesTrain(LSUNBase):
