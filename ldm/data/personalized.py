@@ -7,11 +7,11 @@ from captionizer import caption_from_path, generic_captions_from_path
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
 
 class PersonalizedBase(Dataset):
-    def __init__(self, data_root=None, set='train', reg=False, placeholder_token='lobster', coarse_class_text=None,
+    def __init__(self, data_root=None, set='train', reg=False, placeholder_token=None, coarse_class_text=None,
                  size=512, epochs=100, center_crop=True, flip_p=0.5, mixing_prob=0.25, token_only=False, per_image_tokens=False):
 
         self.data_root = data_root
-        self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
+        self.imgs = glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
         self.token_only = token_only
@@ -50,10 +50,13 @@ class PersonalizedBase(Dataset):
             img = cv2.flip(img, 1)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         example['image'] = np.array((img / 255. - 0.5) * 2).astype(np.float32)
-        
+
+        self.coarse_class_text = img_path.split('/')[-2]
         if self.reg:
+            self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
             example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
+            self.placeholder_token = img_path.split('/')[-3]
             example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         
         return example
