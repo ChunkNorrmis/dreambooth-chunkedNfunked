@@ -5,8 +5,11 @@ import hf_xet, hf_transfer
 
 
 def get_model(url):
-    if url.startswith('http://'):
+    if url.startswith('www.'):
+        url = 'https://' + url
+    elif url.startswith('http://'):
         url = url.replace('http://', 'https://')
+
     if url.startswith(('https://huggingface.co/', 'https://www.huggingface.co/')):
         return from_huggingface_hub(url)
     elif url.startswith(('https://drive.google.com/', 'https://www.drive.google.com/')):
