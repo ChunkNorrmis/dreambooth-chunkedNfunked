@@ -35,7 +35,7 @@ class callbacks():
         return {
             "target": "dreambooth_helpers.callback_helpers.ImageLogger",
             "params": {
-                "batch_frequency": 500 if self.config.save_every_x_steps <= 0 else self.config.save_every_x_steps,
+                "batch_frequency": (self.config.max_training_steps * 0.2) if self.config.save_every_x_steps <= 0 else self.config.save_every_x_steps,
                 "max_images": 8,
                 "increase_log_steps": False,
             }
@@ -242,7 +242,7 @@ def get_dreambooth_lightning_config(config: JoePennaDreamboothConfigSchemaV1) ->
     lightning_config = {
         "modelcheckpoint": {
             "params": {
-                "every_n_train_steps": 500 if config.save_every_x_steps <= 0 else config.save_every_x_steps,
+                "every_n_train_steps": (config.max_training_steps * 0.2) if config.save_every_x_steps <= 0 else config.save_every_x_steps,
             }
         },
         "callbacks": {
