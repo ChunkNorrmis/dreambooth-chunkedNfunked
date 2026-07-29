@@ -28,7 +28,7 @@ class JoePennaDreamboothConfigSchemaV1():
         self.safetensors = safetensors
 
         if not os.path.exists(model_path):
-            if model_path.startswith(('https://', 'http://')):
+            if model_path.startswith(('https://', 'http://', 'www.')):
                 self.model_path = get_model(model_path)
             else: raise Exception(f"{os.path.basename(model_path)} not Found")
         else: self.model_path = os.path.relpath(model_path)
