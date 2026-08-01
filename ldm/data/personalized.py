@@ -2,6 +2,7 @@ import os, sys, torch, cv2, random, glob, numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from captionizer import caption_from_path, generic_captions_from_path
+from torchvision.transforms import v2
 
 
 per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
@@ -23,7 +24,7 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
-
+        self.trnsfm_rgb = v2.compose([v2.RGB])
         if per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
         if set == 'train':
@@ -36,7 +37,6 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         h, w = img.shape[:2]
@@ -49,16 +49,17 @@ class PersonalizedBase(Dataset):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        example['image'] = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+        image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
 
         self.coarse_class_text = img_path.split('/')[-2]
         if self.reg:
             self.reg_tokens = OrderedDict([('C', self.coarse_class_text)])
-            example['caption'] = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
+            caption = generic_captions_from_path(img_path, self.data_root, self.reg_tokens)
         else:
             self.placeholder_token = img_path.split('/')[-3]
-            example['caption'] = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
+            caption = caption_from_path(img_path, self.data_root, self.coarse_class_text, self.placeholder_token)
         
+        example = {'caption': caption, 'image': image}
         return example
         
     
@@ -105,13 +106,13 @@ class PersonalizedBase(Dataset):
 
 
     def to_tensor(self, img):
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        img = torch.tensor(img, dtype=torch.uint8).permute(2, 0, 1)
+        img = torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
+        img = v2.compose([v2.RGB])(img)
         return img
 
 
     def from_tensor(self, img):
-        img = np.array(img, dtype=np.uint8).transpose(1, 2, 0)
+        img = np.array(img).astype(np.uint8).transpose(1, 2, 0)
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         return img
 
