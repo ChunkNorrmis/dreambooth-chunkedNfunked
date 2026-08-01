@@ -1,4 +1,5 @@
-import os, torch, sys, cv2, random, glob, numpy as np
+import os, torch, sys, cv2, random, glob
+import numpy as np
 from torch.utils.data import Dataset
 
 
