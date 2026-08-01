@@ -1,4 +1,5 @@
-import os, sys, torch, cv2, random, glob, numpy as np
+import os, sys, torch, cv2, random, glob
+import numpy as np
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from captionizer import caption_from_path, generic_captions_from_path
@@ -25,7 +26,8 @@ class PersonalizedBase(Dataset):
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
         self.trnsfm_rgb = v2.compose([v2.RGB])
-        if per_image_tokens:
+        
+        if self.per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
         if set == 'train':
             self._length = self.n_imgs * epochs
