@@ -2,6 +2,8 @@ import os, torch, sys, cv2, random, glob, numpy as np
 from torch.utils.data import Dataset
 
 
+per_img_token_list = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת']
+
 imagenet_templates_small = [
     'a painting in the style of {}',
     'a rendering in the style of {}',
@@ -44,9 +46,6 @@ imagenet_dual_templates_small = [
     'a large painting in the style of {} with {}',
 ]
 
-per_img_token_list = [
-    'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק', 'ר', 'ש', 'ת',
-]
 
 class PersonalizedBase(Dataset):
     def __init__(
@@ -56,16 +55,16 @@ class PersonalizedBase(Dataset):
         size=512,
         epochs=100,
         flip_p=0.5,
-        placeholder_token='lobster',
+        placeholder_token=None,
         per_image_tokens=False,
         center_crop=True,
         mixing_prob=0.25
     ):
         self.data_root = data_root
-        self.imgs = [os.path.relpath(im) for im in glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)]
+        self.imgs = glob.glob(os.path.join(self.data_root, '**', '*.png'), recursive=True)
         self.n_imgs = len(self.imgs)
         self._length = self.n_imgs
-        self.odds = flip_p
+        self.flip_p = flip_p
         self.per_image_tokens = per_image_tokens
         self.center_crop = center_crop
         self.size = size
@@ -81,7 +80,6 @@ class PersonalizedBase(Dataset):
         return self._length
 
     def __getitem__(self, i):
-        example = {}
         img_path = self.imgs[i % self.n_imgs]
         img = cv2.imread(img_path)
         h, w = img.shape[:2]
@@ -94,12 +92,15 @@ class PersonalizedBase(Dataset):
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        example['image'] = np.array((img / 255. - 0.5) * 2).astype(np.float32)
-        
+        image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
+
+        self.placeholder_token = img_path.split('/')[-2]
         if self.per_image_tokens and random.random() < self.mixing_prob:
-            example['caption'] = random.choice(imagenet_dual_templates_small).format(placeholder_token, per_img_token_list[i % self.n_imgs])
+            caption = random.choice(imagenet_dual_templates_small).format(self.placeholder_token, per_img_token_list[i % self.n_imgs])
         else:
-            example['caption'] = random.choice(imagenet_templates_small).format(placeholder_token)
+            caption = random.choice(imagenet_templates_small).format(self.placeholder_token)
+        
+        example = {'caption': caption, 'image': image}
         return example
 
 
