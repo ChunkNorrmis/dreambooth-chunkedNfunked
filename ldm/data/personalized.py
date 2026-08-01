@@ -107,7 +107,7 @@ class PersonalizedBase(Dataset):
 
     def to_tensor(self, img):
         img = torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
-        img = v2.compose([v2.RGB])(img)
+        img = self.trnsfm_rgb(img)
         return img
 
 
