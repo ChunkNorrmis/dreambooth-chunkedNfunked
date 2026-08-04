@@ -1,5 +1,6 @@
 import os, sys, torch, cv2, random, glob
 import numpy as np
+from PIL import Image
 from typing import OrderedDict
 from torch.utils.data import Dataset
 from captionizer import caption_from_path, generic_captions_from_path
