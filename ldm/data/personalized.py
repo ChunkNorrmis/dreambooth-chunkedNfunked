@@ -40,17 +40,19 @@ class PersonalizedBase(Dataset):
 
     def __getitem__(self, i):
         img_path = self.imgs[i % self.n_imgs]
-        img = cv2.imread(img_path)
+        img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         h, w = img.shape[:2]
         crop = min(h, w)
         if self.center_crop and h != w:
             img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
-            interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
-            img = cv2.resize(img, (self.size, self.size), interp)
+            #interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
+            #img = cv2.resize(img, (self.size, self.size), interp)
+            img = Image.fromarray(img)
+            img = img.resize((self.size, self.size), resample=1, reducing_gap=3)
+            img = np.array(img).astype(np.uint8)
         if random.random() < self.flip_p:
             img = cv2.flip(img, 1)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         image = np.array((img / 255. - 0.5) * 2).astype(np.float32)
 
         self.coarse_class_text = img_path.split('/')[-2]
