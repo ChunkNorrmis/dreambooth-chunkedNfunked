@@ -110,16 +110,11 @@ class PersonalizedBase(Dataset):
 
 
     def to_tensor(self, img):
-        trnsfm_rgb = v2.compose([v2.RGB])
-        img = torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
-        img = trnsfm_rgb(img)
-        return img
+        return torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
 
 
     def from_tensor(self, img):
-        img = np.array(img).astype(np.uint8).transpose(1, 2, 0)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        return img
+        return np.array(img).astype(np.uint8).transpose(1, 2, 0)
 
 
     def blur(self, img):
