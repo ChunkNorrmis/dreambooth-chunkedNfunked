@@ -26,7 +26,6 @@ class PersonalizedBase(Dataset):
         self.placeholder_token = placeholder_token
         self.coarse_class_text = coarse_class_text
         self.flip_p = flip_p
-        self.trnsfm_rgb = v2.compose([v2.RGB])
         
         if self.per_image_tokens:
             assert self.n_imgs < len(per_img_token_list), f"Can't use per-image tokens when the training set contains more than {len(per_img_token_list)} tokens. To enable larger sets, add more tokens to 'per_img_token_list'."
@@ -111,8 +110,9 @@ class PersonalizedBase(Dataset):
 
 
     def to_tensor(self, img):
+        trnsfm_rgb = v2.compose([v2.RGB])
         img = torch.tensor(img).to(torch.uint8).permute(2, 0, 1)
-        img = self.trnsfm_rgb(img)
+        img = trnsfm_rgb(img)
         return img
 
 
