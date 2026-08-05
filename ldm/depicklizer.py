@@ -7,8 +7,9 @@ def depicklize(dict_pickle, nil_pickle=None):
     sus_dict = {k: v.contiguous() for k, v in suspicious_pickle['state_dict'].items()}
     saved = safetorch.save(sus_dict)
     loaded = safetorch.load(saved)
-    if equal_tensors(sus_dict, loaded):
-        metadata = {k: f"{v}" for k, v in suspicious_pickle.items() if k != 'state_dict'}
+    if equal_tensors(suspicious_pickle['state_dict'], loaded):
+        del suspicious_pickle['state_dict']
+        metadata = {k: f"{v}" for k, v in suspicious_pickle.items()}
         metadata['format'] = 'pt'
         if nil_pickle is None:
             nil_pickle = dict_pickle.replace('.ckpt', '.safetensors')
@@ -21,12 +22,10 @@ def depicklize(dict_pickle, nil_pickle=None):
         print('!! Failed -- key mismatch')
         print('!! Aborting safetensors conversion...')
         print(' ')
-        nil_pickle = os.path.join('trained_models', os.path.basename(dict_pickle))
-        shutil.move(dict_pickle, nil_pickle)
 
-def equal_tensors(sus_dict, loaded):
-    for k in sus_dict.keys():
-        if not torch.equal(sus_dict[k], loaded[k]):
+def equal_tensors(pickle_dict, safe_dict):
+    for k in pickle_dict.keys():
+        if not torch.equal(pickle_dict[k], safe_dict[k]):
             return False
     return True
 
