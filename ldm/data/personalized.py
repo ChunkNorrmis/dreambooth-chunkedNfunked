@@ -43,8 +43,11 @@ class PersonalizedBase(Dataset):
         img = cv2.imread(img_path, cv2.IMREAD_COLOR_RGB)
         h, w = img.shape[:2]
         crop = min(h, w)
-        if self.center_crop and h != w:
-            img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
+        if h != w:
+            if not self.center_crop:
+                img = v2.RandomCrop(size=crop)(img)
+            else:
+                img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
             #interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
             #img = cv2.resize(img, (self.size, self.size), interp)
