@@ -45,11 +45,16 @@ class PersonalizedBase(Dataset):
         crop = min(h, w)
         if h != w:
             if not self.center_crop:
-                img = v2.RandomCrop(size=crop)(img)
+                cropper = v2.RandomCrop(size=crop)
+                img = cropper(img)
             else:
                 img = img[(h - crop) // 2: (h + crop) // 2, (w - crop) // 2: (w + crop) // 2]
         if self.size != crop:
-            #interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_CUBIC
+            #interp = cv2.INTER_AREA if self.size < crop else cv2.INTER_LANCZOS4
+            # diff = (crop - self.size) // 3
+            #for step in range(0, 2):
+            #    size = crop - diff * (step + 1)
+            #    img = cv2.resize(img, (size, size), interp)
             #img = cv2.resize(img, (self.size, self.size), interp)
             img = Image.fromarray(img)
             img = img.resize((self.size, self.size), resample=1, reducing_gap=3)
